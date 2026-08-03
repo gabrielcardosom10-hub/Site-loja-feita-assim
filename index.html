@@ -18,7 +18,8 @@
   --papel:#F6F1F3;
   --cal:#FFFFFF;
   --cinza:#6B5B78;
-  --rosa-claro:#F58CAE;
+  --lilas:#C9B8D4;      /* texto secundário sobre roxo — 5.0:1 */
+  --rosa-claro:#FFA9C6; /* rosa que passa em contraste sobre roxo — 9.5:1 */
   --fio:#2A0E3F1f;
   --fio-claro:#F6F1F32e;
 
@@ -63,11 +64,15 @@ body.com-recado .pagina{grid-template-columns:1fr var(--recado-larg);}
 body.com-recado .coluna{border-right:1px solid var(--fio);}
 .dentro{padding:0 clamp(20px,4vw,52px);}
 
-/* ═══ CABEÇALHO ═══ */
+/* ═══ CABEÇALHO ═══
+   O cabeçalho e a abertura formam um só campo roxo, que é a cor da marca
+   ocupando a entrada da página. Do "como funciona" para baixo volta o papel. */
 .cabeca{
   position:sticky;top:0;z-index:40;
-  background:var(--papel);border-bottom:1px solid var(--fio);
+  background:var(--tinta);color:var(--papel);
 }
+.cabeca .marca__txt{color:var(--papel);}
+.cabeca .marca svg{fill:var(--rosa-claro);}
 .cabeca__topo{
   display:flex;align-items:center;gap:24px;
   padding-top:18px;padding-bottom:16px;
@@ -85,61 +90,92 @@ body.com-recado .coluna{border-right:1px solid var(--fio);}
 .marca__img{height:34px;width:auto;}
 
 .busca{display:flex;align-items:center;gap:8px;margin-left:auto;flex:none;
-  border-bottom:1px solid var(--fio);padding-bottom:5px;transition:border-color var(--t);}
-.busca:focus-within{border-color:var(--tinta);}
+  border-bottom:1px solid var(--fio-claro);padding-bottom:5px;transition:border-color var(--t);}
+.busca:focus-within{border-color:var(--rosa-claro);}
 .busca input{
-  border:0;background:none;font-family:var(--corpo);font-size:14px;
-  color:var(--tinta);width:170px;padding:2px 0;
+  border:0;background:none;font-family:var(--corpo);font-size:16px;
+  color:var(--papel);width:180px;padding:2px 0;
 }
-.busca input::placeholder{color:var(--cinza);}
+.busca input::placeholder{color:var(--lilas);}
 .busca input:focus{outline:none;}
-.busca button{display:grid;place-items:center;padding:2px;}
-.busca svg{width:17px;height:17px;stroke:var(--cinza);fill:none;stroke-width:1.8;}
+.busca button{display:grid;place-items:center;width:44px;height:44px;margin:-11px 0;}
+.busca svg{width:18px;height:18px;stroke:var(--lilas);fill:none;stroke-width:1.8;}
+.busca button:hover svg{stroke:var(--papel);}
 
 .trilhos{display:flex;gap:4px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;}
 .trilhos::-webkit-scrollbar{display:none;}
 .trilho{
-  flex:none;padding:7px 15px;font-size:13.5px;font-weight:500;
-  color:var(--cinza);border:1px solid transparent;border-radius:2px;
+  flex:none;min-height:44px;padding:0 16px;font-size:14px;font-weight:500;
+  color:var(--lilas);border:1px solid transparent;border-radius:2px;
   transition:color var(--t),background var(--t);
 }
-.trilho:hover{color:var(--tinta);background:#2A0E3F0d;}
-.trilho[aria-current="true"]{background:var(--tinta);color:var(--papel);}
+.trilho:hover{color:var(--papel);background:#F6F1F314;}
+/* estado atual não fica só na cor: ganha fundo cheio e peso */
+.trilho[aria-current="true"]{background:var(--papel);color:var(--tinta);font-weight:700;}
 
 /* ═══ ABERTURA ═══ */
 /* Atenção: as seções usam padding-top/bottom, nunca o atalho `padding`.
    O atalho zera o padding lateral que vem de .dentro e cola o texto na borda. */
-.abertura{padding-top:clamp(44px,7vw,90px);padding-bottom:clamp(36px,5vw,56px);}
+.abertura{
+  background:var(--tinta);color:var(--papel);
+  padding-top:clamp(40px,6vw,76px);padding-bottom:clamp(44px,6vw,76px);
+}
+.abertura__grade{
+  display:grid;grid-template-columns:minmax(0,1fr) 330px;
+  gap:clamp(30px,4vw,60px);align-items:end;
+}
 .abertura h1{
   font-family:var(--display);font-weight:800;
-  font-size:clamp(42px,7.6vw,86px);line-height:.95;letter-spacing:-.035em;
+  font-size:clamp(42px,6.6vw,80px);line-height:.95;letter-spacing:-.035em;
   margin:0;max-width:12ch;text-transform:lowercase;
   font-variation-settings:'wdth' 85,'opsz' 24;
 }
-.abertura h1 em{font-style:normal;color:var(--rosa);}
+.abertura h1 em{font-style:normal;color:var(--rosa-claro);}
 .abertura__sub{
-  margin:26px 0 0;max-width:40ch;font-size:17px;color:var(--cinza);
+  margin:26px 0 0;max-width:42ch;font-size:17px;color:var(--lilas);
 }
-.abertura__sub b{color:var(--tinta);font-weight:600;}
+.abertura__sub b{color:var(--papel);font-weight:600;}
 
-.pulso{
-  margin-top:34px;padding-top:20px;border-top:2px solid var(--tinta);
-  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;max-width:52ch;
+/* ═══ A PLACA — a situação da loja, como a placa de uma loja de rua ═══ */
+.placa{
+  background:var(--uva);border:1px solid #F6F1F324;
+  padding:22px 22px 24px;display:flex;flex-direction:column;gap:18px;
 }
+.placa__topo{color:var(--lilas);}
+
+.pulso{display:flex;gap:11px;align-items:flex-start;}
 .pulso__marca{
-  flex:none;width:9px;height:9px;border-radius:50%;background:var(--rosa-forte);
-  align-self:center;
+  flex:none;width:9px;height:9px;border-radius:50%;background:var(--rosa-claro);
+  margin-top:7px;
 }
-.pulso__marca.dorme{background:var(--cinza);}
-.pulso p{margin:0;font-size:15px;flex:1;min-width:0;}
-.pulso b{font-weight:700;}
-.pulso span{color:var(--cinza);}
+/* fora do horário a bolinha muda de cor e de contorno: a informação não
+   fica presa só na cor */
+.pulso__marca.dorme{background:transparent;border:1.5px solid var(--lilas);}
+.pulso p{margin:0;font-size:14.5px;line-height:1.5;flex:1;min-width:0;}
+.pulso b{font-weight:700;display:block;}
+.pulso span{color:var(--lilas);}
+
+.placa__dados{margin:0;padding:16px 0 0;border-top:1px solid #F6F1F324;font-size:13.5px;}
+.placa__dados > div{display:flex;gap:14px;padding:5px 0;}
+.placa__dados dt{flex:none;width:52px;color:var(--lilas);}
+.placa__dados dd{margin:0;flex:1;min-width:0;}
+.placa__cta{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  min-height:48px;padding:0 18px;background:var(--rosa-forte);color:var(--cal);
+  font-size:13.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  transition:background var(--t);
+}
+.placa__cta:hover{background:var(--rosa);}
+.placa__cta svg{width:17px;height:17px;fill:currentColor;flex:none;}
+
+@media(max-width:980px){
+  .abertura__grade{grid-template-columns:1fr;gap:34px;}
+  .placa{max-width:420px;}
+}
 
 /* ═══ COMO FUNCIONA ═══ */
-.fluxo{
-  padding-top:clamp(30px,4vw,44px);padding-bottom:clamp(30px,4vw,44px);
-  border-top:1px solid var(--fio);
-}
+/* sem fio no topo: a troca do roxo para o papel já é a divisão */
+.fluxo{padding-top:clamp(34px,4.5vw,52px);padding-bottom:clamp(34px,4.5vw,52px);}
 .fluxo h2{
   font-family:var(--display);font-weight:700;font-size:clamp(21px,2.6vw,27px);
   letter-spacing:-.025em;margin:0 0 6px;max-width:24ch;line-height:1.15;
@@ -408,7 +444,14 @@ body.com-recado .recado{
   .cabeca__topo{flex-wrap:wrap;gap:12px;padding-bottom:12px;}
   .busca{width:100%;margin-left:0;order:3;}
   .busca input{width:100%;}
+  /* no celular a abertura precisa caber e deixar as peças perto: tudo
+     encolhe para que a primeira foto não fique a duas telas de distância */
+  .abertura{padding-top:26px;padding-bottom:30px;}
   .abertura h1{font-size:clamp(38px,11vw,58px);}
+  .abertura__sub{font-size:15.5px;margin-top:18px;}
+  .abertura__grade{gap:24px;}
+  .placa{padding:18px;gap:14px;}
+  .placa__dados{padding-top:13px;}
   .peca__preco{font-size:21px;}
   .rodape__grade{gap:24px;}
 }
@@ -446,7 +489,7 @@ body.com-recado .recado{
         </a>
         <form class="busca" id="busca" role="search">
           <label class="sr" for="q">Buscar uma peça</label>
-          <input id="q" type="search" placeholder="vestido, bolsa, óculos…" autocomplete="off">
+          <input id="q" type="search" placeholder="buscar uma peça" autocomplete="off">
           <button type="submit" aria-label="Buscar"><svg aria-hidden="true"><use href="#lupa"/></svg></button>
         </form>
       </div>
@@ -456,9 +499,23 @@ body.com-recado .recado{
 
   <main>
     <section class="abertura dentro">
-      <h1>Ganhe o mundo <em>do seu jeito</em></h1>
-      <p class="abertura__sub" id="linha-loja"></p>
-      <div class="pulso" id="pulso"></div>
+      <div class="abertura__grade">
+        <div>
+          <h1>Ganhe o mundo <em>do seu jeito</em></h1>
+          <p class="abertura__sub" id="linha-loja"></p>
+        </div>
+        <aside class="placa" aria-labelledby="tit-placa">
+          <p class="etiqueta placa__topo" id="tit-placa">A loja agora</p>
+          <div class="pulso" id="pulso"></div>
+          <dl class="placa__dados">
+            <div><dt>Hoje</dt><dd id="placa-hoje"></dd></div>
+            <div><dt>Onde</dt><dd id="placa-onde"></dd></div>
+          </dl>
+          <a class="placa__cta" id="placa-provador" target="_blank" rel="noopener">
+            <svg aria-hidden="true"><use href="#zap"/></svg> Marcar um horário
+          </a>
+        </aside>
+      </div>
     </section>
 
     <section class="fluxo dentro">
@@ -675,6 +732,8 @@ if(CONFIG.logo){
 }
 $("#ver-insta").href = CONFIG.instagram;
 $("#btn-provador").href = zapLink("Oi! Queria marcar um horário no provador.");
+$("#placa-provador").href = zapLink("Oi! Queria marcar um horário no provador.");
+$("#placa-onde").textContent = CONFIG.rua;
 $("#social").innerHTML =
   '<a href="'+escapar(CONFIG.instagram)+'" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1zm0 3.6a6.2 6.2 0 100 12.4 6.2 6.2 0 000-12.4zm0 10.2a4 4 0 110-8 4 4 0 010 8zm6.4-10.4a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg></a>' +
   '<a href="'+zapLink("Oi! Vim pelo site.")+'" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#zap"/></svg></a>';
@@ -709,6 +768,8 @@ document.querySelectorAll("[data-zap]").forEach(el => {
     return '<li class="'+(d===hoje?"hoje":"")+'"><span>'+DIAS[d]+'</span>'+
            (h ? h.abre+"–"+h.fecha : "Fechado")+'</li>';
   }).join("");
+  const h = CONFIG.horarios[hoje];
+  $("#placa-hoje").textContent = h ? h.abre+" às "+h.fecha : "Fechado";
 })();
 
 function pulso(){
