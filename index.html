@@ -136,14 +136,33 @@ body.com-recado .coluna{border-right:1px solid var(--fio);}
 }
 .abertura__sub b{color:var(--papel);font-weight:600;}
 
-/* ═══ A PLACA — a situação da loja, como a placa de uma loja de rua ═══ */
+/* ═══ A PLACA — a oferta de entrada, no lugar onde as grandes lojas
+   de roupa põem cupom de primeira compra e frete grátis ═══ */
 .placa{
   background:var(--uva);border:1px solid #F6F1F324;
-  padding:22px 22px 24px;display:flex;flex-direction:column;gap:18px;
+  padding:24px 22px;display:flex;flex-direction:column;gap:16px;
 }
-.placa__topo{color:var(--lilas);}
+.placa__topo{color:var(--lilas);margin:0;}
+.placa__off{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(44px,5vw,58px);line-height:.9;letter-spacing:-.04em;
+  color:var(--rosa-claro);margin:0;
+  font-variation-settings:'wdth' 85,'opsz' 24;
+}
+.placa__regra{margin:0;font-size:14.5px;line-height:1.5;}
+.placa__cupom{
+  display:inline-block;margin-top:9px;padding:7px 13px;
+  border:1px dashed var(--rosa-claro);color:var(--papel);
+  font-size:14px;font-weight:700;letter-spacing:.14em;
+}
+.placa__frete{
+  margin:0;padding-top:15px;border-top:1px solid #F6F1F324;
+  font-size:14px;line-height:1.5;color:var(--lilas);
+}
+.placa__frete b{color:var(--papel);font-weight:600;}
 
-.pulso{display:flex;gap:11px;align-items:flex-start;}
+.pulso{display:flex;gap:11px;align-items:flex-start;margin-top:28px;
+  padding-top:18px;border-top:1px solid #F6F1F324;max-width:48ch;}
 .pulso__marca{
   flex:none;width:9px;height:9px;border-radius:50%;background:var(--rosa-claro);
   margin-top:7px;
@@ -155,18 +174,15 @@ body.com-recado .coluna{border-right:1px solid var(--fio);}
 .pulso b{font-weight:700;display:block;}
 .pulso span{color:var(--lilas);}
 
-.placa__dados{margin:0;padding:16px 0 0;border-top:1px solid #F6F1F324;font-size:13.5px;}
-.placa__dados > div{display:flex;gap:14px;padding:5px 0;}
-.placa__dados dt{flex:none;width:52px;color:var(--lilas);}
-.placa__dados dd{margin:0;flex:1;min-width:0;}
 .placa__cta{
   display:flex;align-items:center;justify-content:center;gap:9px;
-  min-height:48px;padding:0 18px;background:var(--rosa-forte);color:var(--cal);
+  min-height:50px;padding:0 18px;margin-top:2px;
+  background:var(--rosa-forte);color:var(--cal);
   font-size:13.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
   transition:background var(--t);
 }
 .placa__cta:hover{background:var(--rosa);}
-.placa__cta svg{width:17px;height:17px;fill:currentColor;flex:none;}
+.placa__cta svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;flex:none;}
 
 @media(max-width:980px){
   .abertura__grade{grid-template-columns:1fr;gap:34px;}
@@ -503,18 +519,9 @@ body.com-recado .recado{
         <div>
           <h1>Ganhe o mundo <em>do seu jeito</em></h1>
           <p class="abertura__sub" id="linha-loja"></p>
-        </div>
-        <aside class="placa" aria-labelledby="tit-placa">
-          <p class="etiqueta placa__topo" id="tit-placa">A loja agora</p>
           <div class="pulso" id="pulso"></div>
-          <dl class="placa__dados">
-            <div><dt>Hoje</dt><dd id="placa-hoje"></dd></div>
-            <div><dt>Onde</dt><dd id="placa-onde"></dd></div>
-          </dl>
-          <a class="placa__cta" id="placa-provador" target="_blank" rel="noopener">
-            <svg aria-hidden="true"><use href="#zap"/></svg> Marcar um horário
-          </a>
-        </aside>
+        </div>
+        <aside class="placa" id="placa" aria-labelledby="tit-placa"></aside>
       </div>
     </section>
 
@@ -662,6 +669,18 @@ const CONFIG = {
   parcelas:     3,     // máximo de parcelas sem juros
   parcelaMinima:30,    // valor mínimo de cada parcela
 
+  /* ── 5b. OFERTA DA ABERTURA ───────────────────────────────
+     O bloco em destaque no alto da página, como fazem as grandes
+     lojas de roupa. CONFIRME OS VALORES ANTES DE PUBLICAR: é uma
+     promessa comercial, e o site não checa se você pode cumprir.
+     Para desligar qualquer um, ponha null.                       */
+  freteGratis: 299,                    // frete grátis a partir deste valor; null desliga
+  cupom: {
+    codigo:   "BEMVINDA10",
+    desconto: 10,                      // % de desconto
+    regra:    "na primeira compra"
+  },
+
   /* ── 6. FATOS — só o que for verdade. Vira a linha de fatos. */
   fatos: [
     "5% no Pix",
@@ -732,8 +751,28 @@ if(CONFIG.logo){
 }
 $("#ver-insta").href = CONFIG.instagram;
 $("#btn-provador").href = zapLink("Oi! Queria marcar um horário no provador.");
-$("#placa-provador").href = zapLink("Oi! Queria marcar um horário no provador.");
-$("#placa-onde").textContent = CONFIG.rua;
+
+/* a placa da abertura — só entra o que estiver configurado */
+(function(){
+  const c = CONFIG.cupom, partes = [];
+  if(c && c.desconto){
+    partes.push(
+      '<p class="etiqueta placa__topo" id="tit-placa">Cupom de boas-vindas</p>'+
+      '<p class="placa__off">'+c.desconto+'% off</p>'+
+      '<p class="placa__regra">'+escapar(c.regra || "")+
+        (c.codigo ? '<span class="placa__cupom">'+escapar(c.codigo)+'</span>' : "")+
+      '</p>');
+  }
+  if(CONFIG.freteGratis){
+    partes.push('<p class="placa__frete"><b>Frete grátis</b> nas compras acima de '+
+                brl(CONFIG.freteGratis)+', para todo o Brasil.</p>');
+  }
+  if(!partes.length){ $("#placa").remove(); return; }
+  if(!c || !c.desconto) partes.unshift('<p class="etiqueta placa__topo" id="tit-placa">Entrega</p>');
+  partes.push('<a class="placa__cta" href="#pecas">Ver as novidades '+
+              '<svg aria-hidden="true"><use href="#seta"/></svg></a>');
+  $("#placa").innerHTML = partes.join("");
+})();
 $("#social").innerHTML =
   '<a href="'+escapar(CONFIG.instagram)+'" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1zm0 3.6a6.2 6.2 0 100 12.4 6.2 6.2 0 000-12.4zm0 10.2a4 4 0 110-8 4 4 0 010 8zm6.4-10.4a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg></a>' +
   '<a href="'+zapLink("Oi! Vim pelo site.")+'" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#zap"/></svg></a>';
@@ -754,10 +793,15 @@ document.querySelectorAll("[data-zap]").forEach(el => {
 /* rodapé legal — avisa se os dados ainda são provisórios */
 (function(){
   const provisorio = CONFIG.cnpj.startsWith("00.000") || CONFIG.whatsapp.endsWith("000000");
+  const oferta = CONFIG.freteGratis || (CONFIG.cupom && CONFIG.cupom.desconto);
+  const avisos = [];
+  if(provisorio) avisos.push("preencha contato, CNPJ e endereço");
+  if(oferta) avisos.push("confirme o cupom e o valor do frete grátis da abertura, "+
+                         "ou ponha null nos dois em CONFIG para tirá-los do ar");
   $("#legal").innerHTML =
     escapar(CONFIG.razao)+" · "+escapar(CONFIG.rua)+" · "+escapar(CONFIG.cidade)+" · CNPJ "+escapar(CONFIG.cnpj)+
     "<br>© "+new Date().getFullYear()+" Feita Assim." +
-    (provisorio ? "<br><b>Dados provisórios: preencha contato, CNPJ e endereço em CONFIG antes de publicar.</b>" : "");
+    (avisos.length ? "<br><b>Antes de publicar: "+avisos.join("; ")+".</b>" : "");
 })();
 
 /* ─── horários e o pulso da entrega ───────────────────────── */
@@ -768,8 +812,6 @@ document.querySelectorAll("[data-zap]").forEach(el => {
     return '<li class="'+(d===hoje?"hoje":"")+'"><span>'+DIAS[d]+'</span>'+
            (h ? h.abre+"–"+h.fecha : "Fechado")+'</li>';
   }).join("");
-  const h = CONFIG.horarios[hoje];
-  $("#placa-hoje").textContent = h ? h.abre+" às "+h.fecha : "Fechado";
 })();
 
 function pulso(){
