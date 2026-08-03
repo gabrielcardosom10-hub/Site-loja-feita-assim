@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feita Assim — loja de rua em Criciúma</title>
+<meta name="description" content="Looks, bolsas, óculos e acessórios. Loja de rua em Criciúma, poucas peças de cada modelo. Você monta o recado, a gente responde no WhatsApp.">
+<meta name="theme-color" content="#2A0E3F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400;12..96,75..100,700;12..96,75..100,800&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tinta:#2A0E3F;
+  --uva:#5B2C7A;
+  --rosa:#E0356E;
+  --rosa-forte:#C81E5B;
+  --papel:#F6F1F3;
+  --cal:#FFFFFF;
+  --cinza:#6B5B78;
+  --rosa-claro:#F58CAE;
+  --fio:#2A0E3F1f;
+  --fio-claro:#F6F1F32e;
+
+  --display:'Bricolage Grotesque',system-ui,sans-serif;
+  --corpo:'Karla',system-ui,sans-serif;
+
+  --recado-larg:340px;
+  --t:170ms cubic-bezier(.2,.6,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+body{
+  margin:0;background:var(--papel);color:var(--tinta);
+  font-family:var(--corpo);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block;}
+a{color:inherit;text-decoration:none;}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
+:focus-visible{outline:2px solid var(--rosa-forte);outline-offset:3px;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+.pular{
+  position:absolute;left:16px;top:-100px;z-index:200;
+  background:var(--tinta);color:var(--papel);padding:12px 18px;
+  transition:top var(--t);
+}
+.pular:focus{top:16px;}
+
+/* etiqueta: substitui o eyebrow em mono */
+.etiqueta{
+  font-size:11.5px;font-weight:600;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--cinza);
+}
+
+/* ═══ ESTRUTURA: loja à esquerda, recado à direita ═══ */
+.pagina{display:grid;grid-template-columns:1fr var(--recado-larg);align-items:start;}
+.coluna{min-width:0;border-right:1px solid var(--fio);}
+.dentro{padding:0 clamp(20px,4vw,52px);}
+
+/* ═══ CABEÇALHO ═══ */
+.cabeca{
+  position:sticky;top:0;z-index:40;
+  background:var(--papel);border-bottom:1px solid var(--fio);
+}
+.cabeca__topo{
+  display:flex;align-items:center;gap:24px;
+  padding-top:18px;padding-bottom:16px;
+}
+.marca{display:flex;align-items:center;gap:10px;flex:none;}
+.marca svg{width:26px;height:19.8px;fill:var(--rosa-forte);flex:none;}
+.marca__txt{
+  font-family:var(--display);font-weight:800;font-size:20px;
+  letter-spacing:-.035em;line-height:1;
+  font-variation-settings:'wdth' 85;
+}
+.marca__img{height:34px;width:auto;}
+
+.busca{display:flex;align-items:center;gap:8px;margin-left:auto;flex:none;
+  border-bottom:1px solid var(--fio);padding-bottom:5px;transition:border-color var(--t);}
+.busca:focus-within{border-color:var(--tinta);}
+.busca input{
+  border:0;background:none;font-family:var(--corpo);font-size:14px;
+  color:var(--tinta);width:170px;padding:2px 0;
+}
+.busca input::placeholder{color:var(--cinza);}
+.busca input:focus{outline:none;}
+.busca button{display:grid;place-items:center;padding:2px;}
+.busca svg{width:17px;height:17px;stroke:var(--cinza);fill:none;stroke-width:1.8;}
+
+.trilhos{display:flex;gap:4px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;}
+.trilhos::-webkit-scrollbar{display:none;}
+.trilho{
+  flex:none;padding:7px 15px;font-size:13.5px;font-weight:500;
+  color:var(--cinza);border:1px solid transparent;border-radius:2px;
+  transition:color var(--t),background var(--t);
+}
+.trilho:hover{color:var(--tinta);background:#2A0E3F0d;}
+.trilho[aria-current="true"]{background:var(--tinta);color:var(--papel);}
+
+/* ═══ ABERTURA ═══ */
+/* Atenção: as seções usam padding-top/bottom, nunca o atalho `padding`.
+   O atalho zera o padding lateral que vem de .dentro e cola o texto na borda. */
+.abertura{padding-top:clamp(44px,7vw,90px);padding-bottom:clamp(36px,5vw,56px);}
+.abertura h1{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(44px,8.2vw,92px);line-height:.93;letter-spacing:-.045em;
+  margin:0;max-width:11ch;font-variation-settings:'wdth' 88;
+}
+.abertura h1 em{font-style:normal;color:var(--rosa);}
+.abertura__sub{
+  margin:26px 0 0;max-width:40ch;font-size:17px;color:var(--cinza);
+}
+.abertura__sub b{color:var(--tinta);font-weight:600;}
+
+.pulso{
+  margin-top:34px;padding-top:20px;border-top:2px solid var(--tinta);
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;max-width:52ch;
+}
+.pulso__marca{
+  flex:none;width:9px;height:9px;border-radius:50%;background:var(--rosa-forte);
+  align-self:center;
+}
+.pulso__marca.dorme{background:var(--cinza);}
+.pulso p{margin:0;font-size:15px;flex:1;min-width:0;}
+.pulso b{font-weight:700;}
+.pulso span{color:var(--cinza);}
+
+/* ═══ COMO FUNCIONA ═══ */
+.fluxo{
+  padding-top:clamp(30px,4vw,44px);padding-bottom:clamp(30px,4vw,44px);
+  border-top:1px solid var(--fio);
+}
+.fluxo h2{
+  font-family:var(--display);font-weight:700;font-size:clamp(21px,2.6vw,27px);
+  letter-spacing:-.025em;margin:0 0 6px;max-width:24ch;line-height:1.15;
+}
+.fluxo__passos{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:11px;max-width:60ch;}
+.fluxo__passos li{display:flex;gap:13px;font-size:15px;}
+.fluxo__passos b{
+  flex:none;font-family:var(--display);font-weight:700;font-size:15px;
+  color:var(--rosa-forte);width:16px;
+}
+.fatos{
+  margin:26px 0 0;padding:0;list-style:none;
+  display:flex;flex-wrap:wrap;gap:8px 22px;
+}
+.fatos li{font-size:11.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--cinza);}
+
+/* ═══ PEÇAS ═══ */
+.pecas{padding-top:clamp(34px,5vw,58px);border-top:1px solid var(--fio);scroll-margin-top:150px;}
+.pecas__cab{display:flex;align-items:baseline;justify-content:space-between;gap:18px;margin-bottom:26px;}
+.pecas__cab h2{
+  font-family:var(--display);font-weight:700;font-size:clamp(22px,2.8vw,30px);
+  letter-spacing:-.03em;margin:0;
+}
+.grade{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:clamp(26px,3vw,44px) clamp(14px,1.8vw,26px);
+}
+/* coluna flex para que o "pôr no recado" fique na mesma linha em todos os
+   cartões, mesmo quando o nome da peça ocupa duas linhas */
+.peca{min-width:0;display:flex;flex-direction:column;}
+
+.peca__foto{
+  position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--cal);
+  margin-bottom:13px;
+}
+.peca__foto img{width:100%;height:100%;object-fit:cover;}
+
+/* estado sem foto — desenhado de propósito, não é erro */
+.semfoto{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;padding:18px;text-align:center;
+  background:var(--cal);
+}
+.semfoto::after{
+  content:"";position:absolute;inset:12px;border:1px solid #5B2C7A1a;
+}
+.semfoto svg{width:44px;height:44px;stroke:#5B2C7A47;fill:none;stroke-width:1.1;}
+.semfoto span{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#5B2C7A73;}
+
+.marcas{position:absolute;top:0;left:0;display:flex;flex-direction:column;align-items:flex-start;}
+.marca-peca{
+  font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:5px 9px;background:var(--tinta);color:var(--papel);
+}
+.marca-peca--off{background:var(--rosa-forte);}
+.marca-peca--ultimas{background:var(--uva);}
+
+.peca h3{
+  font-size:15px;font-weight:500;line-height:1.35;margin:0 0 3px;
+}
+.peca__ref{font-size:11.5px;color:var(--cinza);margin:0 0 11px;letter-spacing:.04em;}
+.peca__antes{display:block;font-size:13px;color:var(--cinza);text-decoration:line-through;}
+.peca__preco{
+  font-family:var(--display);font-weight:700;font-size:25px;
+  letter-spacing:-.035em;line-height:1.1;
+}
+.peca__pagamento{margin:5px 0 0;font-size:12.5px;color:var(--cinza);line-height:1.45;}
+.peca__pagamento b{color:var(--tinta);font-weight:600;}
+
+.tamanhos{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 16px;align-items:flex-start;}
+.tamanho{
+  min-width:36px;height:34px;padding:0 9px;
+  border:1px solid var(--fio);background:var(--cal);
+  font-size:12.5px;font-weight:500;display:grid;place-items:center;
+  transition:border-color var(--t),background var(--t),color var(--t);
+}
+.tamanho:hover{border-color:var(--tinta);}
+.tamanho[aria-pressed="true"]{background:var(--tinta);border-color:var(--tinta);color:var(--papel);}
+
+.marcar{
+  margin:auto 0 0;padding:12px 0 0;width:100%;
+  border-top:1px solid var(--tinta);
+  font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--rosa-forte);text-align:left;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  transition:color var(--t);
+}
+.marcar:hover{color:var(--tinta);}
+.marcar svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;flex:none;}
+
+.vazio-busca{
+  grid-column:1/-1;padding:34px 0;font-size:15px;color:var(--cinza);max-width:46ch;
+}
+.vazio-busca a{color:var(--rosa-forte);font-weight:600;border-bottom:1px solid;}
+
+/* ═══ A LOJA ═══ */
+.loja{
+  margin-top:clamp(48px,6vw,80px);
+  background:var(--tinta);color:var(--papel);
+  padding-top:clamp(38px,5vw,60px);padding-bottom:clamp(38px,5vw,60px);
+}
+.loja__grade{display:grid;grid-template-columns:1.15fr 1fr;gap:clamp(28px,4vw,54px);}
+.loja h2{
+  font-family:var(--display);font-weight:700;font-size:clamp(24px,3.2vw,34px);
+  letter-spacing:-.03em;margin:0 0 14px;line-height:1.1;max-width:16ch;
+}
+.loja p{margin:0 0 18px;color:#F6F1F3c4;max-width:42ch;}
+.loja__end{font-size:15px;line-height:1.7;margin:0 0 20px;}
+.loja__end b{display:block;font-weight:700;}
+.provador{
+  display:inline-flex;align-items:center;gap:9px;
+  background:var(--rosa-forte);color:var(--cal);
+  padding:13px 22px;font-size:13.5px;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;
+  transition:background var(--t);
+}
+.provador:hover{background:var(--rosa);}
+.provador svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;}
+
+.horarios{margin:0;padding:0;list-style:none;border-top:1px solid var(--fio-claro);}
+.horarios li{
+  display:flex;justify-content:space-between;gap:14px;
+  padding:9px 0;border-bottom:1px solid var(--fio-claro);font-size:14px;
+}
+.horarios li.hoje{color:var(--rosa-claro);font-weight:700;}
+.horarios span{color:#F6F1F3a8;}
+.horarios li.hoje span{color:var(--rosa-claro);}
+
+/* ═══ VOZES ═══ */
+.vozes{padding-top:clamp(38px,5vw,60px);padding-bottom:clamp(38px,5vw,60px);border-top:1px solid var(--fio);}
+.vozes__grade{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.voz{margin:0;padding:22px;background:var(--cal);}
+.voz p{margin:0 0 14px;font-size:15px;}
+.voz footer{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cinza);}
+.sem-vozes{
+  padding:26px;border:1px dashed #2A0E3F3d;background:var(--cal);
+  font-size:15px;color:var(--cinza);max-width:62ch;
+}
+.sem-vozes code{font-size:13px;background:#2A0E3F0f;padding:2px 5px;}
+
+/* ═══ RODAPÉ ═══ */
+.rodape{padding-top:clamp(34px,4vw,52px);padding-bottom:30px;border-top:1px solid var(--fio);}
+.rodape__grade{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:30px;}
+.rodape h3{font-size:11.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--cinza);margin:0 0 13px;}
+.rodape ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.rodape a{font-size:14px;transition:color var(--t);}
+.rodape a:hover{color:var(--rosa-forte);}
+.rodape__sobre{font-size:14px;color:var(--cinza);margin:12px 0 0;max-width:34ch;}
+.rodape__legal{
+  margin-top:32px;padding-top:18px;border-top:1px solid var(--fio);
+  font-size:12px;color:var(--cinza);line-height:1.7;
+}
+.social{display:flex;gap:16px;margin-top:16px;}
+.social a{display:grid;place-items:center;width:22px;height:22px;color:var(--cinza);transition:color var(--t);}
+.social a:hover{color:var(--rosa-forte);}
+.social svg{width:20px;height:20px;fill:currentColor;}
+
+/* ═══ O RECADO — a assinatura ═══ */
+.recado{
+  position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;background:var(--papel);
+}
+.recado__cab{padding:22px 24px 16px;border-bottom:1px solid var(--fio);}
+.recado__cab h2{
+  font-family:var(--display);font-weight:700;font-size:19px;
+  letter-spacing:-.03em;margin:4px 0 0;
+}
+.recado__corpo{flex:1;overflow-y:auto;padding:20px 24px;}
+
+.bilhete{
+  background:var(--cal);padding:22px 20px;
+  font-size:14px;line-height:1.75;white-space:pre-wrap;
+  box-shadow:0 1px 0 #2A0E3F14, 0 12px 24px -18px #2A0E3F5c;
+}
+.bilhete__linha{display:block;}
+.bilhete__linha--nova{animation:entra 260ms cubic-bezier(.2,.7,.2,1);}
+@keyframes entra{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+.bilhete__item{display:flex;gap:9px;align-items:baseline;}
+.bilhete__item span{flex:1;min-width:0;}
+.bilhete__tirar{
+  flex:none;font-size:11px;color:var(--cinza);margin-left:6px;
+  border-bottom:1px solid transparent;
+  transition:color var(--t),border-color var(--t);
+}
+.bilhete__tirar:hover{color:var(--rosa-forte);border-color:var(--rosa-forte);}
+.bilhete__qtd{
+  display:inline-flex;align-items:center;gap:2px;vertical-align:middle;margin-left:8px;
+}
+/* só os botões de quantidade ganham caixa — o "tirar" mora aqui dentro
+   e um seletor solto em `button` o transformaria numa caixinha de 22px */
+.bilhete__qtd [data-acao="mais"],
+.bilhete__qtd [data-acao="menos"]{
+  width:22px;height:22px;display:grid;place-items:center;
+  font-size:14px;line-height:1;color:var(--cinza);
+  border:1px solid var(--fio);transition:border-color var(--t),color var(--t);
+}
+.bilhete__qtd [data-acao="mais"]:hover,
+.bilhete__qtd [data-acao="menos"]:hover{border-color:var(--tinta);color:var(--tinta);}
+.bilhete__total{font-weight:700;}
+
+.recado__vazio{font-size:14.5px;color:var(--cinza);line-height:1.7;margin:0;}
+.recado__vazio b{display:block;color:var(--tinta);font-family:var(--display);
+  font-weight:700;font-size:17px;letter-spacing:-.02em;margin-bottom:8px;}
+/* o vazio não fica em branco: enquanto não há peça, a coluna mostra a loja */
+.recado__loja{
+  margin-top:28px;padding-top:20px;border-top:1px solid var(--fio);
+  font-size:13.5px;line-height:1.7;color:var(--cinza);
+}
+.recado__loja b{display:block;color:var(--tinta);font-weight:600;}
+.recado__loja a{
+  display:inline-block;margin-top:12px;color:var(--rosa-forte);
+  font-weight:600;border-bottom:1px solid;
+}
+
+.recado__pe{padding:18px 24px 22px;border-top:1px solid var(--fio);}
+.mandar{
+  width:100%;height:54px;background:var(--rosa-forte);color:var(--cal);
+  font-size:14px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:background var(--t);
+}
+.mandar:hover{background:var(--rosa);}
+.mandar svg{width:19px;height:19px;fill:currentColor;}
+.recado__nota{margin:12px 0 0;font-size:12.5px;color:var(--cinza);line-height:1.6;}
+
+/* barra móvel — o recado vira gaveta abaixo de 1040px */
+.barra{display:none;}
+.recado__fechar{display:none;}
+
+@media(max-width:1040px){
+  .pagina{grid-template-columns:1fr;}
+  .coluna{border-right:0;}
+  .recado{
+    position:fixed;inset:0;height:100dvh;z-index:90;
+    transform:translateY(100%);visibility:hidden;
+    transition:transform 280ms cubic-bezier(.2,.7,.2,1),visibility 280ms;
+  }
+  .recado.aberto{transform:none;visibility:visible;}
+  .recado__cab{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+  .recado__fechar{
+    display:grid;place-items:center;width:44px;height:44px;margin:-8px -10px 0 0;flex:none;
+  }
+  .recado__fechar svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;}
+  body.com-barra{padding-bottom:70px;}
+  /* sem esta regra o display:flex abaixo vence o [hidden] do navegador
+     e a barra aparece zerada com o recado vazio */
+  .barra[hidden]{display:none;}
+  .barra{
+    display:flex;align-items:center;gap:14px;
+    position:fixed;left:0;right:0;bottom:0;z-index:80;
+    background:var(--tinta);color:var(--papel);
+    padding:13px clamp(16px,4vw,28px);width:100%;text-align:left;
+  }
+  .barra__n{
+    flex:none;min-width:26px;height:26px;padding:0 7px;background:var(--rosa-forte);
+    display:grid;place-items:center;font-size:12.5px;font-weight:700;
+  }
+  .barra__txt{flex:1;min-width:0;font-size:13.5px;line-height:1.3;}
+  .barra__txt b{display:block;font-size:15px;font-family:var(--display);letter-spacing:-.02em;}
+  .barra__abrir{
+    flex:none;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+    border-bottom:1px solid var(--rosa-claro);color:var(--rosa-claro);padding-bottom:2px;
+  }
+}
+
+@media(max-width:900px){
+  .loja__grade,.rodape__grade{grid-template-columns:1fr;}
+  .vozes__grade{grid-template-columns:1fr;}
+  .grade{grid-template-columns:repeat(4,1fr);}
+  .peca,.peca--larga{grid-column:span 2;}
+}
+@media(max-width:620px){
+  .grade{grid-template-columns:repeat(2,1fr);gap:26px 14px;}
+  .peca,.peca--larga{grid-column:span 1;}
+  /* fixo, o cabeçalho comeria um terço da tela do celular */
+  .cabeca{position:static;}
+  .cabeca__topo{flex-wrap:wrap;gap:12px;padding-bottom:12px;}
+  .busca{width:100%;margin-left:0;order:3;}
+  .busca input{width:100%;}
+  .abertura h1{font-size:clamp(38px,11vw,58px);}
+  .peca__preco{font-size:21px;}
+  .rodape__grade{gap:24px;}
+}
+@media(max-width:380px){
+  .grade{grid-template-columns:1fr;}
+  .tamanho{min-width:34px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+}
+</style>
+</head>
+<body>
+
+<a class="pular" href="#pecas">Pular para as peças</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="tulipa" viewBox="0 0 64 48.7"><path d="M30.5 48.2C30.5 47.1 28.2 44.1 26.9 43.4C26.2 43 25.8 42.7 25.6 42.3C25.3 41.8 24.9 41.4 24.1 41C23.7 40.8 23.3 40.6 23.1 40.5C21.5 39.7 20.7 39.3 20 39.2C19.4 39.2 18.6 38.8 17 38C16.8 37.9 16.2 37.6 15.6 37.3C14.7 36.8 14.5 36.6 13 35.2C11.8 34 11.2 33.6 10.8 33.3C10.1 33 9.7 32.6 9.4 31.9C9.2 31.5 8.7 30.9 7.7 29.9C6 28.1 5.8 27.9 5.5 27.3C5.4 27 5.2 26.5 5 26.2C4.8 25.8 4.6 25.4 4.5 25.1C4.4 24.8 4 24.3 3.6 23.8C2.7 22.7 2.6 22.6 2.5 21.2C2.4 20.1 2.4 20 2 19.2C1.6 18.4 1.6 18.3 1.5 17.2C1.4 16 1.3 15.7 0.8 15.4C0.5 15.3 0.5 15.3 0.5 8.7C0.5 0.1 0 0.2 7.5 7.7C12.6 12.7 12.6 12.7 13.5 13.2C14 13.4 14.5 13.7 14.7 13.9C15.6 14.7 16.1 14.9 16.8 14.4C17.4 14 19.1 12.1 19.3 11.6C19.5 11.4 19.6 11 19.8 10.7C20.2 9.8 26.4 3.8 27.5 3.2C28.8 2.5 30.2 1.2 30.4 0.4C30.5 0 33.6 0 33.7 0.4C33.9 1.2 35.3 2.5 36.6 3.2C37.7 3.8 43.9 9.8 44.4 10.7C44.5 11 44.7 11.4 44.8 11.6C45 12.1 46.7 14 47.4 14.4C48.1 14.9 48.5 14.7 49.5 13.9C49.6 13.7 50.2 13.4 50.7 13.2C51.9 12.5 60.9 3.7 61.6 2.4C62 1.5 62.3 1.3 63.1 1.2C63.7 1.1 64 15.1 63.4 15.4C62.8 15.7 62.7 16 62.6 17.2C62.6 18.3 62.5 18.4 62.2 19.2C61.9 19.7 61.7 20.2 61.6 20.7C61.5 21.4 61.2 22.1 60.4 23.8C60.3 23.9 60.1 24.4 59.9 24.8C59.7 25.1 59.4 25.7 59.3 26C58.8 26.8 58.7 26.9 58.5 27.6C58 28.6 50.9 35.6 49.7 36.2C49.2 36.5 48.5 36.9 48.1 37.2C47.2 38 45.1 39.1 44.1 39.2C43.1 39.4 41 40.5 40.1 41.3C39.7 41.6 39 42 38.5 42.3C36.7 43.2 33.7 46.5 33.6 47.7C33.6 48.2 30.5 48.7 30.5 48.2Z"/></symbol>
+  <symbol id="zap" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.18c-.24.68-1.42 1.31-1.96 1.36-.5.05-1.14.07-1.83-.11-.42-.13-.97-.31-1.66-.61-2.93-1.26-4.84-4.2-4.99-4.4-.14-.2-1.19-1.58-1.19-3.02 0-1.43.75-2.14 1.02-2.43.27-.29.58-.36.78-.36l.56.01c.18.01.42-.07.66.5.24.59.83 2.02.9 2.17.07.15.12.32.02.51-.1.2-.15.32-.29.49l-.44.51c-.14.15-.29.3-.13.59.17.29.74 1.22 1.59 1.98 1.09.97 2.01 1.27 2.3 1.42.29.15.46.12.63-.07.17-.2.73-.85.92-1.14.2-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.15.49.22.56.34.07.12.07.71-.17 1.39z"/></symbol>
+  <symbol id="lupa" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></symbol>
+  <symbol id="seta" viewBox="0 0 24 24"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13,6 19,12 13,18"/></symbol>
+  <symbol id="xis" viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></symbol>
+</svg>
+
+<div class="pagina">
+<div class="coluna">
+
+  <header class="cabeca">
+    <div class="dentro">
+      <div class="cabeca__topo">
+        <a class="marca" href="#" aria-label="Feita Assim, início">
+          <svg aria-hidden="true"><use href="#tulipa"/></svg>
+          <span class="marca__txt">feita assim</span>
+        </a>
+        <form class="busca" id="busca" role="search">
+          <label class="sr" for="q">Buscar uma peça</label>
+          <input id="q" type="search" placeholder="vestido, bolsa, óculos…" autocomplete="off">
+          <button type="submit" aria-label="Buscar"><svg aria-hidden="true"><use href="#lupa"/></svg></button>
+        </form>
+      </div>
+      <nav class="trilhos" id="trilhos" aria-label="Categorias"></nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="abertura dentro">
+      <h1>Ganhe o mundo <em>do seu jeito</em></h1>
+      <p class="abertura__sub" id="linha-loja"></p>
+      <div class="pulso" id="pulso"></div>
+    </section>
+
+    <section class="fluxo dentro">
+      <h2>Aqui não tem carrinho. Você monta o recado, a gente responde.</h2>
+      <ol class="fluxo__passos">
+        <li><b>1</b><span>Escolhe as peças e o tamanho. Elas vão sendo escritas no recado, ao lado.</span></li>
+        <li><b>2</b><span>Manda o recado pronto no WhatsApp, sem digitar nada.</span></li>
+        <li><b>3</b><span>A gente confirma estoque, frete e pagamento na conversa.</span></li>
+      </ol>
+      <ul class="fatos" id="fatos"></ul>
+    </section>
+
+    <section class="pecas dentro" id="pecas" aria-labelledby="tit-pecas">
+      <div class="pecas__cab">
+        <h2 id="tit-pecas">Na loja agora</h2>
+        <span class="etiqueta" id="conta-pecas"></span>
+      </div>
+      <div class="grade" id="grade"></div>
+    </section>
+
+    <section class="loja" id="loja">
+      <div class="dentro loja__grade">
+        <div>
+          <h2>A loja fica na rua, e você pode entrar</h2>
+          <p>Provador com hora marcada: a gente separa as peças no seu tamanho antes de você chegar.</p>
+          <p class="loja__end" id="endereco"></p>
+          <a class="provador" id="btn-provador" target="_blank" rel="noopener">
+            <svg aria-hidden="true"><use href="#zap"/></svg> Marcar um horário
+          </a>
+        </div>
+        <div>
+          <p class="etiqueta" style="color:#F6F1F3a8;margin:0 0 14px">Horários</p>
+          <ul class="horarios" id="horarios"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="vozes dentro">
+      <div class="pecas__cab">
+        <h2>Quem já levou</h2>
+        <a class="etiqueta" id="ver-insta" target="_blank" rel="noopener" style="color:var(--rosa-forte)">Ver no Instagram</a>
+      </div>
+      <div id="vozes"></div>
+    </section>
+
+    <footer class="rodape dentro">
+      <div class="rodape__grade">
+        <div>
+          <span class="marca">
+            <svg aria-hidden="true"><use href="#tulipa"/></svg>
+            <span class="marca__txt">feita assim</span>
+          </span>
+          <p class="rodape__sobre">Looks, bolsas, óculos e acessórios. Poucas peças de cada modelo, escolhidas uma a uma.</p>
+          <div class="social" id="social"></div>
+        </div>
+        <div>
+          <h3>A loja</h3>
+          <ul>
+            <li><a href="#loja">Onde ficamos</a></li>
+            <li><a href="#" data-zap="Oi! Queria marcar um horário no provador.">Provador com hora marcada</a></li>
+            <li><a href="#" data-zap="Oi! Preciso da tabela de medidas.">Tabela de medidas</a></li>
+            <li><a href="#" data-zap="Oi! Quero trocar uma peça.">Troca e devolução</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Falar com a gente</h3>
+          <ul id="contato"></ul>
+        </div>
+      </div>
+      <p class="rodape__legal" id="legal"></p>
+    </footer>
+  </main>
+
+</div><!-- /coluna -->
+
+<aside class="recado" id="recado" aria-labelledby="tit-recado">
+  <div class="recado__cab">
+    <div>
+      <span class="etiqueta">O que vai ser enviado</span>
+      <h2 id="tit-recado">O recado</h2>
+    </div>
+    <button class="recado__fechar" id="fechar-recado" aria-label="Fechar o recado">
+      <svg aria-hidden="true"><use href="#xis"/></svg>
+    </button>
+  </div>
+  <div class="recado__corpo" id="recado-corpo"></div>
+  <div class="recado__pe" id="recado-pe" hidden>
+    <button class="mandar" id="mandar">
+      <svg aria-hidden="true"><use href="#zap"/></svg> Mandar no WhatsApp
+    </button>
+    <p class="recado__nota">A gente responde confirmando estoque, frete e pagamento. Nada é cobrado por aqui.</p>
+  </div>
+</aside>
+
+</div><!-- /pagina -->
+
+<button class="barra" id="barra" aria-controls="recado" aria-expanded="false" hidden>
+  <span class="barra__n" id="barra-n">0</span>
+  <span class="barra__txt"><b id="barra-total">R$ 0,00</b>no recado</span>
+  <span class="barra__abrir">Ver e mandar</span>
+</button>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   ▼▼▼  ÚNICO BLOCO PARA EDITAR  ▼▼▼
+   Tudo o que a loja precisa trocar está aqui dentro.
+   Nada abaixo deste bloco precisa ser mexido.
+   ══════════════════════════════════════════════════════════════ */
+const CONFIG = {
+
+  /* ── 1. CONTATO ─────────────────────────────────────────────
+     PREENCHER ANTES DE PUBLICAR. Enquanto estiver assim, o site
+     avisa no rodapé que os dados são provisórios.              */
+  whatsapp:  "5548000000000",                          // só números, com 55
+  telefone:  "(48) 0000-0000",
+  email:     "contato@feitaassim.com.br",
+  instagram: "https://www.instagram.com/lojafeitaassim/",
+
+  /* ── 2. EMPRESA — PREENCHER ANTES DE PUBLICAR ────────────── */
+  razao:    "Feita Assim Comércio de Confecções Ltda",
+  cnpj:     "00.000.000/0001-00",
+  rua:      "Rua Exemplo, 123 — Centro",
+  cidade:   "Criciúma/SC — CEP 88801-000",
+
+  /* ── 3. LOGO — exporte o arquivo e deixe ao lado do HTML ─── */
+  logo: null,                                          // ex: "logo-feita-assim.svg"
+
+  /* ── 4. HORÁRIOS ──────────────────────────────────────────
+     null = fechado. O site usa isto para dizer, de verdade, se
+     ainda dá tempo de receber hoje.                            */
+  horarios: {
+    0: null,                                           // domingo
+    1: {abre:"09:00", fecha:"18:00"},
+    2: {abre:"09:00", fecha:"18:00"},
+    3: {abre:"09:00", fecha:"18:00"},
+    4: {abre:"09:00", fecha:"18:00"},
+    5: {abre:"09:00", fecha:"18:00"},
+    6: {abre:"09:00", fecha:"13:00"}                   // sábado
+  },
+  corteEntrega: "15:00",   // pedidos até esta hora saem no mesmo dia em Criciúma
+
+  /* ── 5. REGRAS COMERCIAIS ────────────────────────────────── */
+  pixDesconto:  5,     // % de desconto no Pix
+  parcelas:     3,     // máximo de parcelas sem juros
+  parcelaMinima:30,    // valor mínimo de cada parcela
+
+  /* ── 6. FATOS — só o que for verdade. Vira a linha de fatos. */
+  fatos: [
+    "5% no Pix",
+    "Até 3x sem juros",
+    "Troca em 7 dias",
+    "Envio para todo o Brasil"
+  ],
+
+  /* ── 7. CATEGORIAS — filtram as peças da grade ───────────── */
+  categorias: ["Tudo","Looks","Bolsas","Óculos","Acessórios"],
+
+  /* ── 8. PEÇAS ─────────────────────────────────────────────
+     EXEMPLOS PARA TESTE — troque pelas peças reais da loja.
+
+     foto:    caminho da foto, ex "fotos/vestido-midi.jpg".
+              Sem foto, o site desenha um lugar em branco de
+              propósito. Não inventa foto de banco de imagem.
+     restam:  quantidade real em estoque. Escreva o número só
+              se ele for verdadeiro. Com 3 ou menos, a peça
+              ganha a marca "últimas". Deixe null se não
+              controla estoque — nenhuma marca aparece.
+     antes:   preço cheio, só se a peça realmente já custou isso.
+              0 = não tem "de/por" e nenhuma marca de desconto.  */
+  pecas: [
+    {ref:"FA-1001", nome:"Vestido midi de viscose",        cat:"Looks",       antes:279.90, preco:219.90, tams:["P","M","G","GG"], restam:null, foto:null, tipo:"look"},
+    {ref:"FA-1002", nome:"Cropped canelado manga longa",   cat:"Looks",       antes:0,      preco:89.90,  tams:["P","M","G"],      restam:null, foto:null, tipo:"look"},
+    {ref:"FA-1003", nome:"Óculos solar retangular UV400",  cat:"Óculos",      antes:189.90, preco:149.90, tams:["Único"],          restam:null, foto:null, tipo:"oculos"},
+    {ref:"FA-1004", nome:"Bolsa baguette alça removível",  cat:"Bolsas",      antes:0,      preco:189.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"},
+    {ref:"FA-2001", nome:"Calça wide leg de alfaiataria",  cat:"Looks",       antes:249.90, preco:149.90, tams:["36","38","40","42","44"], restam:null, foto:null, tipo:"look"},
+    {ref:"FA-2003", nome:"Saia midi plissada",             cat:"Looks",       antes:199.90, preco:119.90, tams:["P","M","G"],      restam:null, foto:null, tipo:"look"},
+    {ref:"FA-2004", nome:"Cinto de fivela dourada",        cat:"Acessórios",  antes:99.90,  preco:49.90,  tams:["Único"],          restam:null, foto:null, tipo:"cinto"},
+    {ref:"FA-3001", nome:"Bolsa tote estruturada",         cat:"Bolsas",      antes:0,      preco:199.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"},
+    {ref:"FA-3002", nome:"Bolsa baguette vermelha",        cat:"Bolsas",      antes:229.90, preco:179.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"},
+    {ref:"FA-3003", nome:"Bolsa transversal",              cat:"Bolsas",      antes:0,      preco:139.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"}
+  ],
+
+  /* ── 9. DEPOIMENTOS ───────────────────────────────────────
+     Deixe [] até ter autorização de clientes reais. Vazio, a
+     seção explica como preencher em vez de inventar.
+     Formato: {texto:"…", autora:"Nome", peca:"o que levou"}   */
+  depoimentos: []
+};
+/* ══════════════════════════════════════════════════════════════
+   ▲▲▲  FIM DO BLOCO PARA EDITAR  ▲▲▲
+   ══════════════════════════════════════════════════════════════ */
+
+
+const $ = s => document.querySelector(s);
+const brl = n => n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const zapLink = m => "https://wa.me/"+CONFIG.whatsapp+"?text="+encodeURIComponent(m);
+const escapar = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* silhuetas para o lugar da foto que ainda não existe */
+const SILHUETA = {
+  look:  '<path d="M12 4 L8 7 4 10 l3 5 3-2 v14 h12 V13 l3 2 3-5 -4-3 -4-3"/><path d="M12 4 a4 4 0 008 0"/>',
+  bolsa: '<path d="M5 12 h22 l-2 16 H7z"/><path d="M11 12 V9 a5 5 0 0110 0 v3"/>',
+  oculos:'<circle cx="9" cy="18" r="6"/><circle cx="23" cy="18" r="6"/><path d="M15 17 a2.2 2.2 0 012 0"/><path d="M3 15 l3-3"/><path d="M29 15 l-3-3"/>',
+  cinto: '<path d="M3 13 h26 v6 H3z"/><rect x="12" y="11" width="9" height="10" rx="1"/><line x1="16" y1="16" x2="21" y2="16"/>'
+};
+const DIAS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const emMinutos = hhmm => { const [h,m] = hhmm.split(":").map(Number); return h*60+m; };
+
+/* ─── marca, contatos e links ─────────────────────────────── */
+if(CONFIG.logo){
+  document.querySelectorAll(".marca").forEach(m => {
+    m.innerHTML = '<img class="marca__img" src="'+escapar(CONFIG.logo)+'" alt="Feita Assim">';
+  });
+}
+$("#ver-insta").href = CONFIG.instagram;
+$("#btn-provador").href = zapLink("Oi! Queria marcar um horário no provador.");
+$("#social").innerHTML =
+  '<a href="'+escapar(CONFIG.instagram)+'" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1zm0 3.6a6.2 6.2 0 100 12.4 6.2 6.2 0 000-12.4zm0 10.2a4 4 0 110-8 4 4 0 010 8zm6.4-10.4a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg></a>' +
+  '<a href="'+zapLink("Oi! Vim pelo site.")+'" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#zap"/></svg></a>';
+$("#contato").innerHTML = [
+  '<li><a href="'+zapLink("Oi! Vim pelo site.")+'" target="_blank" rel="noopener">WhatsApp '+escapar(CONFIG.telefone)+'</a></li>',
+  '<li><a href="mailto:'+escapar(CONFIG.email)+'">'+escapar(CONFIG.email)+'</a></li>',
+  '<li><a href="'+escapar(CONFIG.instagram)+'" target="_blank" rel="noopener">Instagram</a></li>'
+].join("");
+$("#endereco").innerHTML = "<b>"+escapar(CONFIG.rua)+"</b>"+escapar(CONFIG.cidade);
+$("#fatos").innerHTML = CONFIG.fatos.map(f => "<li>"+escapar(f)+"</li>").join("");
+$("#linha-loja").innerHTML =
+  "Loja de rua em <b>Criciúma</b>, com envio para todo o Brasil. Compramos poucas peças de cada modelo — quem levou não encontra igual na cidade.";
+
+document.querySelectorAll("[data-zap]").forEach(el => {
+  el.href = zapLink(el.dataset.zap); el.target = "_blank"; el.rel = "noopener";
+});
+
+/* rodapé legal — avisa se os dados ainda são provisórios */
+(function(){
+  const provisorio = CONFIG.cnpj.startsWith("00.000") || CONFIG.whatsapp.endsWith("000000");
+  $("#legal").innerHTML =
+    escapar(CONFIG.razao)+" · "+escapar(CONFIG.rua)+" · "+escapar(CONFIG.cidade)+" · CNPJ "+escapar(CONFIG.cnpj)+
+    "<br>© "+new Date().getFullYear()+" Feita Assim." +
+    (provisorio ? "<br><b>Dados provisórios: preencha contato, CNPJ e endereço em CONFIG antes de publicar.</b>" : "");
+})();
+
+/* ─── horários e o pulso da entrega ───────────────────────── */
+(function(){
+  const hoje = new Date().getDay();
+  $("#horarios").innerHTML = [1,2,3,4,5,6,0].map(d => {
+    const h = CONFIG.horarios[d];
+    return '<li class="'+(d===hoje?"hoje":"")+'"><span>'+DIAS[d]+'</span>'+
+           (h ? h.abre+"–"+h.fecha : "Fechado")+'</li>';
+  }).join("");
+})();
+
+function pulso(){
+  const agora = new Date();
+  const min = agora.getHours()*60 + agora.getMinutes();
+  const h = CONFIG.horarios[agora.getDay()];
+  const corte = emMinutos(CONFIG.corteEntrega);
+  let texto, dormindo = false;
+
+  if(!h){
+    let d = agora.getDay(), volta = null;
+    for(let i=1;i<=7;i++){ const p = CONFIG.horarios[(d+i)%7]; if(p){ volta = {dia:(d+i)%7, hora:p.abre}; break; } }
+    dormindo = true;
+    texto = "<b>Hoje a loja está fechada.</b> <span>Abrimos "+
+            (volta ? DIAS[volta.dia].toLowerCase()+" às "+volta.hora : "em breve")+
+            ". Pode montar o recado agora — a gente responde na abertura.</span>";
+  } else if(min < emMinutos(h.abre)){
+    texto = "<b>Abrimos hoje às "+h.abre+".</b> <span>Monte o recado agora e ele fica pronto para enviar.</span>";
+    dormindo = true;
+  } else if(min >= emMinutos(h.fecha)){
+    dormindo = true;
+    texto = "<b>Fechamos por hoje.</b> <span>Amanhã respondemos a partir das "+
+            (CONFIG.horarios[(agora.getDay()+1)%7]?.abre || h.abre)+".</span>";
+  } else if(min < corte){
+    const falta = corte - min;
+    const hh = Math.floor(falta/60), mm = falta%60;
+    texto = "<b>Pedido até as "+CONFIG.corteEntrega+" chega hoje em Criciúma.</b> <span>Faltam "+
+            (hh ? hh+"h" : "")+(hh&&mm ? " " : "")+(mm ? mm+"min" : "")+".</span>";
+  } else {
+    texto = "<b>A entrega de hoje já saiu.</b> <span>Pedido feito agora sai amanhã em Criciúma. Estamos abertos até "+h.fecha+".</span>";
+  }
+  $("#pulso").innerHTML = '<span class="pulso__marca'+(dormindo?" dorme":"")+'"></span><p>'+texto+"</p>";
+}
+pulso();
+setInterval(pulso, 60000);
+
+/* ─── as peças ────────────────────────────────────────────── */
+function parcelar(v){
+  let n = CONFIG.parcelas;
+  while(n > 1 && v/n < CONFIG.parcelaMinima) n--;
+  return n > 1 ? n+"x de "+brl(v/n)+" sem juros" : "à vista no cartão";
+}
+
+function desenharPeca(p){
+  const off = p.antes > p.preco ? Math.round((1 - p.preco/p.antes)*100) : 0;
+  const pix = p.preco * (1 - CONFIG.pixDesconto/100);
+  const ultimas = typeof p.restam === "number" && p.restam > 0 && p.restam <= 3;
+
+  const foto = p.foto
+    ? '<img src="'+escapar(p.foto)+'" alt="'+escapar(p.nome)+'" loading="lazy" width="800" height="1000">'
+    : '<div class="semfoto"><svg viewBox="0 0 32 32" aria-hidden="true">'+(SILHUETA[p.tipo]||SILHUETA.look)+
+      '</svg><span>Foto a caminho</span></div>';
+
+  return '<article class="peca" data-ref="'+escapar(p.ref)+'">'+
+    '<div class="peca__foto">'+foto+
+      '<div class="marcas">'+
+        (off ? '<span class="marca-peca marca-peca--off">'+off+'% off</span>' : "")+
+        (ultimas ? '<span class="marca-peca marca-peca--ultimas">Últimas '+p.restam+'</span>' : "")+
+      '</div>'+
+    '</div>'+
+    '<h3>'+escapar(p.nome)+'</h3>'+
+    '<p class="peca__ref">'+escapar(p.ref)+'</p>'+
+    '<p style="margin:0">'+
+      (off ? '<span class="peca__antes">'+brl(p.antes)+'</span>' : "")+
+      '<span class="peca__preco">'+brl(p.preco)+'</span>'+
+    '</p>'+
+    '<p class="peca__pagamento"><b>'+brl(pix)+'</b> no Pix · '+parcelar(p.preco)+'</p>'+
+    '<div class="tamanhos" role="group" aria-label="Tamanho — '+escapar(p.nome)+'">'+
+      p.tams.map((t,j) =>
+        '<button class="tamanho" type="button" aria-pressed="'+(j===0)+'" data-tam="'+escapar(t)+'">'+escapar(t)+'</button>'
+      ).join("")+
+    '</div>'+
+    '<button class="marcar" type="button">Pôr no recado <svg aria-hidden="true"><use href="#seta"/></svg></button>'+
+  '</article>';
+}
+
+let filtro = "Tudo", termo = "";
+
+function mostrarPecas(){
+  const lista = CONFIG.pecas.filter(p =>
+    (filtro === "Tudo" || p.cat === filtro) &&
+    (!termo || p.nome.toLowerCase().includes(termo) || p.ref.toLowerCase().includes(termo))
+  );
+
+  if(!lista.length){
+    $("#grade").innerHTML =
+      '<p class="vazio-busca">Não achamos nada com esse nome nas peças que estão no site. '+
+      'A loja tem mais coisa do que cabe aqui — <a href="'+
+      zapLink('Oi! Procurei por "'+termo+'" no site e não achei. Vocês têm?')+
+      '" target="_blank" rel="noopener">pergunte no WhatsApp</a>.</p>';
+    $("#conta-pecas").textContent = "";
+    return;
+  }
+
+  $("#grade").innerHTML = lista.map(desenharPeca).join("");
+  $("#conta-pecas").textContent = lista.length + (lista.length > 1 ? " peças" : " peça");
+
+  $("#grade").querySelectorAll(".peca").forEach(el => {
+    const p = CONFIG.pecas.find(x => x.ref === el.dataset.ref);
+    el.querySelectorAll(".tamanho").forEach(b => b.addEventListener("click", () => {
+      el.querySelectorAll(".tamanho").forEach(o => o.setAttribute("aria-pressed","false"));
+      b.setAttribute("aria-pressed","true");
+    }));
+    el.querySelector(".marcar").addEventListener("click", () => {
+      const tam = el.querySelector('.tamanho[aria-pressed="true"]').dataset.tam;
+      por(p, tam);
+    });
+  });
+}
+
+/* categorias */
+$("#trilhos").innerHTML = CONFIG.categorias.map((c,i) =>
+  '<button class="trilho" type="button" aria-current="'+(i===0)+'">'+escapar(c)+'</button>'
+).join("");
+$("#trilhos").addEventListener("click", e => {
+  const b = e.target.closest(".trilho"); if(!b) return;
+  $("#trilhos").querySelectorAll(".trilho").forEach(o => o.setAttribute("aria-current","false"));
+  b.setAttribute("aria-current","true");
+  filtro = b.textContent; mostrarPecas();
+});
+
+/* busca */
+$("#busca").addEventListener("submit", e => {
+  e.preventDefault(); termo = $("#q").value.trim().toLowerCase(); mostrarPecas();
+  document.getElementById("pecas").scrollIntoView({behavior:"smooth", block:"start"});
+});
+$("#q").addEventListener("input", () => { if(!$("#q").value.trim()){ termo = ""; mostrarPecas(); } });
+
+/* ─── depoimentos ─────────────────────────────────────────── */
+$("#vozes").innerHTML = CONFIG.depoimentos.length
+  ? '<div class="vozes__grade">'+CONFIG.depoimentos.map(d =>
+      '<blockquote class="voz"><p>'+escapar(d.texto)+'</p><footer>'+
+      escapar(d.autora)+' · '+escapar(d.peca)+'</footer></blockquote>').join("")+'</div>'
+  : '<p class="sem-vozes">Nenhum depoimento publicado ainda. Peça autorização a três clientes, '+
+    'cole o que elas escreveram em <code>CONFIG.depoimentos</code> e a seção aparece. '+
+    'Numa cidade em que todo mundo se conhece, depoimento inventado é o jeito mais rápido de perder a conversa.</p>';
+
+/* ─── O RECADO ────────────────────────────────────────────── */
+let recado = [];
+try{ recado = JSON.parse(localStorage.getItem("feita-assim-recado") || "[]"); }catch(e){ recado = []; }
+let recemPosto = null;
+
+function guardar(){
+  try{ localStorage.setItem("feita-assim-recado", JSON.stringify(recado)); }catch(e){}
+}
+
+function por(p, tam){
+  const chave = p.ref + "|" + tam;
+  const achou = recado.find(i => i.chave === chave);
+  if(achou) achou.qtd++;
+  else recado.push({chave, ref:p.ref, nome:p.nome, tam, preco:p.preco, qtd:1});
+  recemPosto = chave;
+  escrever();
+  if(window.matchMedia("(max-width:1040px)").matches) $("#barra").focus();
+}
+
+function totais(){
+  const total = recado.reduce((s,i) => s + i.preco*i.qtd, 0);
+  const qtd   = recado.reduce((s,i) => s + i.qtd, 0);
+  return {total, qtd, pix: total * (1 - CONFIG.pixDesconto/100)};
+}
+
+/* o texto exato que vai para o WhatsApp — a tela mostra isto, sem maquiagem */
+function textoDoRecado(){
+  const {total, pix} = totais();
+  const linhas = recado.map(i =>
+    "• " + i.qtd + "x " + i.nome + " — tam " + i.tam + " — " + brl(i.preco*i.qtd)
+  ).join("\n");
+  return "Oi! Vim pelo site e montei meu recado:\n\n" + linhas +
+         "\n\nTotal " + brl(total) + "\nNo Pix (" + CONFIG.pixDesconto + "%): " + brl(pix) +
+         "\n\nConsegue confirmar estoque e frete?";
+}
+
+function escrever(){
+  const {total, qtd, pix} = totais();
+  const corpo = $("#recado-corpo");
+
+  if(!recado.length){
+    const h = CONFIG.horarios[new Date().getDay()];
+    corpo.innerHTML =
+      '<p class="recado__vazio"><b>Nada escolhido ainda.</b>'+
+      'As peças que você marcar aparecem aqui, escritas do jeito que vão ser enviadas. '+
+      'Você lê antes de mandar, e muda o que quiser.</p>'+
+      '<div class="recado__loja">'+
+        '<b>'+escapar(CONFIG.rua)+'</b>'+escapar(CONFIG.cidade)+'<br>'+
+        (h ? "Hoje das "+h.abre+" às "+h.fecha : "Hoje fechado")+
+        '<br><a href="'+zapLink("Oi! Vim pelo site e queria tirar uma dúvida.")+'" target="_blank" rel="noopener">Falar com a loja</a>'+
+      '</div>';
+    $("#recado-pe").hidden = true;
+    $("#barra").hidden = true;
+    document.body.classList.remove("com-barra");
+    guardar();
+    return;
+  }
+
+  corpo.innerHTML =
+    '<div class="bilhete">'+
+      '<span class="bilhete__linha">Oi! Vim pelo site e montei meu recado:</span>'+
+      '<span class="bilhete__linha">&nbsp;</span>'+
+      recado.map(i =>
+        '<span class="bilhete__linha bilhete__item'+(i.chave===recemPosto?" bilhete__linha--nova":"")+'" data-chave="'+escapar(i.chave)+'">'+
+          '<span>• '+escapar(i.qtd > 1 ? i.qtd+"x " : "")+escapar(i.nome)+' — tam '+escapar(i.tam)+' — '+brl(i.preco*i.qtd)+
+            '<span class="bilhete__qtd">'+
+              '<button type="button" data-acao="menos" aria-label="Tirar uma unidade de '+escapar(i.nome)+'">−</button>'+
+              '<button type="button" data-acao="mais" aria-label="Somar uma unidade de '+escapar(i.nome)+'">+</button>'+
+              '<button type="button" class="bilhete__tirar" data-acao="tirar" aria-label="Tirar '+escapar(i.nome)+' do recado">tirar</button>'+
+            '</span>'+
+          '</span>'+
+        '</span>').join("")+
+      '<span class="bilhete__linha">&nbsp;</span>'+
+      '<span class="bilhete__linha bilhete__total">Total '+brl(total)+'</span>'+
+      '<span class="bilhete__linha">No Pix ('+CONFIG.pixDesconto+'%): '+brl(pix)+'</span>'+
+      '<span class="bilhete__linha">'+parcelar(total)+'</span>'+
+      '<span class="bilhete__linha">&nbsp;</span>'+
+      '<span class="bilhete__linha">Consegue confirmar estoque e frete?</span>'+
+    '</div>';
+
+  corpo.querySelectorAll("[data-acao]").forEach(b => b.addEventListener("click", () => {
+    const chave = b.closest(".bilhete__item").dataset.chave;
+    const i = recado.findIndex(x => x.chave === chave);
+    if(i < 0) return;
+    const acao = b.dataset.acao;
+    if(acao === "mais") recado[i].qtd++;
+    else if(acao === "menos"){ recado[i].qtd--; if(recado[i].qtd < 1) recado.splice(i,1); }
+    else recado.splice(i,1);
+    recemPosto = null;
+    escrever();
+  }));
+
+  $("#recado-pe").hidden = false;
+  $("#barra").hidden = false;
+  document.body.classList.add("com-barra");
+  $("#barra-n").textContent = qtd;
+  $("#barra-total").textContent = brl(total);
+  recemPosto = null;
+  guardar();
+}
+
+$("#mandar").addEventListener("click", () => {
+  if(!recado.length) return;
+  window.open(zapLink(textoDoRecado()), "_blank", "noopener");
+});
+
+/* gaveta do recado abaixo de 1040px */
+function abrirRecado(){
+  $("#recado").classList.add("aberto");
+  $("#barra").setAttribute("aria-expanded","true");
+  $("#fechar-recado").focus();
+}
+function fecharRecado(){
+  $("#recado").classList.remove("aberto");
+  $("#barra").setAttribute("aria-expanded","false");
+  $("#barra").focus();
+}
+$("#barra").addEventListener("click", abrirRecado);
+$("#fechar-recado").addEventListener("click", fecharRecado);
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape" && $("#recado").classList.contains("aberto")) fecharRecado();
+});
+
+mostrarPecas();
+escrever();
+</script>
+</body>
+</html>
