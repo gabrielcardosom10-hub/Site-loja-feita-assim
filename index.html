@@ -54,9 +54,13 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   text-transform:uppercase;color:var(--cinza);
 }
 
-/* ═══ ESTRUTURA: loja à esquerda, recado à direita ═══ */
-.pagina{display:grid;grid-template-columns:1fr var(--recado-larg);align-items:start;}
-.coluna{min-width:0;border-right:1px solid var(--fio);}
+/* ═══ ESTRUTURA ═══
+   A loja ocupa a tela inteira. A coluna do recado só entra quando há
+   peça escolhida, ou seja, quando o pedido começou a ser montado. */
+.pagina{display:grid;grid-template-columns:1fr;align-items:start;}
+body.com-recado .pagina{grid-template-columns:1fr var(--recado-larg);}
+.coluna{min-width:0;}
+body.com-recado .coluna{border-right:1px solid var(--fio);}
 .dentro{padding:0 clamp(20px,4vw,52px);}
 
 /* ═══ CABEÇALHO ═══ */
@@ -70,10 +74,13 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 }
 .marca{display:flex;align-items:center;gap:10px;flex:none;}
 .marca svg{width:26px;height:19.8px;fill:var(--rosa-forte);flex:none;}
+/* O título de abertura usa exatamente este tratamento. O eixo 'opsz' fica
+   travado em 24 nos dois: solto, a Bricolage redesenha as letras conforme o
+   tamanho e o título de 92px sairia com outro caráter que a marca de 20px. */
 .marca__txt{
   font-family:var(--display);font-weight:800;font-size:20px;
-  letter-spacing:-.035em;line-height:1;
-  font-variation-settings:'wdth' 85;
+  letter-spacing:-.035em;line-height:1;text-transform:lowercase;
+  font-variation-settings:'wdth' 85,'opsz' 24;
 }
 .marca__img{height:34px;width:auto;}
 
@@ -105,8 +112,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .abertura{padding-top:clamp(44px,7vw,90px);padding-bottom:clamp(36px,5vw,56px);}
 .abertura h1{
   font-family:var(--display);font-weight:800;
-  font-size:clamp(44px,8.2vw,92px);line-height:.93;letter-spacing:-.045em;
-  margin:0;max-width:11ch;font-variation-settings:'wdth' 88;
+  font-size:clamp(42px,7.6vw,86px);line-height:.95;letter-spacing:-.035em;
+  margin:0;max-width:12ch;text-transform:lowercase;
+  font-variation-settings:'wdth' 85,'opsz' 24;
 }
 .abertura h1 em{font-style:normal;color:var(--rosa);}
 .abertura__sub{
@@ -290,7 +298,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .social svg{width:20px;height:20px;fill:currentColor;}
 
 /* ═══ O RECADO — a assinatura ═══ */
-.recado{
+.recado{display:none;}
+body.com-recado .recado{
   position:sticky;top:0;height:100vh;
   display:flex;flex-direction:column;background:var(--papel);
 }
@@ -332,20 +341,6 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .bilhete__qtd [data-acao="menos"]:hover{border-color:var(--tinta);color:var(--tinta);}
 .bilhete__total{font-weight:700;}
 
-.recado__vazio{font-size:14.5px;color:var(--cinza);line-height:1.7;margin:0;}
-.recado__vazio b{display:block;color:var(--tinta);font-family:var(--display);
-  font-weight:700;font-size:17px;letter-spacing:-.02em;margin-bottom:8px;}
-/* o vazio não fica em branco: enquanto não há peça, a coluna mostra a loja */
-.recado__loja{
-  margin-top:28px;padding-top:20px;border-top:1px solid var(--fio);
-  font-size:13.5px;line-height:1.7;color:var(--cinza);
-}
-.recado__loja b{display:block;color:var(--tinta);font-weight:600;}
-.recado__loja a{
-  display:inline-block;margin-top:12px;color:var(--rosa-forte);
-  font-weight:600;border-bottom:1px solid;
-}
-
 .recado__pe{padding:18px 24px 22px;border-top:1px solid var(--fio);}
 .mandar{
   width:100%;height:54px;background:var(--rosa-forte);color:var(--cal);
@@ -362,20 +357,22 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .recado__fechar{display:none;}
 
 @media(max-width:1040px){
-  .pagina{grid-template-columns:1fr;}
-  .coluna{border-right:0;}
-  .recado{
+  /* precisa repetir o `body.com-recado` porque a regra de cima tem
+     especificidade maior e venceria um `.pagina` sozinho aqui dentro */
+  body.com-recado .pagina{grid-template-columns:1fr;}
+  body.com-recado .coluna{border-right:0;}
+  body.com-recado .recado{
     position:fixed;inset:0;height:100dvh;z-index:90;
     transform:translateY(100%);visibility:hidden;
     transition:transform 280ms cubic-bezier(.2,.7,.2,1),visibility 280ms;
   }
-  .recado.aberto{transform:none;visibility:visible;}
+  body.com-recado .recado.aberto{transform:none;visibility:visible;}
   .recado__cab{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
   .recado__fechar{
     display:grid;place-items:center;width:44px;height:44px;margin:-8px -10px 0 0;flex:none;
   }
   .recado__fechar svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;}
-  body.com-barra{padding-bottom:70px;}
+  body.com-recado{padding-bottom:70px;}
   /* sem esta regra o display:flex abaixo vence o [hidden] do navegador
      e a barra aparece zerada com o recado vazio */
   .barra[hidden]{display:none;}
@@ -467,14 +464,14 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
     <section class="fluxo dentro">
       <h2>Aqui não tem carrinho. Você monta o recado, a gente responde.</h2>
       <ol class="fluxo__passos">
-        <li><b>1</b><span>Escolhe as peças e o tamanho. Elas vão sendo escritas no recado, ao lado.</span></li>
+        <li><b>1</b><span>Escolhe as peças e o tamanho. O recado abre na primeira peça e vai se escrevendo sozinho.</span></li>
         <li><b>2</b><span>Manda o recado pronto no WhatsApp, sem digitar nada.</span></li>
         <li><b>3</b><span>A gente confirma estoque, frete e pagamento na conversa.</span></li>
       </ol>
       <ul class="fatos" id="fatos"></ul>
     </section>
 
-    <section class="pecas dentro" id="pecas" aria-labelledby="tit-pecas">
+    <section class="pecas dentro" id="pecas" tabindex="-1" aria-labelledby="tit-pecas">
       <div class="pecas__cab">
         <h2 id="tit-pecas">Na loja agora</h2>
         <span class="etiqueta" id="conta-pecas"></span>
@@ -889,20 +886,17 @@ function escrever(){
   const {total, qtd, pix} = totais();
   const corpo = $("#recado-corpo");
 
+  /* Recado vazio não tem o que mostrar: a coluna sai da direita e a página
+     volta a ocupar a tela inteira. Ela só existe com pedido sendo montado. */
   if(!recado.length){
-    const h = CONFIG.horarios[new Date().getDay()];
-    corpo.innerHTML =
-      '<p class="recado__vazio"><b>Nada escolhido ainda.</b>'+
-      'As peças que você marcar aparecem aqui, escritas do jeito que vão ser enviadas. '+
-      'Você lê antes de mandar, e muda o que quiser.</p>'+
-      '<div class="recado__loja">'+
-        '<b>'+escapar(CONFIG.rua)+'</b>'+escapar(CONFIG.cidade)+'<br>'+
-        (h ? "Hoje das "+h.abre+" às "+h.fecha : "Hoje fechado")+
-        '<br><a href="'+zapLink("Oi! Vim pelo site e queria tirar uma dúvida.")+'" target="_blank" rel="noopener">Falar com a loja</a>'+
-      '</div>';
+    const estavaAberto = $("#recado").classList.contains("aberto");
+    corpo.innerHTML = "";
+    $("#recado").classList.remove("aberto");
     $("#recado-pe").hidden = true;
     $("#barra").hidden = true;
-    document.body.classList.remove("com-barra");
+    $("#barra").setAttribute("aria-expanded","false");
+    document.body.classList.remove("com-recado");
+    if(estavaAberto) document.getElementById("pecas").focus({preventScroll:true});
     guardar();
     return;
   }
@@ -943,7 +937,7 @@ function escrever(){
 
   $("#recado-pe").hidden = false;
   $("#barra").hidden = false;
-  document.body.classList.add("com-barra");
+  document.body.classList.add("com-recado");
   $("#barra-n").textContent = qtd;
   $("#barra-total").textContent = brl(total);
   recemPosto = null;
