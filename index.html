@@ -144,7 +144,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   overflow:hidden;
 }
 .abertura__foto{position:absolute;inset:0;}
-.abertura__foto img{width:100%;height:100%;object-fit:cover;object-position:70% 22%;}
+.abertura__foto img{width:100%;height:100%;object-fit:cover;object-position:78% 26%;}
 .abertura__veu{
   position:absolute;inset:0;
   background:
@@ -165,7 +165,10 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   font-size:clamp(38px,6.4vw,82px);line-height:.98;letter-spacing:.005em;
   font-variation-settings:var(--cond);
 }
-.abertura h1 span{display:block;}
+/* cada linha é uma janela: o <i> sobe de trás dela na entrada.
+   O padding/margem compensam a barriga do J para o overflow não cortar. */
+.abertura h1 span{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em;}
+.abertura h1 i{display:block;font-style:normal;}
 .abertura h1 span:nth-child(1){font-weight:800;}
 .abertura h1 span:nth-child(2){font-weight:400;}
 
@@ -184,20 +187,25 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .abertura.sem-foto .abertura__veu{display:none;}
 
 /* ═══ ENTRADA ═══
-   Sequência única no carregamento, com fill-mode both para o conteúdo
-   terminar visível mesmo se a animação não rodar. O bloco de
-   prefers-reduced-motion no fim da folha zera a duração. */
-@keyframes sobe{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
-@keyframes assenta{from{opacity:0;transform:scale(1.06);}to{opacity:1;transform:none;}}
+   Uma sequência só: a foto abre num afastamento lento, o véu assenta,
+   a etiqueta risca da esquerda e as duas linhas do título sobem de trás
+   do próprio corte. Tudo com fill-mode both, então o conteúdo termina
+   visível mesmo se a animação não rodar; o bloco de
+   prefers-reduced-motion no fim da folha zera duração e atraso. */
+@keyframes sobe{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+@keyframes afasta{from{transform:scale(1.12);}to{transform:scale(1);}}
 @keyframes surge{from{opacity:0;}to{opacity:1;}}
+@keyframes risca{from{opacity:0;clip-path:inset(0 100% 0 0);}
+                 to{opacity:1;clip-path:inset(0 0 0 0);}}
+@keyframes linha{from{transform:translateY(105%);}to{transform:none;}}
 
-.abertura__foto{animation:assenta 1.2s cubic-bezier(.2,.7,.2,1) both;}
-.abertura__veu{animation:surge .9s ease-out both .1s;}
-.abertura__etiqueta{animation:sobe .6s cubic-bezier(.2,.7,.2,1) both .3s;}
-.abertura h1 span{animation:sobe .7s cubic-bezier(.2,.7,.2,1) both;}
-.abertura h1 span:nth-child(1){animation-delay:.42s;}
-.abertura h1 span:nth-child(2){animation-delay:.54s;}
-.abertura__cta{animation:sobe .6s cubic-bezier(.2,.7,.2,1) both .7s;}
+.abertura__foto{animation:surge 1.1s ease-out both, afasta 2.2s cubic-bezier(.16,.8,.28,1) both;}
+.abertura__veu{animation:surge 1s ease-out both .15s;}
+.abertura__etiqueta{animation:risca .8s cubic-bezier(.2,.7,.2,1) both .5s;}
+.abertura h1 i{animation:linha .82s cubic-bezier(.22,.75,.2,1) both;}
+.abertura h1 span:nth-child(1) i{animation-delay:.62s;}
+.abertura h1 span:nth-child(2) i{animation-delay:.74s;}
+.abertura__cta{animation:sobe .65s cubic-bezier(.2,.7,.2,1) both 1s;}
 
 @media(max-width:980px){
   .abertura{min-height:78vh;}
@@ -465,7 +473,14 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 }
 
 @media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+  /* zerar só a duração não basta: os atrasos continuam valendo e o
+     elemento fica preso no estado inicial, invisível, esperando a vez */
+  *,*::before,*::after{
+    animation-duration:.01ms!important;animation-delay:0s!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;transition-delay:0s!important;
+  }
+  html{scroll-behavior:auto;}
 }
 </style>
 </head>
@@ -519,7 +534,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
       <div class="abertura__veu"></div>
       <div class="abertura__texto dentro">
         <p class="abertura__etiqueta" id="abertura-etiqueta"></p>
-        <h1><span>Ganhe o mundo</span><span>do seu jeito</span></h1>
+        <h1><span><i>Ganhe o mundo</i></span><span><i>do seu jeito</i></span></h1>
       </div>
       <a class="abertura__cta" href="#pecas">Ver as peças</a>
     </section>
@@ -535,8 +550,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
     <section class="loja" id="loja">
       <div class="dentro loja__grade">
         <div>
-          <h2>A loja fica na rua, e você pode entrar</h2>
-          <p>Provador com hora marcada: a gente separa as peças no seu tamanho antes de você chegar.</p>
+          <h2>Prove antes de levar</h2>
+          <p>Marque um horário e a gente separa as peças do seu tamanho para você experimentar com calma.</p>
           <p class="loja__end" id="endereco"></p>
           <a class="provador" id="btn-provador" target="_blank" rel="noopener">
             <svg aria-hidden="true"><use href="#zap"/></svg> Marcar um horário
@@ -566,7 +581,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
             <svg aria-hidden="true"><use href="#tulipa"/></svg>
             <span class="marca__txt">feita assim</span>
           </span>
-          <p class="rodape__sobre">Looks, bolsas, óculos e acessórios. Poucas peças de cada modelo, escolhidas uma a uma.</p>
+          <p class="rodape__sobre">Looks, bolsas, óculos e acessórios, escolhidos uma peça de cada vez.</p>
           <div class="social" id="social"></div>
         </div>
         <div>
@@ -665,8 +680,8 @@ const CONFIG = {
      abaixo por "fotos/abertura.jpg". O ideal mesmo é uma foto sua,
      de uma peça real da loja: é o que diferencia de qualquer catálogo. */
   abertura: {
-    foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_034215_c3b8fd32-9b11-46d4-9d67-6fbf122263e4.png",
-    alt:  "Modelo de perfil com vestido midi claro e bolsa estruturada"
+    foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_135611_aeac77cd-c1f7-43f0-9abf-d4922dce4e2f.png",
+    alt:  "Modelo com vestido midi claro, bolsa de ombro e óculos de sol"
   },
 
   /* ── 5b. OFERTA DA ABERTURA ───────────────────────────────
@@ -764,7 +779,7 @@ $("#btn-provador").href = zapLink("Oi! Queria marcar um horário no provador.");
   const img = new Image();
   img.src = f;
   img.alt = CONFIG.abertura.alt || "";
-  img.width = 1100; img.height = 1467;   // proporção reservada, sem pulo de layout
+  img.width = 2048; img.height = 1152;   // proporção reservada, sem pulo de layout
   img.fetchPriority = "high";
   img.onerror = () => $("#abertura").classList.add("sem-foto");
   $("#abertura-foto").appendChild(img);
@@ -792,8 +807,7 @@ $("#contato").innerHTML = [
   '<li><a href="'+escapar(CONFIG.instagram)+'" target="_blank" rel="noopener">Instagram</a></li>'
 ].join("");
 $("#endereco").innerHTML = "<b>"+escapar(CONFIG.rua)+"</b>"+escapar(CONFIG.cidade);
-$("#abertura-etiqueta").innerHTML =
-  '<span>Coleção nova</span> &nbsp;·&nbsp; Poucas peças de cada modelo';
+$("#abertura-etiqueta").innerHTML = '<span>Coleção nova</span>';
 
 document.querySelectorAll("[data-zap]").forEach(el => {
   el.href = zapLink(el.dataset.zap); el.target = "_blank"; el.rel = "noopener";
