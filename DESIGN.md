@@ -60,6 +60,24 @@ que a mão toca, não tudo.
 - Foto do Instagram: 1:1
 - Abertura: deitada, com metade do quadro vazia de um lado
 
+## Movimento na capa
+
+`CONFIG.abertura.video` aceita um laço curto por cima da foto. A foto continua
+sendo o poster, então ela aparece primeiro e o vídeo entra em fade só quando
+tem quadro pronto — nunca pisca preto.
+
+O movimento é sempre opcional, em quatro sentidos:
+
+- com `prefers-reduced-motion` ligado o vídeo **não chega a ser baixado**
+  (esconder por CSS gastaria os dados de quem já disse que não quer movimento)
+- se o navegador barrar o autoplay, o vídeo se remove e fica a foto
+- se o arquivo falhar, idem
+- com `video: null`, idem
+
+O laço deve ser quieto: tecido que balança, um respiro, uma aproximação lenta.
+Corte, tremida ou zoom brusco brigam com o resto da página e chamam atenção
+para si em vez de para a roupa.
+
 ## O logo de verdade
 
 Hoje o cabeçalho **escreve** "feita assim" em Poppins, o que é uma

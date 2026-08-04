@@ -145,7 +145,13 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   overflow:hidden;
 }
 .abertura__foto{position:absolute;inset:0;}
-.abertura__foto img{width:100%;height:100%;object-fit:cover;object-position:78% 26%;}
+.abertura__foto img,
+.abertura__video{width:100%;height:100%;object-fit:cover;object-position:78% 26%;}
+/* o vídeo entra por cima da foto, aparecendo só quando tem quadro pronto */
+.abertura__video{
+  position:absolute;inset:0;opacity:0;transition:opacity .7s ease-out;
+}
+.abertura__video.pronto{opacity:1;}
 .abertura__veu{
   position:absolute;inset:0;
   background:
@@ -674,6 +680,10 @@ const CONFIG = {
      abaixo por "fotos/abertura.jpg". O ideal mesmo é uma foto sua,
      de uma peça real da loja: é o que diferencia de qualquer catálogo. */
   abertura: {
+    /* video: um laço curto e quieto por cima da foto. null desliga.
+       A foto acima continua sendo o poster e o retrato de quem tem
+       movimento reduzido ligado — nesse caso o vídeo nem é baixado. */
+    video: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_231940_538d400d-02ff-4cc6-b21b-5464841edde3.mp4",
     foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_135611_aeac77cd-c1f7-43f0-9abf-d4922dce4e2f.png",
     alt:  "Modelo com vestido midi claro, bolsa de ombro e óculos de sol"
   },
@@ -766,17 +776,37 @@ if(CONFIG.logo){
 $("#ver-insta").href = CONFIG.instagram;
 $("#btn-provador").href = zapLink("Oi! Queria marcar um horário no provador.");
 
-/* foto da abertura — sem foto, a coluna some e o texto ocupa a faixa toda */
+/* capa — foto sempre; vídeo só se houver e se a pessoa aceitar movimento */
 (function(){
-  const f = CONFIG.abertura && CONFIG.abertura.foto;
-  if(!f){ $("#abertura").classList.add("sem-foto"); return; }
+  const a = CONFIG.abertura || {};
+  if(!a.foto){ $("#abertura").classList.add("sem-foto"); return; }
+
   const img = new Image();
-  img.src = f;
-  img.alt = CONFIG.abertura.alt || "";
+  img.src = a.foto;
+  img.alt = a.alt || "";
   img.width = 2048; img.height = 1152;   // proporção reservada, sem pulo de layout
   img.fetchPriority = "high";
   img.onerror = () => $("#abertura").classList.add("sem-foto");
   $("#abertura-foto").appendChild(img);
+
+  /* Movimento reduzido: sai daqui sem sequer pedir o vídeo ao servidor.
+     Esconder por CSS baixaria o arquivo assim mesmo. */
+  if(!a.video || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const v = document.createElement("video");
+  v.className = "abertura__video";
+  v.src = a.video;
+  v.poster = a.foto;
+  v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+  v.setAttribute("aria-hidden","true");
+  v.preload = "auto";
+  /* só aparece quando tem quadro para mostrar: assim ele nunca pisca
+     preto por cima da foto enquanto carrega */
+  v.addEventListener("canplay", () => v.classList.add("pronto"), {once:true});
+  v.addEventListener("error", () => v.remove(), {once:true});
+  $("#abertura-foto").appendChild(v);
+  const t = v.play();
+  if(t && t.catch) t.catch(() => v.remove());   // autoplay barrado: fica a foto
 })();
 
 /* tarja do topo — só entra o que estiver configurado */
