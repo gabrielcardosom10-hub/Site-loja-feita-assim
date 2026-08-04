@@ -138,7 +138,24 @@ body.com-carrinho .coluna{border-right:1px solid var(--fio);}
   margin:0;max-width:12ch;text-transform:lowercase;
   font-variation-settings:'wdth' 85,'opsz' 24;
 }
+.abertura h1 span{display:block;}
 .abertura h1 em{font-style:normal;color:var(--rosa-claro);}
+
+/* ═══ ENTRADA ═══
+   Uma sequência só, no carregamento: as duas linhas do título sobem,
+   o texto segue, a foto assenta. Tudo com fill-mode both, para que o
+   conteúdo termine visível mesmo se a animação não rodar. O bloco de
+   prefers-reduced-motion no fim da folha zera a duração e a página
+   simplesmente aparece pronta. */
+@keyframes sobe{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+@keyframes assenta{from{opacity:0;transform:scale(1.05);}to{opacity:1;transform:none;}}
+
+.abertura h1 span{animation:sobe .68s cubic-bezier(.2,.7,.2,1) both;}
+.abertura h1 span:nth-child(1){animation-delay:.06s;}
+.abertura h1 span:nth-child(2){animation-delay:.19s;}
+.abertura__sub{animation:sobe .68s cubic-bezier(.2,.7,.2,1) both .33s;}
+.abertura__foto{animation:assenta .9s cubic-bezier(.2,.7,.2,1) both .08s;}
+.oferta{animation:sobe .6s cubic-bezier(.2,.7,.2,1) both .46s;}
 .abertura__sub{
   margin:26px 0 0;max-width:42ch;font-size:17px;color:var(--lilas);
 }
@@ -146,35 +163,24 @@ body.com-carrinho .coluna{border-right:1px solid var(--fio);}
 
 /* ═══ A FAIXA DE OFERTA — logo abaixo da abertura, como as grandes lojas
    de roupa fazem com cupom de primeira compra e frete grátis ═══ */
-.oferta{background:var(--uva);color:var(--papel);}
+/* Uma linha só, sem caixa tracejada e sem número gigante: a oferta
+   informa e sai da frente. */
+.oferta{background:var(--papel);border-bottom:1px solid var(--fio);}
 .oferta__in{
-  display:flex;align-items:center;gap:clamp(20px,3vw,44px);flex-wrap:wrap;
-  padding-top:18px;padding-bottom:18px;
+  display:flex;align-items:baseline;gap:10px 30px;flex-wrap:wrap;
+  padding-top:16px;padding-bottom:16px;font-size:14px;color:var(--cinza);
 }
-.oferta__cupom{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0;}
-.oferta__off{
-  font-family:var(--display);font-weight:800;font-size:34px;line-height:1;
-  letter-spacing:-.04em;color:var(--rosa-claro);
-  font-variation-settings:'wdth' 85,'opsz' 24;
-}
-.oferta__regra{font-size:14.5px;color:var(--lilas);}
+.oferta__in b{color:var(--tinta);font-weight:600;}
 .oferta__codigo{
-  display:inline-block;padding:6px 12px;border:1px dashed var(--rosa-claro);
-  color:var(--papel);font-size:13.5px;font-weight:700;letter-spacing:.14em;
+  font-weight:700;letter-spacing:.1em;color:var(--rosa-forte);
 }
-.oferta__frete{
-  margin:0;font-size:14.5px;color:var(--lilas);line-height:1.45;
-  padding-left:clamp(20px,3vw,44px);border-left:1px solid #F6F1F324;
-}
-.oferta__frete b{color:var(--papel);font-weight:600;}
 .oferta__cta{
-  margin-left:auto;display:flex;align-items:center;justify-content:center;gap:9px;
-  min-height:48px;padding:0 24px;background:var(--rosa-forte);color:var(--cal);
-  font-size:13.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-  transition:background var(--t);
+  margin-left:auto;color:var(--rosa-forte);font-weight:600;
+  display:inline-flex;align-items:center;gap:7px;
+  border-bottom:1px solid transparent;transition:border-color var(--t);
 }
-.oferta__cta:hover{background:var(--rosa);}
-.oferta__cta svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;flex:none;}
+.oferta__cta:hover{border-color:var(--rosa-forte);}
+.oferta__cta svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
 
 /* aviso de entrega, dentro da seção da loja */
 .pulso{display:flex;gap:11px;align-items:flex-start;margin-top:22px;
@@ -207,17 +213,7 @@ body.com-carrinho .coluna{border-right:1px solid var(--fio);}
   font-family:var(--display);font-weight:700;font-size:clamp(21px,2.6vw,27px);
   letter-spacing:-.025em;margin:0 0 6px;max-width:24ch;line-height:1.15;
 }
-.fluxo__passos{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:11px;max-width:60ch;}
-.fluxo__passos li{display:flex;gap:13px;font-size:15px;}
-.fluxo__passos b{
-  flex:none;font-family:var(--display);font-weight:700;font-size:15px;
-  color:var(--rosa-forte);width:16px;
-}
-.fatos{
-  margin:26px 0 0;padding:0;list-style:none;
-  display:flex;flex-wrap:wrap;gap:8px 22px;
-}
-.fatos li{font-size:11.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--cinza);}
+.fluxo__linha{margin:16px 0 0;max-width:58ch;font-size:16px;color:var(--cinza);}
 
 /* ═══ PEÇAS ═══ */
 .pecas{padding-top:clamp(34px,5vw,58px);border-top:1px solid var(--fio);scroll-margin-top:150px;}
@@ -263,7 +259,6 @@ body.com-carrinho .coluna{border-right:1px solid var(--fio);}
 .peca h3{
   font-size:15px;font-weight:500;line-height:1.35;margin:0 0 3px;
 }
-.peca__ref{font-size:11.5px;color:var(--cinza);margin:0 0 11px;letter-spacing:.04em;}
 .peca__antes{display:block;font-size:13px;color:var(--cinza);text-decoration:line-through;}
 .peca__preco{
   font-family:var(--display);font-weight:700;font-size:25px;
@@ -331,8 +326,19 @@ body.com-carrinho .coluna{border-right:1px solid var(--fio);}
 .horarios span{color:#F6F1F3a8;}
 .horarios li.hoje span{color:var(--rosa-claro);}
 
+/* ═══ INSTAGRAM ═══ */
+.insta__grade{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.2vw,16px);}
+.insta__item{display:block;aspect-ratio:1/1;overflow:hidden;background:var(--cal);}
+.insta__item img{width:100%;height:100%;object-fit:cover;transition:opacity var(--t);}
+.insta__item:hover img{opacity:.82;}
+@media(max-width:760px){.insta__grade{grid-template-columns:repeat(2,1fr);}}
+
 /* ═══ VOZES ═══ */
 .vozes{padding-top:clamp(38px,5vw,60px);padding-bottom:clamp(38px,5vw,60px);border-top:1px solid var(--fio);}
+.vozes__tit{
+  font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:-.025em;
+  margin:clamp(34px,4vw,52px) 0 20px;
+}
 .vozes__grade{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
 .voz{margin:0;padding:22px;background:var(--cal);}
 .voz p{margin:0 0 14px;font-size:15px;}
@@ -523,7 +529,7 @@ body.com-carrinho .carrinho{
   <main>
     <section class="abertura" id="abertura">
       <div class="abertura__texto dentro">
-        <h1>Ganhe o mundo <em>do seu jeito</em></h1>
+        <h1><span>Ganhe o mundo</span><span><em>do seu jeito</em></span></h1>
         <p class="abertura__sub" id="linha-loja"></p>
       </div>
       <div class="abertura__foto" id="abertura-foto"></div>
@@ -533,12 +539,9 @@ body.com-carrinho .carrinho{
 
     <section class="fluxo dentro">
       <h2>Aqui não tem checkout. Você monta o carrinho, a gente fecha na conversa.</h2>
-      <ol class="fluxo__passos">
-        <li><b>1</b><span>Escolhe as peças e o tamanho. O carrinho abre na primeira peça e já monta o pedido escrito.</span></li>
-        <li><b>2</b><span>Manda o pedido pronto no WhatsApp, sem digitar nada.</span></li>
-        <li><b>3</b><span>A gente confirma estoque, frete e pagamento na conversa.</span></li>
-      </ol>
-      <ul class="fatos" id="fatos"></ul>
+      <p class="fluxo__linha">Escolhe as peças e o tamanho, manda o pedido pronto no
+      WhatsApp sem digitar nada, e a gente confirma estoque, frete e pagamento
+      conversando.</p>
     </section>
 
     <section class="pecas dentro" id="pecas" tabindex="-1" aria-labelledby="tit-pecas">
@@ -569,9 +572,10 @@ body.com-carrinho .carrinho{
 
     <section class="vozes dentro">
       <div class="pecas__cab">
-        <h2>Quem já levou</h2>
-        <a class="etiqueta" id="ver-insta" target="_blank" rel="noopener" style="color:var(--rosa-forte)">Ver no Instagram</a>
+        <h2>No Instagram</h2>
+        <a class="etiqueta" id="ver-insta" target="_blank" rel="noopener" style="color:var(--rosa-forte)">@lojafeitaassim</a>
       </div>
+      <div id="insta"></div>
       <div id="vozes"></div>
     </section>
 
@@ -685,8 +689,8 @@ const CONFIG = {
      abaixo por "fotos/abertura.jpg". O ideal mesmo é uma foto sua,
      de uma peça real da loja: é o que diferencia de qualquer catálogo. */
   abertura: {
-    foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_000301_2b5cd19e-eaf3-4e5e-bb30-f020f711ae04.png",
-    alt:  "Modelo com vestido midi e bolsa estruturada"
+    foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_034215_c3b8fd32-9b11-46d4-9d67-6fbf122263e4.png",
+    alt:  "Modelo de perfil com vestido midi claro e bolsa estruturada"
   },
 
   /* ── 5b. OFERTA DA ABERTURA ───────────────────────────────
@@ -700,14 +704,6 @@ const CONFIG = {
     desconto: 10,                      // % de desconto
     regra:    "na primeira compra"
   },
-
-  /* ── 6. FATOS — só o que for verdade. Vira a linha de fatos. */
-  fatos: [
-    "5% no Pix",
-    "Até 3x sem juros",
-    "Troca em 7 dias",
-    "Envio para todo o Brasil"
-  ],
 
   /* ── 7. CATEGORIAS — filtram as peças da grade ───────────── */
   categorias: ["Tudo","Looks","Bolsas","Óculos","Acessórios"],
@@ -735,6 +731,19 @@ const CONFIG = {
     {ref:"FA-3001", nome:"Bolsa tote estruturada",         cat:"Bolsas",      antes:0,      preco:199.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"},
     {ref:"FA-3002", nome:"Bolsa baguette vermelha",        cat:"Bolsas",      antes:229.90, preco:179.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"},
     {ref:"FA-3003", nome:"Bolsa transversal",              cat:"Bolsas",      antes:0,      preco:139.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"}
+  ],
+
+  /* ── 8b. INSTAGRAM ────────────────────────────────────────
+     O site NÃO consegue puxar as fotos do Instagram sozinho: o
+     Instagram exige autenticação e bloqueia acesso automático.
+     As fotos precisam ser baixadas do seu próprio perfil e salvas
+     na pasta fotos/, uma linha aqui para cada uma.
+
+     foto: caminho do arquivo | post: link do post no Instagram
+     Lista vazia = a seção explica o que fazer, em vez de sumir.     */
+  instagram_fotos: [
+    // {foto:"fotos/insta-1.jpg", post:"https://www.instagram.com/p/XXXXXXXX/", alt:"Vestido midi na loja"},
+    // {foto:"fotos/insta-2.jpg", post:"https://www.instagram.com/p/YYYYYYYY/", alt:"Bolsa baguette"},
   ],
 
   /* ── 9. DEPOIMENTOS ───────────────────────────────────────
@@ -789,19 +798,14 @@ $("#btn-provador").href = zapLink("Oi! Queria marcar um horário no provador.");
 (function(){
   const c = CONFIG.cupom, partes = [];
   if(c && c.desconto){
-    partes.push(
-      '<p class="oferta__cupom">'+
-        '<span class="oferta__off">'+c.desconto+'% off</span>'+
-        '<span class="oferta__regra">'+escapar(c.regra || "")+'</span>'+
-        (c.codigo ? '<span class="oferta__codigo">'+escapar(c.codigo)+'</span>' : "")+
-      '</p>');
+    partes.push('<span><b>'+c.desconto+'% off</b> '+escapar(c.regra || "")+
+      (c.codigo ? ' com <span class="oferta__codigo">'+escapar(c.codigo)+'</span>' : "")+'</span>');
   }
   if(CONFIG.freteGratis){
-    partes.push('<p class="oferta__frete"><b>Frete grátis</b> acima de '+
-                brl(CONFIG.freteGratis)+',<br>para todo o Brasil.</p>');
+    partes.push('<span><b>Frete grátis</b> acima de '+brl(CONFIG.freteGratis)+'</span>');
   }
   if(!partes.length){ $("#oferta").remove(); return; }
-  partes.push('<a class="oferta__cta" href="#pecas">Ver as novidades '+
+  partes.push('<a class="oferta__cta" href="#pecas">Ver as peças '+
               '<svg aria-hidden="true"><use href="#seta"/></svg></a>');
   $("#oferta").firstElementChild.innerHTML = partes.join("");
 })();
@@ -814,7 +818,6 @@ $("#contato").innerHTML = [
   '<li><a href="'+escapar(CONFIG.instagram)+'" target="_blank" rel="noopener">Instagram</a></li>'
 ].join("");
 $("#endereco").innerHTML = "<b>"+escapar(CONFIG.rua)+"</b>"+escapar(CONFIG.cidade);
-$("#fatos").innerHTML = CONFIG.fatos.map(f => "<li>"+escapar(f)+"</li>").join("");
 $("#linha-loja").innerHTML =
   "Loja de rua em <b>Criciúma</b>, com envio para todo o Brasil. Compramos poucas peças de cada modelo — quem levou não encontra igual na cidade.";
 
@@ -905,12 +908,11 @@ function desenharPeca(p){
       '</div>'+
     '</div>'+
     '<h3>'+escapar(p.nome)+'</h3>'+
-    '<p class="peca__ref">'+escapar(p.ref)+'</p>'+
     '<p style="margin:0">'+
       (off ? '<span class="peca__antes">'+brl(p.antes)+'</span>' : "")+
       '<span class="peca__preco">'+brl(p.preco)+'</span>'+
     '</p>'+
-    '<p class="peca__pagamento"><b>'+brl(pix)+'</b> no Pix · '+parcelar(p.preco)+'</p>'+
+    '<p class="peca__pagamento">'+brl(pix)+' no Pix · '+parcelar(p.preco)+'</p>'+
     '<div class="tamanhos" role="group" aria-label="Tamanho — '+escapar(p.nome)+'">'+
       p.tams.map((t,j) =>
         '<button class="tamanho" type="button" aria-pressed="'+(j===0)+'" data-tam="'+escapar(t)+'">'+escapar(t)+'</button>'
@@ -972,14 +974,25 @@ $("#busca").addEventListener("submit", e => {
 });
 $("#q").addEventListener("input", () => { if(!$("#q").value.trim()){ termo = ""; mostrarPecas(); } });
 
+/* ─── instagram ───────────────────────────────────────────── */
+$("#insta").innerHTML = CONFIG.instagram_fotos.length
+  ? '<div class="insta__grade">'+CONFIG.instagram_fotos.map(f =>
+      '<a class="insta__item" href="'+escapar(f.post || CONFIG.instagram)+'" target="_blank" rel="noopener">'+
+        '<img src="'+escapar(f.foto)+'" alt="'+escapar(f.alt || "")+'" loading="lazy" width="600" height="600">'+
+      '</a>').join("")+'</div>'
+  : '<p class="sem-vozes">O Instagram não deixa o site buscar as fotos sozinho — ele exige '+
+    'login e bloqueia acesso automático. Baixe as fotos que você quer aqui do seu próprio '+
+    'perfil, salve na pasta <code>fotos/</code> e liste cada uma em '+
+    '<code>CONFIG.instagram_fotos</code>. A grade aparece sozinha.</p>';
+
 /* ─── depoimentos ─────────────────────────────────────────── */
+/* sem depoimento a seção não mostra aviso nenhum: um bloco vazio explicado
+   já basta por página, e o do Instagram acima cumpre esse papel */
 $("#vozes").innerHTML = CONFIG.depoimentos.length
-  ? '<div class="vozes__grade">'+CONFIG.depoimentos.map(d =>
+  ? '<h3 class="vozes__tit">Quem já levou</h3><div class="vozes__grade">'+CONFIG.depoimentos.map(d =>
       '<blockquote class="voz"><p>'+escapar(d.texto)+'</p><footer>'+
       escapar(d.autora)+' · '+escapar(d.peca)+'</footer></blockquote>').join("")+'</div>'
-  : '<p class="sem-vozes">Nenhum depoimento publicado ainda. Peça autorização a três clientes, '+
-    'cole o que elas escreveram em <code>CONFIG.depoimentos</code> e a seção aparece. '+
-    'Numa cidade em que todo mundo se conhece, depoimento inventado é o jeito mais rápido de perder a conversa.</p>';
+  : "";
 
 /* ─── O CARRINHO ────────────────────────────────────────────── */
 let carrinho = [];
