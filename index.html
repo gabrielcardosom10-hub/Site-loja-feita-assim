@@ -697,16 +697,16 @@ const CONFIG = {
   },
 
   /* ── 7. CATEGORIAS — filtram as peças da grade ───────────── */
-  categorias: ["Tudo","Looks","Bolsas","Óculos","Acessórios"],
+  categorias: ["Tudo","Looks","Bolsas","Óculos"],   // só categorias com peça; vazia vira beco sem saída
 
   /* ── 8. PEÇAS ─────────────────────────────────────────────
      EXEMPLOS PARA TESTE — troque pelas peças reais da loja.
 
-     foto:    deixe null. O site procura sozinho por
-              fotos/<referência>.jpg — ex: fotos/FA-1001.jpg.
-              Só preencha para usar outro nome ou outra pasta.
-              Sem arquivo, o site desenha um lugar em branco de
-              propósito; não inventa foto de banco de imagem.
+     foto:    RESERVA, usada só se não houver arquivo local. As de
+              hoje são PROVISÓRIAS, geradas por IA, para o layout
+              ficar de pé. Salve a foto real como fotos/<referência>.jpg
+              — ex: fotos/FA-1001.jpg — e ela vence esta sozinha.
+              Depois de trocar todas, ponha null aqui.
      restam:  quantidade real em estoque. Escreva o número só
               se ele for verdadeiro. Com 3 ou menos, a peça
               ganha a marca "últimas". Deixe null se não
@@ -714,16 +714,14 @@ const CONFIG = {
      antes:   preço cheio, só se a peça realmente já custou isso.
               0 = não tem "de/por" e nenhuma marca de desconto.  */
   pecas: [
-    {ref:"FA-1001", nome:"Vestido midi de viscose",        cat:"Looks",       antes:279.90, preco:219.90, tams:["P","M","G","GG"], restam:null, foto:null, tipo:"look"},
-    {ref:"FA-1002", nome:"Cropped canelado manga longa",   cat:"Looks",       antes:0,      preco:89.90,  tams:["P","M","G"],      restam:null, foto:null, tipo:"look"},
-    {ref:"FA-1003", nome:"Óculos solar retangular UV400",  cat:"Óculos",      antes:189.90, preco:149.90, tams:["Único"],          restam:null, foto:null, tipo:"oculos"},
-    {ref:"FA-1004", nome:"Bolsa baguette alça removível",  cat:"Bolsas",      antes:0,      preco:189.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"},
-    {ref:"FA-2001", nome:"Calça wide leg de alfaiataria",  cat:"Looks",       antes:249.90, preco:149.90, tams:["36","38","40","42","44"], restam:null, foto:null, tipo:"look"},
-    {ref:"FA-2003", nome:"Saia midi plissada",             cat:"Looks",       antes:199.90, preco:119.90, tams:["P","M","G"],      restam:null, foto:null, tipo:"look"},
-    {ref:"FA-2004", nome:"Cinto de fivela dourada",        cat:"Acessórios",  antes:99.90,  preco:49.90,  tams:["Único"],          restam:null, foto:null, tipo:"cinto"},
-    {ref:"FA-3001", nome:"Bolsa tote estruturada",         cat:"Bolsas",      antes:0,      preco:199.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"},
-    {ref:"FA-3002", nome:"Bolsa baguette vermelha",        cat:"Bolsas",      antes:229.90, preco:179.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"},
-    {ref:"FA-3003", nome:"Bolsa transversal",              cat:"Bolsas",      antes:0,      preco:139.90, tams:["Único"],          restam:null, foto:null, tipo:"bolsa"}
+    {ref:"FA-1001", nome:"Calça wide leg jeans",          cat:"Looks",      antes:279.90, preco:139.90, tams:["36","38","40","42","44"], restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223235_f25f524d-836d-4398-8d0e-b889de8308cd.png", tipo:"look"},
+    {ref:"FA-1002", nome:"Blazer de alfaiataria off-white", cat:"Looks",    antes:0,      preco:329.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_c41cd411-9209-4f31-b192-2964580cb50c.png", tipo:"look"},
+    {ref:"FA-1003", nome:"Jaqueta de couro preta",         cat:"Looks",     antes:0,      preco:459.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_12c3a06b-82e4-41ce-b970-9b63e9bf321c.png", tipo:"look"},
+    {ref:"FA-1004", nome:"Tricô gola alta",                cat:"Looks",     antes:189.90, preco:149.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_b79e3cba-fad1-4c38-bcd5-58e96c3227db.png", tipo:"look"},
+    {ref:"FA-1005", nome:"Sobretudo longo",                cat:"Looks",     antes:0,      preco:399.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_c4e5d9f0-3b47-4acd-84b3-56354cd14ab8.png", tipo:"look"},
+    {ref:"FA-3001", nome:"Bolsa de ombro em couro caramelo", cat:"Bolsas",  antes:0,      preco:289.90, tams:["Único"],                  restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_a643090c-9bb5-4d0a-a3ff-ab391393551a.png", tipo:"bolsa"},
+    {ref:"FA-3002", nome:"Bolsa estruturada preta",        cat:"Bolsas",    antes:229.90, preco:179.90, tams:["Único"],                  restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_8cc38d69-d40d-4f6a-bd2c-89c26889d992.png", tipo:"bolsa"},
+    {ref:"FA-2001", nome:"Óculos solar retangular",        cat:"Óculos",    antes:0,      preco:149.90, tams:["Único"],                  restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_aed46c2e-db49-4b9f-b949-39bdacc79df2.png", tipo:"oculos"}
   ],
 
   /* ── 8b. INSTAGRAM ────────────────────────────────────────
@@ -885,12 +883,13 @@ function desenharPeca(p){
   const pix = p.preco * (1 - CONFIG.pixDesconto/100);
   const ultimas = typeof p.restam === "number" && p.restam > 0 && p.restam <= 3;
 
-  /* Sem foto declarada, o site procura sozinho por fotos/<referência>.jpg.
-     Se o arquivo não existir, o onerror devolve o lugar vazio desenhado.
-     Assim basta salvar a foto com o nome da peça — nada a editar aqui. */
-  const arquivo = p.foto || ("fotos/" + p.ref + ".jpg");
-  const foto = '<img src="'+escapar(arquivo)+'" alt="'+escapar(p.nome)+
-    '" loading="lazy" width="800" height="1000" data-tipo="'+escapar(p.tipo)+'">';
+  /* Ordem de busca: primeiro o arquivo local fotos/<referência>.jpg, depois
+     o que estiver em `foto` (hoje, provisórias geradas), depois o lugar vazio
+     desenhado. Assim basta salvar a foto real com o nome da peça: ela vence
+     sozinha, sem nada a editar aqui. */
+  const foto = '<img src="fotos/'+escapar(p.ref)+'.jpg" alt="'+escapar(p.nome)+
+    '" loading="lazy" width="800" height="1000" data-tipo="'+escapar(p.tipo)+'"'+
+    (p.foto ? ' data-reserva="'+escapar(p.foto)+'"' : '')+'>';
 
   return '<article class="peca" data-ref="'+escapar(p.ref)+'">'+
     '<div class="peca__foto">'+foto+
@@ -935,13 +934,19 @@ function mostrarPecas(){
   $("#grade").innerHTML = lista.map(desenharPeca).join("");
   $("#conta-pecas").textContent = lista.length + (lista.length > 1 ? " peças" : " peça");
 
-  /* foto que não carrega vira o lugar vazio, nunca o ícone de imagem quebrada */
+  /* sem arquivo local, tenta a reserva; sem reserva, o lugar vazio desenhado.
+     Nunca o ícone de imagem quebrada. */
   $("#grade").querySelectorAll(".peca__foto img").forEach(img => {
     img.addEventListener("error", () => {
-      const tipo = img.dataset.tipo;
+      if(img.dataset.reserva){
+        const r = img.dataset.reserva;
+        delete img.dataset.reserva;
+        img.src = r;
+        return;
+      }
       img.outerHTML = '<div class="semfoto"><svg viewBox="0 0 32 32" aria-hidden="true">'+
-        (SILHUETA[tipo] || SILHUETA.look)+'</svg><span>Foto a caminho</span></div>';
-    }, {once:true});
+        (SILHUETA[img.dataset.tipo] || SILHUETA.look)+'</svg><span>Foto a caminho</span></div>';
+    });
   });
 
   $("#grade").querySelectorAll(".peca").forEach(el => {

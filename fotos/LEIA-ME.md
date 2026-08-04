@@ -10,20 +10,20 @@ celular** são bem melhores. Use elas.
 
 ## Fotos das peças
 
-Uma foto por peça, nomeada com o código dela:
+As peças hoje no site estão com **fotos provisórias geradas por IA**, para
+você ver o layout de pé. Substitua salvando a sua com o código da peça — o
+arquivo local vence a provisória automaticamente. Uma foto por peça:
 
 | arquivo a salvar | peça | referência |
 |---|---|---|
-| `fotos/FA-1001.jpg` | Vestido midi de viscose | FA-1001 |
-| `fotos/FA-1002.jpg` | Cropped canelado manga longa | FA-1002 |
-| `fotos/FA-1003.jpg` | Óculos solar retangular UV400 | FA-1003 |
-| `fotos/FA-1004.jpg` | Bolsa baguette alça removível | FA-1004 |
-| `fotos/FA-2001.jpg` | Calça wide leg de alfaiataria | FA-2001 |
-| `fotos/FA-2003.jpg` | Saia midi plissada | FA-2003 |
-| `fotos/FA-2004.jpg` | Cinto de fivela dourada | FA-2004 |
-| `fotos/FA-3001.jpg` | Bolsa tote estruturada | FA-3001 |
-| `fotos/FA-3002.jpg` | Bolsa baguette vermelha | FA-3002 |
-| `fotos/FA-3003.jpg` | Bolsa transversal | FA-3003 |
+| `fotos/FA-1001.jpg` | Calça wide leg jeans | FA-1001 |
+| `fotos/FA-1002.jpg` | Blazer de alfaiataria off-white | FA-1002 |
+| `fotos/FA-1003.jpg` | Jaqueta de couro preta | FA-1003 |
+| `fotos/FA-1004.jpg` | Tricô gola alta | FA-1004 |
+| `fotos/FA-1005.jpg` | Sobretudo longo | FA-1005 |
+| `fotos/FA-3001.jpg` | Bolsa de ombro em couro caramelo | FA-3001 |
+| `fotos/FA-3002.jpg` | Bolsa estruturada preta | FA-3002 |
+| `fotos/FA-2001.jpg` | Óculos solar retangular | FA-2001 |
 
 Se faltar alguma, a peça mostra um lugar em branco desenhado de propósito —
 não quebra nada, e você pode ir preenchendo aos poucos.
