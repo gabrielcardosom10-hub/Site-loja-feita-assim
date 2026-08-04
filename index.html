@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Feita Assim — loja de rua em Criciúma</title>
-<meta name="description" content="Looks, bolsas, óculos e acessórios. Loja de rua em Criciúma, poucas peças de cada modelo. Você monta o recado, a gente responde no WhatsApp.">
+<meta name="description" content="Looks, bolsas, óculos e acessórios. Loja de rua em Criciúma, poucas peças de cada modelo. Você monta o carrinho, a gente responde no WhatsApp.">
 <meta name="theme-color" content="#2A0E3F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +26,7 @@
   --display:'Bricolage Grotesque',system-ui,sans-serif;
   --corpo:'Karla',system-ui,sans-serif;
 
-  --recado-larg:340px;
+  --carrinho-larg:340px;
   --t:170ms cubic-bezier(.2,.6,.2,1);
 }
 
@@ -56,12 +56,12 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 }
 
 /* ═══ ESTRUTURA ═══
-   A loja ocupa a tela inteira. A coluna do recado só entra quando há
+   A loja ocupa a tela inteira. A coluna do carrinho só entra quando há
    peça escolhida, ou seja, quando o pedido começou a ser montado. */
 .pagina{display:grid;grid-template-columns:1fr;align-items:start;}
-body.com-recado .pagina{grid-template-columns:1fr var(--recado-larg);}
+body.com-carrinho .pagina{grid-template-columns:1fr var(--carrinho-larg);}
 .coluna{min-width:0;}
-body.com-recado .coluna{border-right:1px solid var(--fio);}
+body.com-carrinho .coluna{border-right:1px solid var(--fio);}
 .dentro{padding:0 clamp(20px,4vw,52px);}
 
 /* ═══ CABEÇALHO ═══
@@ -116,14 +116,22 @@ body.com-recado .coluna{border-right:1px solid var(--fio);}
 /* ═══ ABERTURA ═══ */
 /* Atenção: as seções usam padding-top/bottom, nunca o atalho `padding`.
    O atalho zera o padding lateral que vem de .dentro e cola o texto na borda. */
+/* A abertura é uma faixa roxa dividida em dois: o texto à esquerda com o
+   respiro da página, e a foto sangrando até a borda direita da tela. */
 .abertura{
   background:var(--tinta);color:var(--papel);
-  padding-top:clamp(40px,6vw,76px);padding-bottom:clamp(44px,6vw,76px);
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,42%);
+  align-items:center;
 }
-.abertura__grade{
-  display:grid;grid-template-columns:minmax(0,1fr) 330px;
-  gap:clamp(30px,4vw,60px);align-items:end;
+.abertura__texto{padding-top:clamp(40px,6vw,84px);padding-bottom:clamp(40px,6vw,84px);}
+.abertura__foto{
+  align-self:stretch;position:relative;overflow:hidden;
+  min-height:clamp(340px,38vw,520px);background:var(--uva);
 }
+.abertura__foto img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;}
+/* sem foto configurada a coluna some e o texto ocupa a faixa inteira */
+.abertura.sem-foto{grid-template-columns:1fr;}
+.abertura.sem-foto .abertura__foto{display:none;}
 .abertura h1{
   font-family:var(--display);font-weight:800;
   font-size:clamp(42px,6.6vw,80px);line-height:.95;letter-spacing:-.035em;
@@ -136,57 +144,60 @@ body.com-recado .coluna{border-right:1px solid var(--fio);}
 }
 .abertura__sub b{color:var(--papel);font-weight:600;}
 
-/* ═══ A PLACA — a oferta de entrada, no lugar onde as grandes lojas
-   de roupa põem cupom de primeira compra e frete grátis ═══ */
-.placa{
-  background:var(--uva);border:1px solid #F6F1F324;
-  padding:24px 22px;display:flex;flex-direction:column;gap:16px;
+/* ═══ A FAIXA DE OFERTA — logo abaixo da abertura, como as grandes lojas
+   de roupa fazem com cupom de primeira compra e frete grátis ═══ */
+.oferta{background:var(--uva);color:var(--papel);}
+.oferta__in{
+  display:flex;align-items:center;gap:clamp(20px,3vw,44px);flex-wrap:wrap;
+  padding-top:18px;padding-bottom:18px;
 }
-.placa__topo{color:var(--lilas);margin:0;}
-.placa__off{
-  font-family:var(--display);font-weight:800;
-  font-size:clamp(44px,5vw,58px);line-height:.9;letter-spacing:-.04em;
-  color:var(--rosa-claro);margin:0;
+.oferta__cupom{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0;}
+.oferta__off{
+  font-family:var(--display);font-weight:800;font-size:34px;line-height:1;
+  letter-spacing:-.04em;color:var(--rosa-claro);
   font-variation-settings:'wdth' 85,'opsz' 24;
 }
-.placa__regra{margin:0;font-size:14.5px;line-height:1.5;}
-.placa__cupom{
-  display:inline-block;margin-top:9px;padding:7px 13px;
-  border:1px dashed var(--rosa-claro);color:var(--papel);
-  font-size:14px;font-weight:700;letter-spacing:.14em;
+.oferta__regra{font-size:14.5px;color:var(--lilas);}
+.oferta__codigo{
+  display:inline-block;padding:6px 12px;border:1px dashed var(--rosa-claro);
+  color:var(--papel);font-size:13.5px;font-weight:700;letter-spacing:.14em;
 }
-.placa__frete{
-  margin:0;padding-top:15px;border-top:1px solid #F6F1F324;
-  font-size:14px;line-height:1.5;color:var(--lilas);
+.oferta__frete{
+  margin:0;font-size:14.5px;color:var(--lilas);line-height:1.45;
+  padding-left:clamp(20px,3vw,44px);border-left:1px solid #F6F1F324;
 }
-.placa__frete b{color:var(--papel);font-weight:600;}
+.oferta__frete b{color:var(--papel);font-weight:600;}
+.oferta__cta{
+  margin-left:auto;display:flex;align-items:center;justify-content:center;gap:9px;
+  min-height:48px;padding:0 24px;background:var(--rosa-forte);color:var(--cal);
+  font-size:13.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  transition:background var(--t);
+}
+.oferta__cta:hover{background:var(--rosa);}
+.oferta__cta svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;flex:none;}
 
-.pulso{display:flex;gap:11px;align-items:flex-start;margin-top:28px;
-  padding-top:18px;border-top:1px solid #F6F1F324;max-width:48ch;}
+/* aviso de entrega, dentro da seção da loja */
+.pulso{display:flex;gap:11px;align-items:flex-start;margin-top:22px;
+  padding-top:18px;border-top:1px solid var(--fio-claro);}
 .pulso__marca{
   flex:none;width:9px;height:9px;border-radius:50%;background:var(--rosa-claro);
   margin-top:7px;
 }
-/* fora do horário a bolinha muda de cor e de contorno: a informação não
-   fica presa só na cor */
+/* fora do horário a bolinha vira contorno vazado: a informação não fica
+   presa só na cor */
 .pulso__marca.dorme{background:transparent;border:1.5px solid var(--lilas);}
-.pulso p{margin:0;font-size:14.5px;line-height:1.5;flex:1;min-width:0;}
+.pulso p{margin:0;font-size:14px;line-height:1.5;flex:1;min-width:0;}
 .pulso b{font-weight:700;display:block;}
 .pulso span{color:var(--lilas);}
 
-.placa__cta{
-  display:flex;align-items:center;justify-content:center;gap:9px;
-  min-height:50px;padding:0 18px;margin-top:2px;
-  background:var(--rosa-forte);color:var(--cal);
-  font-size:13.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-  transition:background var(--t);
-}
-.placa__cta:hover{background:var(--rosa);}
-.placa__cta svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;flex:none;}
-
 @media(max-width:980px){
-  .abertura__grade{grid-template-columns:1fr;gap:34px;}
-  .placa{max-width:420px;}
+  .abertura{grid-template-columns:1fr;}
+  /* a foto vem primeiro, mas com teto de altura: solta, ela empurrava o
+     título inteiro para fora da primeira tela do celular */
+  .abertura__foto{order:-1;min-height:0;height:38vh;max-height:340px;}
+  .abertura__texto{padding-top:30px;padding-bottom:30px;}
+  .oferta__frete{padding-left:0;border-left:0;}
+  .oferta__cta{margin-left:0;width:100%;}
 }
 
 /* ═══ COMO FUNCIONA ═══ */
@@ -219,7 +230,7 @@ body.com-recado .coluna{border-right:1px solid var(--fio);}
   display:grid;grid-template-columns:repeat(4,1fr);
   gap:clamp(26px,3vw,44px) clamp(14px,1.8vw,26px);
 }
-/* coluna flex para que o "pôr no recado" fique na mesma linha em todos os
+/* coluna flex para que o "adicionar ao carrinho" fique na mesma linha em todos os
    cartões, mesmo quando o nome da peça ocupa duas linhas */
 .peca{min-width:0;display:flex;flex-direction:column;}
 
@@ -349,18 +360,18 @@ body.com-recado .coluna{border-right:1px solid var(--fio);}
 .social a:hover{color:var(--rosa-forte);}
 .social svg{width:20px;height:20px;fill:currentColor;}
 
-/* ═══ O RECADO — a assinatura ═══ */
-.recado{display:none;}
-body.com-recado .recado{
+/* ═══ O CARRINHO — a assinatura ═══ */
+.carrinho{display:none;}
+body.com-carrinho .carrinho{
   position:sticky;top:0;height:100vh;
   display:flex;flex-direction:column;background:var(--papel);
 }
-.recado__cab{padding:22px 24px 16px;border-bottom:1px solid var(--fio);}
-.recado__cab h2{
+.carrinho__cab{padding:22px 24px 16px;border-bottom:1px solid var(--fio);}
+.carrinho__cab h2{
   font-family:var(--display);font-weight:700;font-size:19px;
   letter-spacing:-.03em;margin:4px 0 0;
 }
-.recado__corpo{flex:1;overflow-y:auto;padding:20px 24px;}
+.carrinho__corpo{flex:1;overflow-y:auto;padding:20px 24px;}
 
 .bilhete{
   background:var(--cal);padding:22px 20px;
@@ -393,7 +404,7 @@ body.com-recado .recado{
 .bilhete__qtd [data-acao="menos"]:hover{border-color:var(--tinta);color:var(--tinta);}
 .bilhete__total{font-weight:700;}
 
-.recado__pe{padding:18px 24px 22px;border-top:1px solid var(--fio);}
+.carrinho__pe{padding:18px 24px 22px;border-top:1px solid var(--fio);}
 .mandar{
   width:100%;height:54px;background:var(--rosa-forte);color:var(--cal);
   font-size:14px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
@@ -402,31 +413,31 @@ body.com-recado .recado{
 }
 .mandar:hover{background:var(--rosa);}
 .mandar svg{width:19px;height:19px;fill:currentColor;}
-.recado__nota{margin:12px 0 0;font-size:12.5px;color:var(--cinza);line-height:1.6;}
+.carrinho__nota{margin:12px 0 0;font-size:12.5px;color:var(--cinza);line-height:1.6;}
 
-/* barra móvel — o recado vira gaveta abaixo de 1040px */
+/* barra móvel — o carrinho vira gaveta abaixo de 1040px */
 .barra{display:none;}
-.recado__fechar{display:none;}
+.carrinho__fechar{display:none;}
 
 @media(max-width:1040px){
-  /* precisa repetir o `body.com-recado` porque a regra de cima tem
+  /* precisa repetir o `body.com-carrinho` porque a regra de cima tem
      especificidade maior e venceria um `.pagina` sozinho aqui dentro */
-  body.com-recado .pagina{grid-template-columns:1fr;}
-  body.com-recado .coluna{border-right:0;}
-  body.com-recado .recado{
+  body.com-carrinho .pagina{grid-template-columns:1fr;}
+  body.com-carrinho .coluna{border-right:0;}
+  body.com-carrinho .carrinho{
     position:fixed;inset:0;height:100dvh;z-index:90;
     transform:translateY(100%);visibility:hidden;
     transition:transform 280ms cubic-bezier(.2,.7,.2,1),visibility 280ms;
   }
-  body.com-recado .recado.aberto{transform:none;visibility:visible;}
-  .recado__cab{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
-  .recado__fechar{
+  body.com-carrinho .carrinho.aberto{transform:none;visibility:visible;}
+  .carrinho__cab{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+  .carrinho__fechar{
     display:grid;place-items:center;width:44px;height:44px;margin:-8px -10px 0 0;flex:none;
   }
-  .recado__fechar svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;}
-  body.com-recado{padding-bottom:70px;}
+  .carrinho__fechar svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;}
+  body.com-carrinho{padding-bottom:70px;}
   /* sem esta regra o display:flex abaixo vence o [hidden] do navegador
-     e a barra aparece zerada com o recado vazio */
+     e a barra aparece zerada com o carrinho vazio */
   .barra[hidden]{display:none;}
   .barra{
     display:flex;align-items:center;gap:14px;
@@ -460,14 +471,10 @@ body.com-recado .recado{
   .cabeca__topo{flex-wrap:wrap;gap:12px;padding-bottom:12px;}
   .busca{width:100%;margin-left:0;order:3;}
   .busca input{width:100%;}
-  /* no celular a abertura precisa caber e deixar as peças perto: tudo
-     encolhe para que a primeira foto não fique a duas telas de distância */
-  .abertura{padding-top:26px;padding-bottom:30px;}
+  /* no celular tudo encolhe para as peças não ficarem a duas telas */
   .abertura h1{font-size:clamp(38px,11vw,58px);}
   .abertura__sub{font-size:15.5px;margin-top:18px;}
-  .abertura__grade{gap:24px;}
-  .placa{padding:18px;gap:14px;}
-  .placa__dados{padding-top:13px;}
+  .oferta__off{font-size:28px;}
   .peca__preco{font-size:21px;}
   .rodape__grade{gap:24px;}
 }
@@ -514,22 +521,21 @@ body.com-recado .recado{
   </header>
 
   <main>
-    <section class="abertura dentro">
-      <div class="abertura__grade">
-        <div>
-          <h1>Ganhe o mundo <em>do seu jeito</em></h1>
-          <p class="abertura__sub" id="linha-loja"></p>
-          <div class="pulso" id="pulso"></div>
-        </div>
-        <aside class="placa" id="placa" aria-labelledby="tit-placa"></aside>
+    <section class="abertura" id="abertura">
+      <div class="abertura__texto dentro">
+        <h1>Ganhe o mundo <em>do seu jeito</em></h1>
+        <p class="abertura__sub" id="linha-loja"></p>
       </div>
+      <div class="abertura__foto" id="abertura-foto"></div>
     </section>
 
+    <div class="oferta" id="oferta"><div class="oferta__in dentro"></div></div>
+
     <section class="fluxo dentro">
-      <h2>Aqui não tem carrinho. Você monta o recado, a gente responde.</h2>
+      <h2>Aqui não tem checkout. Você monta o carrinho, a gente fecha na conversa.</h2>
       <ol class="fluxo__passos">
-        <li><b>1</b><span>Escolhe as peças e o tamanho. O recado abre na primeira peça e vai se escrevendo sozinho.</span></li>
-        <li><b>2</b><span>Manda o recado pronto no WhatsApp, sem digitar nada.</span></li>
+        <li><b>1</b><span>Escolhe as peças e o tamanho. O carrinho abre na primeira peça e já monta o pedido escrito.</span></li>
+        <li><b>2</b><span>Manda o pedido pronto no WhatsApp, sem digitar nada.</span></li>
         <li><b>3</b><span>A gente confirma estoque, frete e pagamento na conversa.</span></li>
       </ol>
       <ul class="fatos" id="fatos"></ul>
@@ -556,6 +562,7 @@ body.com-recado .recado{
         <div>
           <p class="etiqueta" style="color:#F6F1F3a8;margin:0 0 14px">Horários</p>
           <ul class="horarios" id="horarios"></ul>
+          <div class="pulso" id="pulso"></div>
         </div>
       </div>
     </section>
@@ -598,30 +605,30 @@ body.com-recado .recado{
 
 </div><!-- /coluna -->
 
-<aside class="recado" id="recado" aria-labelledby="tit-recado">
-  <div class="recado__cab">
+<aside class="carrinho" id="carrinho" aria-labelledby="tit-carrinho">
+  <div class="carrinho__cab">
     <div>
       <span class="etiqueta">O que vai ser enviado</span>
-      <h2 id="tit-recado">O recado</h2>
+      <h2 id="tit-carrinho">O carrinho</h2>
     </div>
-    <button class="recado__fechar" id="fechar-recado" aria-label="Fechar o recado">
+    <button class="carrinho__fechar" id="fechar-carrinho" aria-label="Fechar o carrinho">
       <svg aria-hidden="true"><use href="#xis"/></svg>
     </button>
   </div>
-  <div class="recado__corpo" id="recado-corpo"></div>
-  <div class="recado__pe" id="recado-pe" hidden>
+  <div class="carrinho__corpo" id="carrinho-corpo"></div>
+  <div class="carrinho__pe" id="carrinho-pe" hidden>
     <button class="mandar" id="mandar">
       <svg aria-hidden="true"><use href="#zap"/></svg> Mandar no WhatsApp
     </button>
-    <p class="recado__nota">A gente responde confirmando estoque, frete e pagamento. Nada é cobrado por aqui.</p>
+    <p class="carrinho__nota">A gente responde confirmando estoque, frete e pagamento. Nada é cobrado por aqui.</p>
   </div>
 </aside>
 
 </div><!-- /pagina -->
 
-<button class="barra" id="barra" aria-controls="recado" aria-expanded="false" hidden>
+<button class="barra" id="barra" aria-controls="carrinho" aria-expanded="false" hidden>
   <span class="barra__n" id="barra-n">0</span>
-  <span class="barra__txt"><b id="barra-total">R$ 0,00</b>no recado</span>
+  <span class="barra__txt"><b id="barra-total">R$ 0,00</b>no carrinho</span>
   <span class="barra__abrir">Ver e mandar</span>
 </button>
 
@@ -668,6 +675,19 @@ const CONFIG = {
   pixDesconto:  5,     // % de desconto no Pix
   parcelas:     3,     // máximo de parcelas sem juros
   parcelaMinima:30,    // valor mínimo de cada parcela
+
+  /* ── 5a. FOTO DA ABERTURA ─────────────────────────────────
+     A imagem grande no alto da página. Ponha null e a faixa passa a
+     ser só o texto, ocupando a largura toda.
+
+     A que está aqui é PROVISÓRIA — uma imagem gerada, hospedada fora.
+     Baixe o arquivo, salve como fotos/abertura.jpg e troque o valor
+     abaixo por "fotos/abertura.jpg". O ideal mesmo é uma foto sua,
+     de uma peça real da loja: é o que diferencia de qualquer catálogo. */
+  abertura: {
+    foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_000301_2b5cd19e-eaf3-4e5e-bb30-f020f711ae04.png",
+    alt:  "Modelo com vestido midi e bolsa estruturada"
+  },
 
   /* ── 5b. OFERTA DA ABERTURA ───────────────────────────────
      O bloco em destaque no alto da página, como fazem as grandes
@@ -752,26 +772,38 @@ if(CONFIG.logo){
 $("#ver-insta").href = CONFIG.instagram;
 $("#btn-provador").href = zapLink("Oi! Queria marcar um horário no provador.");
 
-/* a placa da abertura — só entra o que estiver configurado */
+/* foto da abertura — sem foto, a coluna some e o texto ocupa a faixa toda */
+(function(){
+  const f = CONFIG.abertura && CONFIG.abertura.foto;
+  if(!f){ $("#abertura").classList.add("sem-foto"); return; }
+  const img = new Image();
+  img.src = f;
+  img.alt = CONFIG.abertura.alt || "";
+  img.width = 1100; img.height = 1467;   // proporção reservada, sem pulo de layout
+  img.fetchPriority = "high";
+  img.onerror = () => $("#abertura").classList.add("sem-foto");
+  $("#abertura-foto").appendChild(img);
+})();
+
+/* faixa de oferta — só entra o que estiver configurado */
 (function(){
   const c = CONFIG.cupom, partes = [];
   if(c && c.desconto){
     partes.push(
-      '<p class="etiqueta placa__topo" id="tit-placa">Cupom de boas-vindas</p>'+
-      '<p class="placa__off">'+c.desconto+'% off</p>'+
-      '<p class="placa__regra">'+escapar(c.regra || "")+
-        (c.codigo ? '<span class="placa__cupom">'+escapar(c.codigo)+'</span>' : "")+
+      '<p class="oferta__cupom">'+
+        '<span class="oferta__off">'+c.desconto+'% off</span>'+
+        '<span class="oferta__regra">'+escapar(c.regra || "")+'</span>'+
+        (c.codigo ? '<span class="oferta__codigo">'+escapar(c.codigo)+'</span>' : "")+
       '</p>');
   }
   if(CONFIG.freteGratis){
-    partes.push('<p class="placa__frete"><b>Frete grátis</b> nas compras acima de '+
-                brl(CONFIG.freteGratis)+', para todo o Brasil.</p>');
+    partes.push('<p class="oferta__frete"><b>Frete grátis</b> acima de '+
+                brl(CONFIG.freteGratis)+',<br>para todo o Brasil.</p>');
   }
-  if(!partes.length){ $("#placa").remove(); return; }
-  if(!c || !c.desconto) partes.unshift('<p class="etiqueta placa__topo" id="tit-placa">Entrega</p>');
-  partes.push('<a class="placa__cta" href="#pecas">Ver as novidades '+
+  if(!partes.length){ $("#oferta").remove(); return; }
+  partes.push('<a class="oferta__cta" href="#pecas">Ver as novidades '+
               '<svg aria-hidden="true"><use href="#seta"/></svg></a>');
-  $("#placa").innerHTML = partes.join("");
+  $("#oferta").firstElementChild.innerHTML = partes.join("");
 })();
 $("#social").innerHTML =
   '<a href="'+escapar(CONFIG.instagram)+'" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1zm0 3.6a6.2 6.2 0 100 12.4 6.2 6.2 0 000-12.4zm0 10.2a4 4 0 110-8 4 4 0 010 8zm6.4-10.4a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z"/></svg></a>' +
@@ -827,9 +859,9 @@ function pulso(){
     dormindo = true;
     texto = "<b>Hoje a loja está fechada.</b> <span>Abrimos "+
             (volta ? DIAS[volta.dia].toLowerCase()+" às "+volta.hora : "em breve")+
-            ". Pode montar o recado agora — a gente responde na abertura.</span>";
+            ". Pode montar o carrinho agora — a gente responde na abertura.</span>";
   } else if(min < emMinutos(h.abre)){
-    texto = "<b>Abrimos hoje às "+h.abre+".</b> <span>Monte o recado agora e ele fica pronto para enviar.</span>";
+    texto = "<b>Abrimos hoje às "+h.abre+".</b> <span>Monte o carrinho agora e ele fica pronto para enviar.</span>";
     dormindo = true;
   } else if(min >= emMinutos(h.fecha)){
     dormindo = true;
@@ -884,7 +916,7 @@ function desenharPeca(p){
         '<button class="tamanho" type="button" aria-pressed="'+(j===0)+'" data-tam="'+escapar(t)+'">'+escapar(t)+'</button>'
       ).join("")+
     '</div>'+
-    '<button class="marcar" type="button">Pôr no recado <svg aria-hidden="true"><use href="#seta"/></svg></button>'+
+    '<button class="marcar" type="button">Adicionar ao carrinho <svg aria-hidden="true"><use href="#seta"/></svg></button>'+
   '</article>';
 }
 
@@ -949,56 +981,56 @@ $("#vozes").innerHTML = CONFIG.depoimentos.length
     'cole o que elas escreveram em <code>CONFIG.depoimentos</code> e a seção aparece. '+
     'Numa cidade em que todo mundo se conhece, depoimento inventado é o jeito mais rápido de perder a conversa.</p>';
 
-/* ─── O RECADO ────────────────────────────────────────────── */
-let recado = [];
-try{ recado = JSON.parse(localStorage.getItem("feita-assim-recado") || "[]"); }catch(e){ recado = []; }
+/* ─── O CARRINHO ────────────────────────────────────────────── */
+let carrinho = [];
+try{ carrinho = JSON.parse(localStorage.getItem("feita-assim-carrinho") || "[]"); }catch(e){ carrinho = []; }
 let recemPosto = null;
 
 function guardar(){
-  try{ localStorage.setItem("feita-assim-recado", JSON.stringify(recado)); }catch(e){}
+  try{ localStorage.setItem("feita-assim-carrinho", JSON.stringify(carrinho)); }catch(e){}
 }
 
 function por(p, tam){
   const chave = p.ref + "|" + tam;
-  const achou = recado.find(i => i.chave === chave);
+  const achou = carrinho.find(i => i.chave === chave);
   if(achou) achou.qtd++;
-  else recado.push({chave, ref:p.ref, nome:p.nome, tam, preco:p.preco, qtd:1});
+  else carrinho.push({chave, ref:p.ref, nome:p.nome, tam, preco:p.preco, qtd:1});
   recemPosto = chave;
   escrever();
   if(window.matchMedia("(max-width:1040px)").matches) $("#barra").focus();
 }
 
 function totais(){
-  const total = recado.reduce((s,i) => s + i.preco*i.qtd, 0);
-  const qtd   = recado.reduce((s,i) => s + i.qtd, 0);
+  const total = carrinho.reduce((s,i) => s + i.preco*i.qtd, 0);
+  const qtd   = carrinho.reduce((s,i) => s + i.qtd, 0);
   return {total, qtd, pix: total * (1 - CONFIG.pixDesconto/100)};
 }
 
 /* o texto exato que vai para o WhatsApp — a tela mostra isto, sem maquiagem */
-function textoDoRecado(){
+function textoDoCarrinho(){
   const {total, pix} = totais();
-  const linhas = recado.map(i =>
+  const linhas = carrinho.map(i =>
     "• " + i.qtd + "x " + i.nome + " — tam " + i.tam + " — " + brl(i.preco*i.qtd)
   ).join("\n");
-  return "Oi! Vim pelo site e montei meu recado:\n\n" + linhas +
+  return "Oi! Vim pelo site e montei meu pedido:\n\n" + linhas +
          "\n\nTotal " + brl(total) + "\nNo Pix (" + CONFIG.pixDesconto + "%): " + brl(pix) +
          "\n\nConsegue confirmar estoque e frete?";
 }
 
 function escrever(){
   const {total, qtd, pix} = totais();
-  const corpo = $("#recado-corpo");
+  const corpo = $("#carrinho-corpo");
 
-  /* Recado vazio não tem o que mostrar: a coluna sai da direita e a página
+  /* Carrinho vazio não tem o que mostrar: a coluna sai da direita e a página
      volta a ocupar a tela inteira. Ela só existe com pedido sendo montado. */
-  if(!recado.length){
-    const estavaAberto = $("#recado").classList.contains("aberto");
+  if(!carrinho.length){
+    const estavaAberto = $("#carrinho").classList.contains("aberto");
     corpo.innerHTML = "";
-    $("#recado").classList.remove("aberto");
-    $("#recado-pe").hidden = true;
+    $("#carrinho").classList.remove("aberto");
+    $("#carrinho-pe").hidden = true;
     $("#barra").hidden = true;
     $("#barra").setAttribute("aria-expanded","false");
-    document.body.classList.remove("com-recado");
+    document.body.classList.remove("com-carrinho");
     if(estavaAberto) document.getElementById("pecas").focus({preventScroll:true});
     guardar();
     return;
@@ -1006,15 +1038,15 @@ function escrever(){
 
   corpo.innerHTML =
     '<div class="bilhete">'+
-      '<span class="bilhete__linha">Oi! Vim pelo site e montei meu recado:</span>'+
+      '<span class="bilhete__linha">Oi! Vim pelo site e montei meu pedido:</span>'+
       '<span class="bilhete__linha">&nbsp;</span>'+
-      recado.map(i =>
+      carrinho.map(i =>
         '<span class="bilhete__linha bilhete__item'+(i.chave===recemPosto?" bilhete__linha--nova":"")+'" data-chave="'+escapar(i.chave)+'">'+
           '<span>• '+escapar(i.qtd > 1 ? i.qtd+"x " : "")+escapar(i.nome)+' — tam '+escapar(i.tam)+' — '+brl(i.preco*i.qtd)+
             '<span class="bilhete__qtd">'+
               '<button type="button" data-acao="menos" aria-label="Tirar uma unidade de '+escapar(i.nome)+'">−</button>'+
               '<button type="button" data-acao="mais" aria-label="Somar uma unidade de '+escapar(i.nome)+'">+</button>'+
-              '<button type="button" class="bilhete__tirar" data-acao="tirar" aria-label="Tirar '+escapar(i.nome)+' do recado">tirar</button>'+
+              '<button type="button" class="bilhete__tirar" data-acao="tirar" aria-label="Tirar '+escapar(i.nome)+' do carrinho">tirar</button>'+
             '</span>'+
           '</span>'+
         '</span>').join("")+
@@ -1028,19 +1060,19 @@ function escrever(){
 
   corpo.querySelectorAll("[data-acao]").forEach(b => b.addEventListener("click", () => {
     const chave = b.closest(".bilhete__item").dataset.chave;
-    const i = recado.findIndex(x => x.chave === chave);
+    const i = carrinho.findIndex(x => x.chave === chave);
     if(i < 0) return;
     const acao = b.dataset.acao;
-    if(acao === "mais") recado[i].qtd++;
-    else if(acao === "menos"){ recado[i].qtd--; if(recado[i].qtd < 1) recado.splice(i,1); }
-    else recado.splice(i,1);
+    if(acao === "mais") carrinho[i].qtd++;
+    else if(acao === "menos"){ carrinho[i].qtd--; if(carrinho[i].qtd < 1) carrinho.splice(i,1); }
+    else carrinho.splice(i,1);
     recemPosto = null;
     escrever();
   }));
 
-  $("#recado-pe").hidden = false;
+  $("#carrinho-pe").hidden = false;
   $("#barra").hidden = false;
-  document.body.classList.add("com-recado");
+  document.body.classList.add("com-carrinho");
   $("#barra-n").textContent = qtd;
   $("#barra-total").textContent = brl(total);
   recemPosto = null;
@@ -1048,25 +1080,25 @@ function escrever(){
 }
 
 $("#mandar").addEventListener("click", () => {
-  if(!recado.length) return;
-  window.open(zapLink(textoDoRecado()), "_blank", "noopener");
+  if(!carrinho.length) return;
+  window.open(zapLink(textoDoCarrinho()), "_blank", "noopener");
 });
 
-/* gaveta do recado abaixo de 1040px */
-function abrirRecado(){
-  $("#recado").classList.add("aberto");
+/* gaveta do carrinho abaixo de 1040px */
+function abrirCarrinho(){
+  $("#carrinho").classList.add("aberto");
   $("#barra").setAttribute("aria-expanded","true");
-  $("#fechar-recado").focus();
+  $("#fechar-carrinho").focus();
 }
-function fecharRecado(){
-  $("#recado").classList.remove("aberto");
+function fecharCarrinho(){
+  $("#carrinho").classList.remove("aberto");
   $("#barra").setAttribute("aria-expanded","false");
   $("#barra").focus();
 }
-$("#barra").addEventListener("click", abrirRecado);
-$("#fechar-recado").addEventListener("click", fecharRecado);
+$("#barra").addEventListener("click", abrirCarrinho);
+$("#fechar-carrinho").addEventListener("click", fecharCarrinho);
 document.addEventListener("keydown", e => {
-  if(e.key === "Escape" && $("#recado").classList.contains("aberto")) fecharRecado();
+  if(e.key === "Escape" && $("#carrinho").classList.contains("aberto")) fecharCarrinho();
 });
 
 mostrarPecas();
