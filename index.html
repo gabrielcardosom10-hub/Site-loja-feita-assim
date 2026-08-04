@@ -702,9 +702,11 @@ const CONFIG = {
   /* ── 8. PEÇAS ─────────────────────────────────────────────
      EXEMPLOS PARA TESTE — troque pelas peças reais da loja.
 
-     foto:    caminho da foto, ex "fotos/vestido-midi.jpg".
-              Sem foto, o site desenha um lugar em branco de
-              propósito. Não inventa foto de banco de imagem.
+     foto:    deixe null. O site procura sozinho por
+              fotos/<referência>.jpg — ex: fotos/FA-1001.jpg.
+              Só preencha para usar outro nome ou outra pasta.
+              Sem arquivo, o site desenha um lugar em branco de
+              propósito; não inventa foto de banco de imagem.
      restam:  quantidade real em estoque. Escreva o número só
               se ele for verdadeiro. Com 3 ou menos, a peça
               ganha a marca "últimas". Deixe null se não
@@ -883,10 +885,12 @@ function desenharPeca(p){
   const pix = p.preco * (1 - CONFIG.pixDesconto/100);
   const ultimas = typeof p.restam === "number" && p.restam > 0 && p.restam <= 3;
 
-  const foto = p.foto
-    ? '<img src="'+escapar(p.foto)+'" alt="'+escapar(p.nome)+'" loading="lazy" width="800" height="1000">'
-    : '<div class="semfoto"><svg viewBox="0 0 32 32" aria-hidden="true">'+(SILHUETA[p.tipo]||SILHUETA.look)+
-      '</svg><span>Foto a caminho</span></div>';
+  /* Sem foto declarada, o site procura sozinho por fotos/<referência>.jpg.
+     Se o arquivo não existir, o onerror devolve o lugar vazio desenhado.
+     Assim basta salvar a foto com o nome da peça — nada a editar aqui. */
+  const arquivo = p.foto || ("fotos/" + p.ref + ".jpg");
+  const foto = '<img src="'+escapar(arquivo)+'" alt="'+escapar(p.nome)+
+    '" loading="lazy" width="800" height="1000" data-tipo="'+escapar(p.tipo)+'">';
 
   return '<article class="peca" data-ref="'+escapar(p.ref)+'">'+
     '<div class="peca__foto">'+foto+
@@ -930,6 +934,15 @@ function mostrarPecas(){
 
   $("#grade").innerHTML = lista.map(desenharPeca).join("");
   $("#conta-pecas").textContent = lista.length + (lista.length > 1 ? " peças" : " peça");
+
+  /* foto que não carrega vira o lugar vazio, nunca o ícone de imagem quebrada */
+  $("#grade").querySelectorAll(".peca__foto img").forEach(img => {
+    img.addEventListener("error", () => {
+      const tipo = img.dataset.tipo;
+      img.outerHTML = '<div class="semfoto"><svg viewBox="0 0 32 32" aria-hidden="true">'+
+        (SILHUETA[tipo] || SILHUETA.look)+'</svg><span>Foto a caminho</span></div>';
+    }, {once:true});
+  });
 
   $("#grade").querySelectorAll(".peca").forEach(el => {
     const p = CONFIG.pecas.find(x => x.ref === el.dataset.ref);
