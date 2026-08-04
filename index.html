@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Feita Assim — loja de rua em Criciúma</title>
 <meta name="description" content="Looks, bolsas, óculos e acessórios. Loja de rua em Criciúma, poucas peças de cada modelo. Você monta o carrinho, a gente responde no WhatsApp.">
-<meta name="theme-color" content="#2A0E3F">
+<meta name="theme-color" content="#33153B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -74,7 +74,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .tarja__in b{color:var(--papel);font-weight:600;}
 .tarja__codigo{font-weight:700;letter-spacing:.12em;color:var(--rosa-claro);}
 .tarja__cta{
-  color:var(--papel);border-bottom:1px solid #F6F1F35c;
+  color:var(--papel);border-bottom:1px solid #F7F3F55c;
   transition:border-color var(--t);
 }
 .tarja__cta:hover{border-color:var(--papel);}
@@ -140,8 +140,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
    isolado embaixo, ao centro. O véu escurece da esquerda para a direita,
    porque é do lado esquerdo que o texto mora. */
 .abertura{
-  position:relative;background:var(--tinta);color:var(--papel);
-  min-height:clamp(520px,84vh,860px);display:flex;align-items:center;background:var(--ameixa);
+  position:relative;background:var(--ameixa);color:var(--papel);
+  min-height:clamp(520px,84vh,860px);display:flex;align-items:center;
   overflow:hidden;
 }
 .abertura__foto{position:absolute;inset:0;}
@@ -155,8 +155,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .abertura__veu{
   position:absolute;inset:0;
   background:
-    linear-gradient(to right,#2A0E3Fe8 0%,#2A0E3Fc4 32%,#2A0E3F5c 58%,#2A0E3F14 82%),
-    linear-gradient(to top,#2A0E3F5c 0%,#2A0E3F00 40%);
+    linear-gradient(to right,#33153Be8 0%,#33153Bc4 32%,#33153B5c 58%,#33153B14 82%),
+    linear-gradient(to top,#33153B5c 0%,#33153B00 40%);
 }
 .abertura__texto{position:relative;width:100%;}
 
@@ -245,10 +245,10 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   background:var(--cal);
 }
 .semfoto::after{
-  content:"";position:absolute;inset:12px;border:1px solid #5B2C7A1a;
+  content:"";position:absolute;inset:12px;border:1px solid #3E1A461a;
 }
-.semfoto svg{width:44px;height:44px;stroke:#5B2C7A47;fill:none;stroke-width:1.1;}
-.semfoto span{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#5B2C7A73;}
+.semfoto svg{width:44px;height:44px;stroke:#3E1A4647;fill:none;stroke-width:1.1;}
+.semfoto span{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#3E1A4673;}
 
 /* selos discretos: texto sobre a foto, sem retângulo colorido gritando */
 .marcas{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;
@@ -305,7 +305,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .loja h2{
   font-family:var(--display);font-weight:600;font-size:clamp(24px,3vw,34px);
   letter-spacing:-.025em;margin:0 0 16px;line-height:1.1;max-width:18ch;}
-.loja p{margin:0 0 18px;color:#F6F1F3c4;max-width:42ch;}
+.loja p{margin:0 0 18px;color:#F7F3F5c4;max-width:42ch;}
 .loja__end{font-size:15px;line-height:1.7;margin:0 0 20px;}
 .loja__end b{display:block;font-weight:700;}
 .provador{
@@ -324,8 +324,24 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   padding:9px 0;border-bottom:1px solid var(--fio-claro);font-size:14px;
 }
 .horarios li.hoje{color:var(--rosa-claro);font-weight:700;}
-.horarios span{color:#F6F1F3a8;}
+.horarios span{color:#F7F3F5a8;}
 .horarios li.hoje span{color:var(--rosa-claro);}
+
+/* aviso de entrega, dentro da seção da loja */
+.pulso{
+  display:flex;gap:11px;align-items:flex-start;
+  margin-top:22px;padding-top:18px;border-top:1px solid var(--fio-claro);
+}
+.pulso__marca{
+  flex:none;width:9px;height:9px;border-radius:50%;
+  background:var(--rosa-claro);margin-top:7px;
+}
+/* fora do horário a bolinha vira contorno vazado: a informação não fica
+   presa só na cor */
+.pulso__marca.dorme{background:transparent;border:1.5px solid var(--lilas);}
+.pulso p{margin:0;font-size:14px;line-height:1.5;flex:1;min-width:0;}
+.pulso b{font-weight:700;display:block;}
+.pulso span{color:var(--lilas);}
 
 /* ═══ INSTAGRAM ═══ */
 .insta__grade{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.2vw,16px);}
@@ -345,10 +361,10 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .voz p{margin:0 0 14px;font-size:15px;}
 .voz footer{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cinza);}
 .sem-vozes{
-  padding:26px;border:1px dashed #2A0E3F3d;background:var(--cal);
+  padding:26px;border:1px dashed #33153B3d;background:var(--cal);
   font-size:15px;color:var(--cinza);max-width:62ch;
 }
-.sem-vozes code{font-size:13px;background:#2A0E3F0f;padding:2px 5px;}
+.sem-vozes code{font-size:13px;background:#33153B0f;padding:2px 5px;}
 
 /* ═══ RODAPÉ ═══ */
 /* rodapé escuro: fecha a página na cor da marca, como abriu */
@@ -373,12 +389,11 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .social a:hover{color:var(--rosa-claro);}
 .social svg{width:20px;height:20px;fill:currentColor;}
 
-/* ═══ O CARRINHO — a assinatura ═══ */
 /* ═══ O CARRINHO ═══
    Gaveta lateral em todos os tamanhos, aberta pelo ícone da sacola.
    O painel continua mostrando o texto exato que vai para o WhatsApp. */
 .scrim{
-  position:fixed;inset:0;background:#2A0E3F99;z-index:80;
+  position:fixed;inset:0;background:#33153B99;z-index:80;
   opacity:0;visibility:hidden;transition:opacity var(--t),visibility var(--t);
 }
 .scrim.on{opacity:1;visibility:visible;}
@@ -406,7 +421,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .bilhete{
   background:var(--cal);padding:22px 20px;
   font-size:14px;line-height:1.75;white-space:pre-wrap;
-  box-shadow:0 1px 0 #2A0E3F14, 0 12px 24px -18px #2A0E3F5c;
+  box-shadow:0 1px 0 #33153B14, 0 12px 24px -18px #33153B5c;
 }
 .bilhete__linha{display:block;}
 .bilhete__linha--nova{animation:sobe 260ms cubic-bezier(.2,.7,.2,1);}
@@ -450,12 +465,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 @media(max-width:900px){
   .loja__grade,.rodape__grade{grid-template-columns:1fr;}
   .vozes__grade{grid-template-columns:1fr;}
-  .grade{grid-template-columns:repeat(4,1fr);}
-  .peca,.peca--larga{grid-column:span 2;}
 }
 @media(max-width:620px){
   .grade{grid-template-columns:repeat(2,1fr);gap:26px 14px;}
-  .peca,.peca--larga{grid-column:span 1;}
   /* fixo, o cabeçalho comeria um terço da tela do celular */
   .cabeca{position:static;}
   .cabeca__topo{flex-wrap:wrap;gap:12px;padding-bottom:12px;}
@@ -463,7 +475,6 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   .busca input{width:100%;}
   /* no celular tudo encolhe para as peças não ficarem a duas telas */
   .abertura h1{font-size:clamp(38px,11vw,58px);}
-  .oferta__off{font-size:28px;}
   .peca__preco{font-size:21px;}
   .rodape__grade{gap:24px;}
 }
@@ -558,7 +569,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
           </a>
         </div>
         <div>
-          <p class="etiqueta" style="color:#F6F1F3a8;margin:0 0 14px">Horários</p>
+          <p class="etiqueta" style="color:#F7F3F5a8;margin:0 0 14px">Horários</p>
           <ul class="horarios" id="horarios"></ul>
           <div class="pulso" id="pulso"></div>
         </div>
