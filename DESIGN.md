@@ -128,10 +128,28 @@ de informação não trabalha.
 **Um destino só.** Os três slides da capa levam às peças. Página com um CTA
 claro mede cerca de 13% mais conversão que página com vários competindo.
 
-**A seção de depoimentos não se esconde quando está vazia.** É a parte que
+**A seção de avaliações não se esconde quando está vazia.** É a parte que
 mais pesa na decisão de comprar — 92% das pessoas hesitam quando não há
 avaliação nenhuma — e ela subiu do rodapé para logo depois das peças.
 Esconder o vazio esconderia de você o maior buraco da página.
+
+## Avaliações
+
+Nota e total vêm do perfil real da loja no Google. **Nenhum dos dois se
+inventa**, e nenhum texto é escrito em nome de quem avaliou.
+
+Avaliação de estrela sem comentário aparece como estrela, nome e data — e a
+página diz, em uma linha, que ali não há comentário escrito. Preencher aquele
+espaço com uma frase inventada seria pôr palavra na boca de uma pessoa real,
+com nome e sobrenome, num site que a cidade inteira vai ler.
+
+Nome de quem avaliou nunca vai como e-mail. No Google, um dos perfis aparece
+com o endereço de e-mail no lugar do nome; no site ele entra como nome
+próprio. Publicar e-mail de cliente na vitrine da loja seria expor dado
+pessoal de quem só quis elogiar.
+
+Abaixo das avaliações há um convite para avaliar no Google. Com duas
+avaliações, conseguir a terceira vale mais do que qualquer ajuste de layout.
 
 ## Alvo de toque
 

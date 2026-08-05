@@ -406,6 +406,41 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .pulso b{font-weight:700;display:block;}
 .pulso span{color:var(--lilas);}
 
+/* ═══ AVALIAÇÕES ═══ */
+.nota{
+  display:inline-flex;align-items:center;gap:16px;
+  padding:16px 22px;background:var(--cal);border-radius:var(--r);
+  border:1px solid var(--fio);transition:border-color var(--t);
+}
+.nota:hover{border-color:var(--rosa-forte);}
+.nota__n{
+  font-family:var(--display);font-weight:700;font-size:38px;line-height:1;
+  letter-spacing:-.03em;color:var(--tinta);
+}
+.nota__d{display:flex;flex-direction:column;gap:4px;}
+.nota__t{font-size:13px;color:var(--cinza);}
+
+.estrelas{display:inline-flex;gap:2px;}
+.estrelas svg{width:15px;height:15px;fill:#C8791A;}
+
+.estreladas{list-style:none;margin:22px 0 0;padding:0;display:grid;max-width:46ch;}
+.estreladas li{
+  display:flex;align-items:center;gap:12px;min-height:44px;
+  border-bottom:1px solid var(--fio);font-size:14px;
+}
+.estreladas li:last-child{border-bottom:0;}
+.estreladas li span{color:var(--cinza);}
+.estreladas__nota{margin:10px 0 0;font-size:12.5px;color:var(--cinza);max-width:54ch;}
+
+.avaliar{
+  display:inline-flex;align-items:center;min-height:44px;margin-top:20px;
+  padding:0 22px;border:1px solid var(--rosa-forte);border-radius:var(--r);
+  color:var(--rosa-forte);font-size:13px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;
+  transition:background var(--t),color var(--t);
+}
+.avaliar:hover{background:var(--rosa-forte);color:var(--cal);}
+
 /* ═══ INSTAGRAM ═══ */
 .insta__grade{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.2vw,16px);}
 .insta__item{display:block;aspect-ratio:1/1;overflow:hidden;background:var(--cal);}
@@ -575,6 +610,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   <symbol id="zap" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.18c-.24.68-1.42 1.31-1.96 1.36-.5.05-1.14.07-1.83-.11-.42-.13-.97-.31-1.66-.61-2.93-1.26-4.84-4.2-4.99-4.4-.14-.2-1.19-1.58-1.19-3.02 0-1.43.75-2.14 1.02-2.43.27-.29.58-.36.78-.36l.56.01c.18.01.42-.07.66.5.24.59.83 2.02.9 2.17.07.15.12.32.02.51-.1.2-.15.32-.29.49l-.44.51c-.14.15-.29.3-.13.59.17.29.74 1.22 1.59 1.98 1.09.97 2.01 1.27 2.3 1.42.29.15.46.12.63-.07.17-.2.73-.85.92-1.14.2-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.15.49.22.56.34.07.12.07.71-.17 1.39z"/></symbol>
   <symbol id="lupa" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></symbol>
   <symbol id="sacola" viewBox="0 0 24 24"><path d="M4.5 7.5h15l-1.2 13.5H5.7z"/><path d="M8.8 7.5V6a3.2 3.2 0 016.4 0v1.5"/></symbol>
+  <symbol id="estrela" viewBox="0 0 24 24"><path d="M12 2.6l2.9 6 6.5.9-4.8 4.5 1.2 6.4-5.8-3.1-5.8 3.1 1.2-6.4L2.6 9.5l6.5-.9z"/></symbol>
   <symbol id="seta" viewBox="0 0 24 24"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13,6 19,12 13,18"/></symbol>
   <symbol id="xis" viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></symbol>
 </svg>
@@ -734,8 +770,8 @@ const CONFIG = {
   /* ── 2. EMPRESA — PREENCHER ANTES DE PUBLICAR ────────────── */
   razao:    "Feita Assim Comércio de Confecções Ltda",
   cnpj:     "00.000.000/0001-00",
-  rua:      "Rua Exemplo, 123 — Centro",
-  cidade:   "Criciúma/SC — CEP 88801-000",
+  rua:      "Praça Dr. Nereu Ramos, 358 — loja 02 — Centro",
+  cidade:   "Criciúma/SC — CEP 88801-505",
 
   /* ── 3. LOGO — exporte o arquivo e deixe ao lado do HTML ─── */
   logo: null,                                          // ex: "logo-feita-assim.svg"
@@ -774,7 +810,7 @@ const CONFIG = {
     intervalo: 7000,
     slides: [
       {
-        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_225800_a71546df-c384-4f6d-b4ea-228aeaca3b6c.png",
+        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_231637_65b6bd23-90ca-4c2a-b96f-ade6f9b594cf.png",
         video: null,
         alt: "Modelo com vestido midi claro, bolsa de ombro e óculos de sol",
         etiqueta: "Coleção nova", canto: "Criciúma",
@@ -866,11 +902,27 @@ const CONFIG = {
     // {foto:"fotos/insta-2.jpg", post:"https://www.instagram.com/p/YYYYYYYY/", alt:"Bolsa baguette"},
   ],
 
-  /* ── 9. DEPOIMENTOS ───────────────────────────────────────
-     Deixe [] até ter autorização de clientes reais. Vazio, a
-     seção explica como preencher em vez de inventar.
-     Formato: {texto:"…", autora:"Nome", peca:"o que levou"}   */
-  depoimentos: []
+  /* ── 9. AVALIAÇÕES DO GOOGLE ──────────────────────────────
+     Dados reais do perfil da loja. A nota e o total são o sinal de
+     confiança mais forte da página — não invente nenhum dos dois.
+
+     texto:   o que a pessoa escreveu. As duas de hoje são só de
+              nota, sem comentário, então ficam com "". O site mostra
+              a estrela e a data e não põe palavra na boca de ninguém.
+              Quando alguém escrever, cole aqui igual ao original.
+     perfil / avaliar: troque pelo link do seu perfil no Google. O que
+              está aqui é uma busca pelo nome e endereço; funciona,
+              mas o link direto do perfil é melhor.                   */
+  google: {
+    nota:    5.0,
+    total:   2,
+    perfil:  "https://www.google.com/maps/search/?api=1&query=Feita+Assim+Pra%C3%A7a+Dr.+Nereu+Ramos+358+Crici%C3%BAma+SC",
+    avaliar: "https://www.google.com/maps/search/?api=1&query=Feita+Assim+Pra%C3%A7a+Dr.+Nereu+Ramos+358+Crici%C3%BAma+SC",
+    avaliacoes: [
+      {autora:"Edson M. Alves",       estrelas:5, quando:"4 meses atrás", texto:""},
+      {autora:"Veridiana Dias Alves", estrelas:5, quando:"7 meses atrás", texto:""}
+    ]
+  }
 };
 /* ══════════════════════════════════════════════════════════════
    ▲▲▲  FIM DO BLOCO PARA EDITAR  ▲▲▲
@@ -1049,7 +1101,7 @@ document.querySelectorAll("[data-zap]").forEach(el => {
   const provisorio = CONFIG.cnpj.startsWith("00.000") || CONFIG.whatsapp.endsWith("000000");
   const oferta = CONFIG.freteGratis || (CONFIG.cupom && CONFIG.cupom.desconto);
   const avisos = [];
-  if(provisorio) avisos.push("preencha contato, CNPJ e endereço");
+  if(provisorio) avisos.push("preencha o WhatsApp, o telefone e o CNPJ");
   if(oferta) avisos.push("confirme o cupom e o valor do frete grátis da abertura, "+
                          "ou ponha null nos dois em CONFIG para tirá-los do ar");
   $("#legal").innerHTML =
@@ -1245,20 +1297,59 @@ $("#insta").innerHTML = CONFIG.instagram_fotos.length
     'perfil, salve na pasta <code>fotos/</code> e liste cada uma em '+
     '<code>CONFIG.instagram_fotos</code>. A grade aparece sozinha.</p>';
 
-/* ─── depoimentos ─────────────────────────────────────────── */
-/* Vazio, esta seção NÃO se esconde. Pesquisa de conversão: 92% das pessoas
-   hesitam em comprar quando não há avaliação nenhuma, e depoimento perto do
-   topo trabalha mais do que enterrado no rodapé. Deixar invisível esconderia
-   de você o maior buraco da página. */
-$("#vozes").innerHTML = CONFIG.depoimentos.length
-  ? '<div class="vozes__grade">'+CONFIG.depoimentos.map(d =>
-      '<blockquote class="voz"><p>'+escapar(d.texto)+'</p><footer>'+
-      escapar(d.autora)+' · '+escapar(d.peca)+'</footer></blockquote>').join("")+'</div>'
-  : '<p class="sem-vozes"><b>Esta é a parte que mais pesa na decisão de comprar, '+
-    'e ainda está vazia.</b> Peça a três clientes que já levaram uma frase sobre '+
-    'a peça e o atendimento, com autorização para publicar, e cole em '+
-    '<code>CONFIG.depoimentos</code>. Três já bastam. Prefira as compras mais '+
-    'recentes: avaliação de mais de três meses convence pouco.</p>';
+/* ─── avaliações do Google ────────────────────────────────────
+   Nota e total vêm do perfil real da loja. Avaliação sem comentário
+   aparece como estrela e data, sem texto: pôr palavra na boca de quem
+   só deu estrela seria invenção, e são pessoas com nome e sobrenome.
+   Esta seção não se esconde quando está vazia — 92% das pessoas
+   hesitam em comprar sem nenhuma avaliação, e esconder o vazio
+   esconderia o maior buraco da página. */
+(function(){
+  const g = CONFIG.google || {};
+  const estrelas = n => '<span class="estrelas" role="img" aria-label="'+n+' de 5 estrelas">'+
+    '<svg aria-hidden="true"><use href="#estrela"/></svg>'.repeat(n)+'</span>';
+
+  if(!g.total){
+    $("#vozes").innerHTML =
+      '<p class="sem-vozes"><b>Esta é a parte que mais pesa na decisão de comprar, '+
+      'e ainda está vazia.</b> Peça a quem já levou uma avaliação no Google e '+
+      'preencha <code>CONFIG.google</code>.</p>';
+    return;
+  }
+
+  const nota = g.nota.toLocaleString("pt-BR",{minimumFractionDigits:1});
+  const lista = g.avaliacoes || [];
+  const comTexto  = lista.filter(a => (a.texto||"").trim());
+  const soEstrela = lista.filter(a => !(a.texto||"").trim());
+
+  $("#vozes").innerHTML =
+    '<a class="nota" href="'+escapar(g.perfil||"#")+'" target="_blank" rel="noopener">'+
+      '<b class="nota__n">'+nota+'</b>'+
+      '<span class="nota__d">'+estrelas(Math.round(g.nota))+
+        '<span class="nota__t">'+g.total+(g.total>1?' avaliações':' avaliação')+' no Google</span>'+
+      '</span>'+
+    '</a>'+
+    (comTexto.length
+      ? '<div class="vozes__grade">'+comTexto.map(a =>
+          '<blockquote class="voz">'+estrelas(a.estrelas||5)+'<p>'+escapar(a.texto)+'</p>'+
+          '<footer>'+escapar(a.autora)+(a.quando?' · '+escapar(a.quando):'')+'</footer>'+
+          '</blockquote>').join("")+'</div>'
+      : "")+
+    (soEstrela.length
+      ? '<ul class="estreladas">'+soEstrela.map(a =>
+          '<li>'+estrelas(a.estrelas||5)+'<span>'+escapar(a.autora)+
+          (a.quando?' · '+escapar(a.quando):'')+'</span></li>').join("")+'</ul>'+
+        '<p class="estreladas__nota">'+
+        (soEstrela.length>1?'Estas avaliações são':'Esta avaliação é')+
+        ' só de nota, sem comentário escrito.</p>'
+      : "")+
+    (g.avaliar
+      ? '<a class="avaliar" href="'+escapar(g.avaliar)+'" target="_blank" rel="noopener">'+
+        'Avaliar a loja no Google</a>'+
+        '<p class="estreladas__nota">Se você já levou uma peça, uma linha sua ajuda '+
+        'muito quem está decidindo agora.</p>'
+      : "");
+})();
 
 /* ─── O CARRINHO ────────────────────────────────────────────── */
 let carrinho = [];
