@@ -47,8 +47,9 @@ seu território.
 | Corpo | 400, 16px, altura 1.6 |
 | Interface | 12px, 600, caixa alta, entreletras +0.09em |
 
-A caixa alta vive **só na camada de interface** — menu, botões, etiquetas,
-selos. Título nenhum é caixa alta: isso brigaria com o logo.
+A caixa alta vive na camada de interface — menu, botões, etiquetas, selos —
+e no título da capa, onde a serifada a sustenta. Os demais títulos ficam em
+caixa baixa, na voz do logo.
 
 > A escolha da Poppins é uma inferência a partir da imagem do logo, que é
 > pequena demais para identificar a fonte com certeza. Se o logo usa outra,
@@ -93,7 +94,7 @@ tela não anuncia.
 
 ## Movimento na capa
 
-`CONFIG.abertura.video` aceita um laço curto por cima da foto. A foto continua
+Cada slide aceita um `video` — um laço curto por cima da foto daquele slide. A foto continua
 sendo o poster, então ela aparece primeiro e o vídeo entra em fade só quando
 tem quadro pronto — nunca pisca preto.
 
@@ -103,7 +104,7 @@ O movimento é sempre opcional, em quatro sentidos:
   (esconder por CSS gastaria os dados de quem já disse que não quer movimento)
 - se o navegador barrar o autoplay, o vídeo se remove e fica a foto
 - se o arquivo falhar, idem
-- com `video: null`, idem
+- com `video: null` naquele slide, idem
 
 O laço deve ser quieto: tecido que balança, um respiro, uma aproximação lenta.
 Corte, tremida ou zoom brusco brigam com o resto da página e chamam atenção
