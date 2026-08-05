@@ -14,16 +14,16 @@ letra é geométrica arredondada. Nada no logo é anguloso ou apertado. A marca
 | variável | valor | papel |
 |---|---|---|
 | `--tinta` | `#33153B` | ameixa escura: texto e fundos fechados |
-| `--ameixa` | `#3E1A46` | o roxo do logo: superfícies |
-| `--rosa` | `#E23C7E` | o magenta da tulipa: só em tipo grande |
-| `--rosa-forte` | `#C42566` | o mesmo magenta fechado: botões e links |
+| `--ameixa` | `#4A1157` | o roxo do logo: superfícies |
+| `--rosa` | `#FF2D7A` | o magenta da tulipa: só em tipo grande |
+| `--rosa-forte` | `#CC1A64` | o mesmo magenta fechado: botões e links |
 | `--papel` | `#F7F3F5` | off-white morno: o fundo da página |
 | `--cal` | `#FFFFFF` | branco das fotos e do bilhete |
 | `--lilas` | `#CDBBD6` | texto secundário sobre roxo |
 | `--rosa-claro` | `#FFA8C8` | magenta claro sobre roxo |
 | `--cinza` | `#6E5C77` | texto secundário sobre papel |
 
-**Por que dois rosas.** O magenta do logo tem 4,0:1 sobre papel — passa em
+**Por que dois rosas.** O magenta vivo tem menos de 4,5:1 sobre papel — passa em
 título grande, reprova em texto corrido. `--rosa-forte` é o mesmo tom
 fechado até 5,0:1, e é ele que vai em botão, link e preço.
 
@@ -32,11 +32,17 @@ loja e o rodapé. O miolo é claro e a fotografia manda.
 
 ## Tipografia
 
-**Poppins**, uma família em dois papéis.
+**Poppins** no corpo e na interface, **Bodoni Moda** só no título da capa.
+
+A serifada de alto contraste aparece em um lugar e nada mais. Ela dá a
+elegância que a moda pede sem disputar com o logo, que é de caixa baixa
+arredondada — contraste é diferente de conflito, desde que cada uma tenha
+seu território.
 
 | papel | tratamento |
 |---|---|
-| Display | 600, caixa baixa, entreletras −0.03em |
+| Título da capa | Bodoni Moda, caixa alta, 2ª linha em itálico rosa |
+| Display | Poppins 600, caixa baixa, entreletras −0.03em |
 | Subtítulo do display | 300, caixa baixa |
 | Corpo | 400, 16px, altura 1.6 |
 | Interface | 12px, 600, caixa alta, entreletras +0.09em |
@@ -59,6 +65,31 @@ que a mão toca, não tudo.
 - Foto de produto: 4:5, retrato
 - Foto do Instagram: 1:1
 - Abertura: deitada, com metade do quadro vazia de um lado
+
+## A capa
+
+Carrossel de tela cheia. Os slides ficam empilhados no mesmo lugar e trocam
+por **fusão**, nunca deslizando: deslizar chamaria atenção para a mecânica em
+vez da roupa. O slide ativo faz uma aproximação lenta de 9 segundos.
+
+Cada slide tem etiqueta partida nas duas pontas de uma linha, título em duas
+linhas — a segunda em itálico rosa —, legenda entreletrada e botão vazado.
+
+**Regras do giro automático.** Conteúdo que se move sozinho precisa de um
+jeito de parar (WCAG 2.2.2). O giro para em quatro situações:
+
+- botão *Pausar* na própria capa
+- ponteiro em cima da capa
+- foco do teclado dentro da capa
+- aba do navegador escondida
+
+Com `prefers-reduced-motion` ligado o giro nem começa, o botão de pausa some
+por não ter o que pausar, e as setas continuam funcionando — quem não quer
+movimento automático ainda pode navegar.
+
+O slide escondido recebe `inert`, e não só `aria-hidden`. Só o `aria-hidden`
+deixaria o botão dele alcançável pelo Tab dentro de um bloco que o leitor de
+tela não anuncia.
 
 ## Movimento na capa
 
