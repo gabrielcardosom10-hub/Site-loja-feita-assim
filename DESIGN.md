@@ -107,7 +107,7 @@ para si em vez de para a roupa.
 
 ## O logo de verdade
 
-Hoje o cabeçalho **escreve** "feita assim" em Poppins, o que é uma
+Hoje o cabeçalho **escreve** "feita assim" em DM Sans, o que é uma
 aproximação. O certo é usar o arquivo. Exporte o logo em SVG ou PNG com
 fundo transparente, salve ao lado do `index.html` e preencha:
 
