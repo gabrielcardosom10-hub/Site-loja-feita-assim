@@ -5,32 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Feita Assim — loja de rua em Criciúma</title>
 <meta name="description" content="Looks, bolsas, óculos e acessórios. Loja de rua em Criciúma, poucas peças de cada modelo. Você monta o carrinho, a gente responde no WhatsApp.">
-<meta name="theme-color" content="#33153B">
+<meta name="theme-color" content="#2E0F3D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..700&display=swap" rel="stylesheet">
 <style>
 :root{
   /* Extraído do logo: ameixa de fundo, magenta da tulipa, branco do texto.
      Os tons de apoio saem daí, escurecidos o bastante para passar em AA. */
-  --tinta:#33153B;      /* ameixa escura — texto e fundos fechados */
-  --ameixa:#4A1157;     /* o roxo do logo, mais saturado — superfícies */
-  --rosa:#FF2D7A;       /* o magenta da tulipa, vivo — só em tipo grande */
-  --rosa-forte:#CC1A64; /* o magenta que passa em contraste — botões e links (4.9:1) */
-  --papel:#F7F3F5;      /* off-white morno */
+  --tinta:#2E0F3D;      /* ameixa quase preta — texto e fundos fechados */
+  --ameixa:#6B1580;     /* roxo elétrico — superfícies (9.7:1 com o papel) */
+  --rosa:#FF1D6E;       /* magenta vivo — só como fundo de hover */
+  --rosa-forte:#D6006A; /* magenta saturado que ainda passa — botões e links (4.9:1) */
+  --papel:#FBF7F9;      /* off-white mais claro, para a cor saltar */
   --cal:#FFFFFF;
-  --cinza:#6E5C77;
-  --lilas:#CDBBD6;      /* texto secundário sobre ameixa — 8.0:1 */
-  --rosa-claro:#FFA8C8; /* magenta claro sobre ameixa — 9.0:1 */
-  --fio:#33153B1f;
-  --fio-claro:#F7F3F52e;
+  --cinza:#6B5878;
+  --lilas:#D7C2E2;      /* texto secundário sobre roxo — 6.2:1 */
+  --rosa-claro:#FFA0C4; /* magenta claro sobre roxo — 5.4:1 */
+  --fio:#2E0F3D1f;
+  --fio-claro:#FBF7F92e;
 
   /* A marca é caixa baixa e arredondada. O display segue essa voz;
      a caixa alta fica só na camada de interface. */
-  --display:'Poppins',system-ui,sans-serif;
-  --corpo:'Poppins',system-ui,sans-serif;
-  /* serifada de alto contraste, só no título da capa — um lugar, nada mais */
-  --serifa:'Bodoni Moda',Georgia,serif;
+  /* Uma família só, neutra e muito legível. Pagina de alta conversao usa
+     tipo que sai da frente: quem tem de chamar atencao e a peca e o preco. */
+  --display:'DM Sans',system-ui,sans-serif;
+  --corpo:'DM Sans',system-ui,sans-serif;
   --r:4px;              /* curva mínima, ecoando a pétala */
 
   --t:170ms cubic-bezier(.2,.6,.2,1);
@@ -76,7 +76,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .tarja__in b{color:var(--papel);font-weight:600;}
 .tarja__codigo{font-weight:700;letter-spacing:.12em;color:var(--rosa-claro);}
 .tarja__cta{
-  color:var(--papel);border-bottom:1px solid #F7F3F55c;
+  color:var(--papel);border-bottom:1px solid #FBF7F95c;
   transition:border-color var(--t);
 }
 .tarja__cta:hover{border-color:var(--papel);}
@@ -165,8 +165,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .abertura__veu{
   position:absolute;inset:0;pointer-events:none;
   background:
-    linear-gradient(to right,#33153Bd6 0%,#33153Bab 34%,#33153B45 60%,#33153B0f 84%),
-    linear-gradient(to top,#33153B45 0%,#33153B00 42%);
+    linear-gradient(to right,#2E0F3Dcc 0%,#2E0F3D9e 36%,#2E0F3D33 62%,#2E0F3D08 86%),
+    linear-gradient(to top,#2E0F3D45 0%,#2E0F3D00 42%);
 }
 .slide__texto{position:relative;width:100%;z-index:1;}
 
@@ -183,14 +183,14 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .slide__etiqueta span:last-child{color:var(--rosa-claro);}
 
 .slide h1,.slide__h{
-  margin:0;font-family:var(--serifa);font-weight:400;
-  font-size:clamp(42px,6.6vw,84px);line-height:1.02;letter-spacing:.005em;
-  text-transform:uppercase;
+  margin:0;font-family:var(--display);font-weight:700;
+  font-size:clamp(40px,6.2vw,80px);line-height:1.04;letter-spacing:-.035em;
+  text-transform:none;
 }
 /* cada linha é uma janela: o <i> sobe de trás dela na entrada */
 .slide h1 span{display:block;overflow:hidden;padding-bottom:.1em;margin-bottom:-.1em;}
 .slide h1 i{display:block;font-style:normal;}
-.slide h1 span:nth-child(2) i{font-style:italic;color:var(--rosa-claro);}
+.slide h1 span:nth-child(2) i{font-weight:300;color:var(--rosa-claro);}
 
 .slide__sub{
   margin:18px 0 0;font-size:12px;font-weight:600;letter-spacing:.2em;
@@ -225,7 +225,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .pausa{
   position:absolute;right:clamp(14px,3vw,34px);bottom:clamp(16px,3vh,28px);z-index:2;
   min-height:34px;padding:0 14px;color:var(--papel);
-  border:1px solid #F7F3F55c;background:#33153B5c;
+  border:1px solid #FBF7F95c;background:#2E0F3D5c;
   font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
   transition:background var(--t),border-color var(--t);
 }
@@ -257,6 +257,22 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   .seta svg{width:22px;height:22px;}
 }
 
+/* ═══ CONFIANÇA ═══
+   Logo abaixo da capa, porque é ali que a dúvida aparece. A pesquisa de
+   conversão é consistente nisso: sinal de confiança enterrado no rodapé
+   não trabalha. */
+.confianca{
+  display:flex;flex-wrap:wrap;gap:10px clamp(18px,3vw,40px);
+  list-style:none;margin:0;padding-top:16px;padding-bottom:16px;
+  border-bottom:1px solid var(--fio);
+  font-size:13px;font-weight:500;color:var(--tinta);
+}
+.confianca li{display:flex;align-items:center;gap:8px;}
+.confianca li::before{
+  content:"";flex:none;width:6px;height:6px;border-radius:50%;
+  background:var(--rosa-forte);
+}
+
 /* ═══ PEÇAS ═══ */
 .pecas{padding-top:clamp(34px,5vw,58px);border-top:1px solid var(--fio);scroll-margin-top:150px;}
 .pecas__cab{display:flex;align-items:baseline;justify-content:space-between;gap:18px;margin-bottom:26px;}
@@ -285,10 +301,10 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   background:var(--cal);
 }
 .semfoto::after{
-  content:"";position:absolute;inset:12px;border:1px solid #3E1A461a;
+  content:"";position:absolute;inset:12px;border:1px solid #6B15801a;
 }
-.semfoto svg{width:44px;height:44px;stroke:#3E1A4647;fill:none;stroke-width:1.1;}
-.semfoto span{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#3E1A4673;}
+.semfoto svg{width:44px;height:44px;stroke:#6B158047;fill:none;stroke-width:1.1;}
+.semfoto span{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#6B158073;}
 
 /* selos discretos: texto sobre a foto, sem retângulo colorido gritando */
 .marcas{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;
@@ -345,7 +361,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .loja h2{
   font-family:var(--display);font-weight:600;font-size:clamp(24px,3vw,34px);
   letter-spacing:-.025em;margin:0 0 16px;line-height:1.1;max-width:18ch;}
-.loja p{margin:0 0 18px;color:#F7F3F5c4;max-width:42ch;}
+.loja p{margin:0 0 18px;color:#FBF7F9c4;max-width:42ch;}
 .loja__end{font-size:15px;line-height:1.7;margin:0 0 20px;}
 .loja__end b{display:block;font-weight:700;}
 .provador{
@@ -364,7 +380,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   padding:9px 0;border-bottom:1px solid var(--fio-claro);font-size:14px;
 }
 .horarios li.hoje{color:var(--rosa-claro);font-weight:700;}
-.horarios span{color:#F7F3F5a8;}
+.horarios span{color:#FBF7F9a8;}
 .horarios li.hoje span{color:var(--rosa-claro);}
 
 /* aviso de entrega, dentro da seção da loja */
@@ -401,10 +417,11 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .voz p{margin:0 0 14px;font-size:15px;}
 .voz footer{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cinza);}
 .sem-vozes{
-  padding:26px;border:1px dashed #33153B3d;background:var(--cal);
-  font-size:15px;color:var(--cinza);max-width:62ch;
+  padding:24px;border-left:3px solid var(--rosa-forte);background:var(--cal);
+  font-size:15px;color:var(--cinza);max-width:64ch;line-height:1.6;
 }
-.sem-vozes code{font-size:13px;background:#33153B0f;padding:2px 5px;}
+.sem-vozes b{color:var(--tinta);}
+.sem-vozes code{font-size:13px;background:#2E0F3D0f;padding:2px 5px;}
 
 /* ═══ RODAPÉ ═══ */
 /* rodapé escuro: fecha a página na cor da marca, como abriu */
@@ -433,7 +450,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
    Gaveta lateral em todos os tamanhos, aberta pelo ícone da sacola.
    O painel continua mostrando o texto exato que vai para o WhatsApp. */
 .scrim{
-  position:fixed;inset:0;background:#33153B99;z-index:80;
+  position:fixed;inset:0;background:#2E0F3D99;z-index:80;
   opacity:0;visibility:hidden;transition:opacity var(--t),visibility var(--t);
 }
 .scrim.on{opacity:1;visibility:visible;}
@@ -461,7 +478,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .bilhete{
   background:var(--cal);padding:22px 20px;
   font-size:14px;line-height:1.75;white-space:pre-wrap;
-  box-shadow:0 1px 0 #33153B14, 0 12px 24px -18px #33153B5c;
+  box-shadow:0 1px 0 #2E0F3D14, 0 12px 24px -18px #2E0F3D5c;
 }
 .bilhete__linha{display:block;}
 .bilhete__linha--nova{animation:sobe 260ms cubic-bezier(.2,.7,.2,1);}
@@ -593,12 +610,23 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
       <button class="pausa" id="pausa" hidden aria-pressed="false"></button>
     </section>
 
+    <ul class="confianca dentro" id="confianca"></ul>
+
     <section class="pecas dentro" id="pecas" tabindex="-1" aria-labelledby="tit-pecas">
       <div class="pecas__cab">
         <h2 id="tit-pecas">Na loja agora</h2>
         <span class="etiqueta" id="conta-pecas"></span>
       </div>
       <div class="grade" id="grade"></div>
+    </section>
+
+    <section class="vozes dentro" aria-labelledby="tit-vozes">
+      <div class="pecas__cab">
+        <h2 id="tit-vozes">Quem já levou</h2>
+        <a class="etiqueta" id="ver-insta" target="_blank" rel="noopener" style="color:var(--rosa-forte)">@lojafeitaassim</a>
+      </div>
+      <div id="vozes"></div>
+      <div id="insta"></div>
     </section>
 
     <section class="loja" id="loja">
@@ -612,21 +640,13 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
           </a>
         </div>
         <div>
-          <p class="etiqueta" style="color:#F7F3F5a8;margin:0 0 14px">Horários</p>
+          <p class="etiqueta" style="color:#FBF7F9a8;margin:0 0 14px">Horários</p>
           <ul class="horarios" id="horarios"></ul>
           <div class="pulso" id="pulso"></div>
         </div>
       </div>
     </section>
 
-    <section class="vozes dentro">
-      <div class="pecas__cab">
-        <h2>No Instagram</h2>
-        <a class="etiqueta" id="ver-insta" target="_blank" rel="noopener" style="color:var(--rosa-forte)">@lojafeitaassim</a>
-      </div>
-      <div id="insta"></div>
-      <div id="vozes"></div>
-    </section>
 
     <footer class="rodape dentro">
       <div class="rodape__grade">
@@ -740,10 +760,8 @@ const CONFIG = {
     intervalo: 7000,
     slides: [
       {
-        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_135611_aeac77cd-c1f7-43f0-9abf-d4922dce4e2f.png",
-        /* video: laço curto por cima da foto deste slide. null desliga.
-           Quem tem movimento reduzido ligado nem chega a baixá-lo. */
-        video: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_231940_538d400d-02ff-4cc6-b21b-5464841edde3.mp4",
+        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_223109_2bc530aa-f1c6-434c-b48b-701427d0952c.png",
+        video: null,
         alt: "Modelo com vestido midi claro, bolsa de ombro e óculos de sol",
         etiqueta: "Coleção nova", canto: "Criciúma",
         titulo: "Ganhe o mundo", sub: "do seu jeito",
@@ -751,22 +769,22 @@ const CONFIG = {
         cta: "Ver as peças", href: "#pecas"
       },
       {
-        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_122658_c4c23642-ed6b-4d56-9ecc-7aa89f0d1b07.png",
+        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_223109_46ee88a7-b755-4ed7-a0ef-1725e19469ee.png",
         video: null,
         alt: "Modelo com vestido acetinado em rosa vivo e bolsa de couro",
         etiqueta: "Bolsas e couro", canto: "Seleção",
         titulo: "Nada igual", sub: "na cidade",
         legenda: "Escolhidas uma a uma",
-        cta: "Ver o que chegou", href: "#pecas"
+        cta: "Ver as peças", href: "#pecas"
       },
       {
-        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_122658_01c91277-fe36-453a-a8f9-703b99d7836b.png",
+        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_223109_b6a7511f-b91e-4b19-b1ac-9d7d8536b2a4.png",
         video: null,
         alt: "Modelo com blazer off-white sobre calça jeans wide leg",
         etiqueta: "Alfaiataria", canto: "Provador",
         titulo: "Prove antes", sub: "de levar",
         legenda: "Marque um horário e prove com calma",
-        cta: "Marcar um horário", href: "#loja"
+        cta: "Ver as peças", href: "#pecas"
       }
     ]
   },
@@ -782,6 +800,16 @@ const CONFIG = {
     desconto: 10,                      // % de desconto
     regra:    "na primeira compra"
   },
+
+  /* ── 6. CONFIANÇA — a faixa logo abaixo da capa.
+     Só o que for verdade: ela existe para tirar dúvida, não para
+     enfeitar. Frase curta, uma linha cada.                        */
+  confianca: [
+    "Entrega no mesmo dia em Criciúma",
+    "Troca em até 7 dias",
+    "5% de desconto no Pix",
+    "Envio para todo o Brasil"
+  ],
 
   /* ── 7. CATEGORIAS — filtram as peças da grade ───────────── */
   categorias: ["Tudo","Looks","Bolsas","Óculos"],   // só categorias com peça; vazia vira beco sem saída
@@ -1175,25 +1203,37 @@ $("#busca").addEventListener("submit", e => {
 });
 $("#q").addEventListener("input", () => { if(!$("#q").value.trim()){ termo = ""; mostrarPecas(); } });
 
+/* faixa de confiança */
+$("#confianca").innerHTML = (CONFIG.confianca || [])
+  .map(f => "<li>"+escapar(f)+"</li>").join("");
+if(!(CONFIG.confianca || []).length) $("#confianca").remove();
+
 /* ─── instagram ───────────────────────────────────────────── */
 $("#insta").innerHTML = CONFIG.instagram_fotos.length
-  ? '<div class="insta__grade">'+CONFIG.instagram_fotos.map(f =>
+  ? '<h3 class="vozes__tit">No Instagram</h3><div class="insta__grade">'+CONFIG.instagram_fotos.map(f =>
       '<a class="insta__item" href="'+escapar(f.post || CONFIG.instagram)+'" target="_blank" rel="noopener">'+
         '<img src="'+escapar(f.foto)+'" alt="'+escapar(f.alt || "")+'" loading="lazy" width="600" height="600">'+
       '</a>').join("")+'</div>'
-  : '<p class="sem-vozes">O Instagram não deixa o site buscar as fotos sozinho — ele exige '+
+  : '<h3 class="vozes__tit">No Instagram</h3>'+
+    '<p class="sem-vozes">O Instagram não deixa o site buscar as fotos sozinho — ele exige '+
     'login e bloqueia acesso automático. Baixe as fotos que você quer aqui do seu próprio '+
     'perfil, salve na pasta <code>fotos/</code> e liste cada uma em '+
     '<code>CONFIG.instagram_fotos</code>. A grade aparece sozinha.</p>';
 
 /* ─── depoimentos ─────────────────────────────────────────── */
-/* sem depoimento a seção não mostra aviso nenhum: um bloco vazio explicado
-   já basta por página, e o do Instagram acima cumpre esse papel */
+/* Vazio, esta seção NÃO se esconde. Pesquisa de conversão: 92% das pessoas
+   hesitam em comprar quando não há avaliação nenhuma, e depoimento perto do
+   topo trabalha mais do que enterrado no rodapé. Deixar invisível esconderia
+   de você o maior buraco da página. */
 $("#vozes").innerHTML = CONFIG.depoimentos.length
-  ? '<h3 class="vozes__tit">Quem já levou</h3><div class="vozes__grade">'+CONFIG.depoimentos.map(d =>
+  ? '<div class="vozes__grade">'+CONFIG.depoimentos.map(d =>
       '<blockquote class="voz"><p>'+escapar(d.texto)+'</p><footer>'+
       escapar(d.autora)+' · '+escapar(d.peca)+'</footer></blockquote>').join("")+'</div>'
-  : "";
+  : '<p class="sem-vozes"><b>Esta é a parte que mais pesa na decisão de comprar, '+
+    'e ainda está vazia.</b> Peça a três clientes que já levaram uma frase sobre '+
+    'a peça e o atendimento, com autorização para publicar, e cole em '+
+    '<code>CONFIG.depoimentos</code>. Três já bastam. Prefira as compras mais '+
+    'recentes: avaliação de mais de três meses convence pouco.</p>';
 
 /* ─── O CARRINHO ────────────────────────────────────────────── */
 let carrinho = [];

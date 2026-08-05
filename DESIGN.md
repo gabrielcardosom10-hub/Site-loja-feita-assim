@@ -13,17 +13,17 @@ letra é geométrica arredondada. Nada no logo é anguloso ou apertado. A marca
 
 | variável | valor | papel |
 |---|---|---|
-| `--tinta` | `#33153B` | ameixa escura: texto e fundos fechados |
-| `--ameixa` | `#4A1157` | o roxo do logo: superfícies |
-| `--rosa` | `#FF2D7A` | o magenta da tulipa: só em tipo grande |
-| `--rosa-forte` | `#CC1A64` | o mesmo magenta fechado: botões e links |
-| `--papel` | `#F7F3F5` | off-white morno: o fundo da página |
+| `--tinta` | `#2E0F3D` | ameixa escura: texto e fundos fechados |
+| `--ameixa` | `#6B1580` | o roxo do logo: superfícies |
+| `--rosa` | `#FF1D6E` | o magenta da tulipa: só em tipo grande |
+| `--rosa-forte` | `#D6006A` | o mesmo magenta fechado: botões e links |
+| `--papel` | `#FBF7F9` | off-white morno: o fundo da página |
 | `--cal` | `#FFFFFF` | branco das fotos e do bilhete |
-| `--lilas` | `#CDBBD6` | texto secundário sobre roxo |
-| `--rosa-claro` | `#FFA8C8` | magenta claro sobre roxo |
-| `--cinza` | `#6E5C77` | texto secundário sobre papel |
+| `--lilas` | `#D7C2E2` | texto secundário sobre roxo |
+| `--rosa-claro` | `#FFA0C4` | magenta claro sobre roxo |
+| `--cinza` | `#6B5878` | texto secundário sobre papel |
 
-**Por que dois rosas.** O magenta vivo tem menos de 4,5:1 sobre papel — passa em
+**Por que dois rosas.** O magenta vivo tem 3,5:1 sobre papel — passa em
 título grande, reprova em texto corrido. `--rosa-forte` é o mesmo tom
 fechado até 5,0:1, e é ele que vai em botão, link e preço.
 
@@ -32,28 +32,21 @@ loja e o rodapé. O miolo é claro e a fotografia manda.
 
 ## Tipografia
 
-**Poppins** no corpo e na interface, **Bodoni Moda** só no título da capa.
+**DM Sans**, uma família só, em todos os papéis.
 
-A serifada de alto contraste aparece em um lugar e nada mais. Ela dá a
-elegância que a moda pede sem disputar com o logo, que é de caixa baixa
-arredondada — contraste é diferente de conflito, desde que cada uma tenha
-seu território.
+Geométrica como o logo, e neutra de propósito. Página que converte usa tipo
+que sai da frente: quem precisa chamar atenção é a peça, o preço e o botão —
+não a letra. Sem serifada, sem condensada, sem segunda família.
 
 | papel | tratamento |
 |---|---|
-| Título da capa | Bodoni Moda, caixa alta, 2ª linha em itálico rosa |
-| Display | Poppins 600, caixa baixa, entreletras −0.03em |
-| Subtítulo do display | 300, caixa baixa |
+| Título da capa | 700, caixa baixa, 2ª linha em 300 rosa claro |
+| Título de seção | 600, caixa baixa, entreletras −0.02em |
 | Corpo | 400, 16px, altura 1.6 |
 | Interface | 12px, 600, caixa alta, entreletras +0.09em |
 
-A caixa alta vive na camada de interface — menu, botões, etiquetas, selos —
-e no título da capa, onde a serifada a sustenta. Os demais títulos ficam em
-caixa baixa, na voz do logo.
-
-> A escolha da Poppins é uma inferência a partir da imagem do logo, que é
-> pequena demais para identificar a fonte com certeza. Se o logo usa outra,
-> troque em `--display` e `--corpo`, no topo do CSS.
+A caixa alta vive só na camada de interface — menu, botões, etiquetas, selos.
+Título nenhum é caixa alta.
 
 ## Forma
 
@@ -74,7 +67,9 @@ por **fusão**, nunca deslizando: deslizar chamaria atenção para a mecânica e
 vez da roupa. O slide ativo faz uma aproximação lenta de 9 segundos.
 
 Cada slide tem etiqueta partida nas duas pontas de uma linha, título em duas
-linhas — a segunda em itálico rosa —, legenda entreletrada e botão vazado.
+linhas — a segunda em peso leve e rosa claro —, legenda entreletrada e botão
+vazado. **Todos os slides levam ao mesmo lugar:** página com um só destino
+converte mais do que página que oferece três.
 
 **Regras do giro automático.** Conteúdo que se move sozinho precisa de um
 jeito de parar (WCAG 2.2.2). O giro para em quatro situações:
@@ -121,3 +116,19 @@ logo: "feita-assim.svg",
 ```
 
 O site troca o texto pela imagem sozinho, no cabeçalho e no rodapé.
+
+## O que a pesquisa de conversão mudou aqui
+
+Três decisões da página vieram de dados, não de gosto:
+
+**Sinal de confiança logo abaixo da capa.** Entrega, troca, Pix e envio numa
+faixa fina, no ponto em que a dúvida aparece. Enterrado no rodapé, esse tipo
+de informação não trabalha.
+
+**Um destino só.** Os três slides da capa levam às peças. Página com um CTA
+claro mede cerca de 13% mais conversão que página com vários competindo.
+
+**A seção de depoimentos não se esconde quando está vazia.** É a parte que
+mais pesa na decisão de comprar — 92% das pessoas hesitam quando não há
+avaliação nenhuma — e ela subiu do rodapé para logo depois das peças.
+Esconder o vazio esconderia de você o maior buraco da página.
