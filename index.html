@@ -76,6 +76,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .tarja__in b{color:var(--papel);font-weight:600;}
 .tarja__codigo{font-weight:700;letter-spacing:.12em;color:var(--rosa-claro);}
 .tarja__cta{
+  display:inline-flex;align-items:center;min-height:44px;margin:-11px 0;
   color:var(--papel);border-bottom:1px solid #FBF7F95c;
   transition:border-color var(--t);
 }
@@ -92,7 +93,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;
   height:62px;
 }
-.marca{display:flex;align-items:center;gap:9px;flex:none;}
+.marca{display:flex;align-items:center;gap:9px;flex:none;min-height:44px;}
 .marca svg{width:24px;height:18.3px;fill:var(--rosa-forte);flex:none;}
 .marca__txt{
   font-family:var(--display);font-weight:600;font-size:20px;
@@ -224,7 +225,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 /* WCAG 2.2.2: conteúdo que gira sozinho precisa de um jeito de parar */
 .pausa{
   position:absolute;right:clamp(14px,3vw,34px);bottom:clamp(16px,3vh,28px);z-index:2;
-  min-height:34px;padding:0 14px;color:var(--papel);
+  min-height:44px;padding:0 16px;color:var(--papel);
   border:1px solid #FBF7F95c;background:#2E0F3D5c;
   font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
   transition:background var(--t),border-color var(--t);
@@ -275,7 +276,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 
 /* ═══ PEÇAS ═══ */
 .pecas{padding-top:clamp(34px,5vw,58px);border-top:1px solid var(--fio);scroll-margin-top:150px;}
-.pecas__cab{display:flex;align-items:baseline;justify-content:space-between;gap:18px;margin-bottom:26px;}
+.pecas__cab{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:26px;}
+.pecas__cab a.etiqueta{display:inline-flex;align-items:center;min-height:44px;}
 .pecas__cab h2{
   font-family:var(--display);font-weight:600;font-size:clamp(21px,2.4vw,27px);
   letter-spacing:-.02em;margin:0;
@@ -327,7 +329,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 
 .tamanhos{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 16px;align-items:flex-start;}
 .tamanho{
-  border-radius:var(--r);min-width:36px;height:34px;padding:0 9px;
+  border-radius:var(--r);min-width:44px;min-height:44px;padding:0 11px;
   border:1px solid var(--fio);background:var(--cal);
   font-size:12.5px;font-weight:500;display:grid;place-items:center;
   transition:border-color var(--t),background var(--t),color var(--t);
@@ -336,7 +338,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .tamanho[aria-pressed="true"]{background:var(--tinta);border-color:var(--tinta);color:var(--papel);}
 
 .marcar{
-  margin:auto 0 0;padding:12px 0 0;width:100%;
+  margin:auto 0 0;padding:14px 0;min-height:44px;width:100%;
   border-top:1px solid var(--tinta);
   font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   color:var(--rosa-forte);text-align:left;
@@ -418,7 +420,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .voz footer{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cinza);}
 .sem-vozes{
   padding:24px;border-left:3px solid var(--rosa-forte);background:var(--cal);
-  font-size:15px;color:var(--cinza);max-width:64ch;line-height:1.6;
+  font-size:15px;color:var(--cinza);max-width:68ch;line-height:1.6;
 }
 .sem-vozes b{color:var(--tinta);}
 .sem-vozes code{font-size:13px;background:#2E0F3D0f;padding:2px 5px;}
@@ -433,16 +435,21 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .rodape .marca svg{fill:var(--rosa-claro);}
 .rodape__grade{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:30px;}
 .rodape h3{font-size:11.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--lilas);margin:0 0 13px;}
-.rodape ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
-.rodape a{font-size:14px;color:var(--lilas);transition:color var(--t);}
+.rodape ul{list-style:none;margin:0;padding:0;display:grid;}
+.rodape a{
+  display:inline-flex;align-items:center;min-height:44px;
+  font-size:14px;color:var(--lilas);transition:color var(--t);
+}
 .rodape a:hover{color:var(--papel);}
 .rodape__sobre{font-size:14px;color:var(--lilas);margin:12px 0 0;max-width:34ch;}
 .rodape__legal{
   margin-top:32px;padding-top:18px;border-top:1px solid var(--fio-claro);
-  font-size:12px;color:var(--lilas);line-height:1.7;
+  font-size:12px;color:var(--lilas);line-height:1.7;max-width:74ch;
 }
-.social{display:flex;gap:16px;margin-top:16px;}
-.social a{display:grid;place-items:center;width:22px;height:22px;color:var(--lilas);transition:color var(--t);}
+.social{display:flex;gap:28px;margin-top:22px;padding-left:12px;}
+/* 44px de área de toque com o desenho seguindo em 20px */
+.social a{display:grid;place-items:center;width:44px;height:44px;margin:-12px;
+  color:var(--lilas);transition:color var(--t);}
 .social a:hover{color:var(--rosa-claro);}
 .social svg{width:20px;height:20px;fill:currentColor;}
 
@@ -537,7 +544,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 }
 @media(max-width:380px){
   .grade{grid-template-columns:1fr;}
-  .tamanho{min-width:34px;}
+  /* o seletor de tamanho NÃO encolhe aqui: 44px é piso de alvo de toque,
+     e é justamente no telefone pequeno que o erro de toque acontece.
+     Se não couberem na linha, eles quebram — e quebrar é o certo. */
 }
 
 @media(prefers-reduced-motion:reduce){

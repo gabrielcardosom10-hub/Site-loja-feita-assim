@@ -132,3 +132,17 @@ claro mede cerca de 13% mais conversão que página com vários competindo.
 mais pesa na decisão de comprar — 92% das pessoas hesitam quando não há
 avaliação nenhuma — e ela subiu do rodapé para logo depois das peças.
 Esconder o vazio esconderia de você o maior buraco da página.
+
+## Alvo de toque
+
+Todo controle tem no mínimo **44×44px** de área tocável, em qualquer largura de
+tela. Onde o desenho é menor que isso — os ícones sociais do rodapé têm 20px —
+a área cresce por padding e margem negativa, sem mudar o que se vê.
+
+O seletor de tamanho **não encolhe** no telefone pequeno. Se os tamanhos não
+couberem na linha, eles quebram para a linha seguinte; quebrar é preferível a
+apertar, porque é exatamente no telefone estreito que o erro de toque acontece,
+e errar o toque em botão de compra é venda perdida.
+
+Isso saiu de uma auditoria automática, não de olho: nenhuma captura de tela
+mostra que um botão tem 34px de altura.
