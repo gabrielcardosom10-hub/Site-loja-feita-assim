@@ -75,12 +75,17 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 }
 .tarja__in b{color:var(--papel);font-weight:600;}
 .tarja__codigo{font-weight:700;letter-spacing:.12em;color:var(--rosa-claro);}
+/* área de toque de 44px sem tirar o sublinhado de junto do texto:
+   border-bottom acompanharia a caixa, não a letra, e sairia da barra.
+   text-decoration acompanha a linha de base. */
 .tarja__cta{
   display:inline-flex;align-items:center;min-height:44px;margin:-11px 0;
-  color:var(--papel);border-bottom:1px solid #FBF7F95c;
-  transition:border-color var(--t);
+  color:var(--papel);
+  text-decoration:underline;text-decoration-color:#FBF7F95c;
+  text-underline-offset:4px;text-decoration-thickness:1px;
+  transition:text-decoration-color var(--t);
 }
-.tarja__cta:hover{border-color:var(--papel);}
+.tarja__cta:hover{text-decoration-color:var(--papel);}
 
 /* ═══ CABEÇALHO ═══
    Claro e quieto: fio, marca, navegação em texto. O roxo deixa de ser
@@ -769,7 +774,7 @@ const CONFIG = {
     intervalo: 7000,
     slides: [
       {
-        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_223109_2bc530aa-f1c6-434c-b48b-701427d0952c.png",
+        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_225800_a71546df-c384-4f6d-b4ea-228aeaca3b6c.png",
         video: null,
         alt: "Modelo com vestido midi claro, bolsa de ombro e óculos de sol",
         etiqueta: "Coleção nova", canto: "Criciúma",
@@ -778,7 +783,7 @@ const CONFIG = {
         cta: "Ver as peças", href: "#pecas"
       },
       {
-        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_223109_46ee88a7-b755-4ed7-a0ef-1725e19469ee.png",
+        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260805_225800_e69f1961-13c4-40e9-9fb2-69d50d7c6fad.png",
         video: null,
         alt: "Modelo com vestido acetinado em rosa vivo e bolsa de couro",
         etiqueta: "Bolsas e couro", canto: "Seleção",
@@ -803,7 +808,7 @@ const CONFIG = {
      lojas de roupa. CONFIRME OS VALORES ANTES DE PUBLICAR: é uma
      promessa comercial, e o site não checa se você pode cumprir.
      Para desligar qualquer um, ponha null.                       */
-  freteGratis: 299,                    // frete grátis a partir deste valor; null desliga
+  freteGratis: null,                   // valor a partir do qual o frete é grátis; null desliga
   cupom: {
     codigo:   "BEMVINDA10",
     desconto: 10,                      // % de desconto
@@ -1141,6 +1146,16 @@ function desenharPeca(p){
 
 let filtro = "Tudo", termo = "";
 
+/* Rolar até as peças. scrollIntoView({behavior:"smooth"}) ignora
+   prefers-reduced-motion, então a preferência é lida aqui na mão: quem
+   pediu menos movimento recebe um salto seco, não uma viagem. */
+function irParaPecas(){
+  const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.getElementById("pecas").scrollIntoView({
+    behavior: quieto ? "auto" : "smooth", block: "start"
+  });
+}
+
 function mostrarPecas(){
   const lista = CONFIG.pecas.filter(p =>
     (filtro === "Tudo" || p.cat === filtro) &&
@@ -1197,6 +1212,7 @@ $("#trilhos").addEventListener("click", e => {
   $("#trilhos").querySelectorAll(".trilho").forEach(o => o.setAttribute("aria-current","false"));
   b.setAttribute("aria-current","true");
   filtro = b.textContent; mostrarPecas();
+  irParaPecas();
 });
 
 /* busca */
@@ -1208,7 +1224,7 @@ $("#abrir-busca").addEventListener("click", () => {
 });
 $("#busca").addEventListener("submit", e => {
   e.preventDefault(); termo = $("#q").value.trim().toLowerCase(); mostrarPecas();
-  document.getElementById("pecas").scrollIntoView({behavior:"smooth", block:"start"});
+  irParaPecas();
 });
 $("#q").addEventListener("input", () => { if(!$("#q").value.trim()){ termo = ""; mostrarPecas(); } });
 
