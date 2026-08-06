@@ -406,64 +406,60 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 .pulso b{font-weight:700;display:block;}
 .pulso span{color:var(--lilas);}
 
-/* ═══ AVALIAÇÕES ═══ */
-.nota{
-  display:inline-flex;align-items:center;gap:16px;
-  padding:16px 22px;background:var(--cal);border-radius:var(--r);
-  border:1px solid var(--fio);transition:border-color var(--t);
+/* ═══ VITRINES ═══
+   Blocos grandes de categoria. É o módulo mais visual da página depois
+   da capa, e cada um é um atalho de verdade: filtra a grade e sobe até
+   ela, em vez de só decorar. */
+.vitrines{
+  padding-top:clamp(40px,5vw,64px);padding-bottom:clamp(40px,5vw,64px);
+  display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,1.4vw,20px);
 }
-.nota:hover{border-color:var(--rosa-forte);}
-.nota__n{
-  font-family:var(--display);font-weight:700;font-size:38px;line-height:1;
-  letter-spacing:-.03em;color:var(--tinta);
+.vitrine{
+  position:relative;display:flex;align-items:flex-end;
+  aspect-ratio:3/4;overflow:hidden;background:var(--ameixa);
+  border-radius:var(--r);text-align:left;width:100%;
+  color:var(--papel);
 }
-.nota__d{display:flex;flex-direction:column;gap:4px;}
-.nota__t{font-size:13px;color:var(--cinza);}
+.vitrine img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transition:transform 700ms cubic-bezier(.2,.7,.2,1);
+}
+.vitrine:hover img{transform:scale(1.05);}
+.vitrine__veu{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,#2E0F3De6 0%,#2E0F3D6b 40%,#2E0F3D0a 78%);
+}
+.vitrine__txt{position:relative;padding:clamp(18px,2vw,28px);width:100%;}
+.vitrine__t{
+  display:block;font-family:var(--display);font-weight:700;
+  font-size:clamp(22px,2.4vw,30px);letter-spacing:-.025em;line-height:1.1;
+}
+.vitrine__l{
+  display:block;margin-top:6px;font-size:13.5px;color:var(--lilas);
+  max-width:26ch;
+}
+.vitrine__seta{
+  display:inline-flex;align-items:center;gap:8px;margin-top:14px;
+  font-size:11.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--papel);
+}
+.vitrine__seta svg{
+  width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;
+  transition:transform var(--t);
+}
+.vitrine:hover .vitrine__seta svg{transform:translateX(4px);}
 
-.estrelas{display:inline-flex;gap:2px;}
-.estrelas svg{width:15px;height:15px;fill:#C8791A;}
-
-.estreladas{list-style:none;margin:22px 0 0;padding:0;display:grid;max-width:46ch;}
-.estreladas li{
-  display:flex;align-items:center;gap:12px;min-height:44px;
-  border-bottom:1px solid var(--fio);font-size:14px;
+/* sem foto o bloco continua de pé: roxo chapado com a tulipa marcada d'água */
+.vitrine__semfoto{
+  position:absolute;inset:0;display:grid;place-items:center;
+  background:var(--ameixa);
 }
-.estreladas li:last-child{border-bottom:0;}
-.estreladas li span{color:var(--cinza);}
-.estreladas__nota{margin:10px 0 0;font-size:12.5px;color:var(--cinza);max-width:54ch;}
+.vitrine__semfoto svg{width:74px;height:56.4px;fill:#FBF7F91f;}
 
-.avaliar{
-  display:inline-flex;align-items:center;min-height:44px;margin-top:20px;
-  padding:0 22px;border:1px solid var(--rosa-forte);border-radius:var(--r);
-  color:var(--rosa-forte);font-size:13px;font-weight:600;
-  letter-spacing:.06em;text-transform:uppercase;
-  transition:background var(--t),color var(--t);
+@media(max-width:860px){
+  .vitrines{grid-template-columns:1fr;}
+  .vitrine{aspect-ratio:16/9;}
 }
-.avaliar:hover{background:var(--rosa-forte);color:var(--cal);}
-
-/* ═══ INSTAGRAM ═══ */
-.insta__grade{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.2vw,16px);}
-.insta__item{display:block;aspect-ratio:1/1;overflow:hidden;background:var(--cal);}
-.insta__item img{width:100%;height:100%;object-fit:cover;transition:opacity var(--t);}
-.insta__item:hover img{opacity:.82;}
-@media(max-width:760px){.insta__grade{grid-template-columns:repeat(2,1fr);}}
-
-/* ═══ VOZES ═══ */
-.vozes{padding-top:clamp(38px,5vw,60px);padding-bottom:clamp(38px,5vw,60px);border-top:1px solid var(--fio);}
-.vozes__tit{
-  font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:-.02em;
-  margin:clamp(34px,4vw,52px) 0 20px;
-}
-.vozes__grade{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
-.voz{margin:0;padding:22px;background:var(--cal);}
-.voz p{margin:0 0 14px;font-size:15px;}
-.voz footer{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cinza);}
-.sem-vozes{
-  padding:24px;border-left:3px solid var(--rosa-forte);background:var(--cal);
-  font-size:15px;color:var(--cinza);max-width:68ch;line-height:1.6;
-}
-.sem-vozes b{color:var(--tinta);}
-.sem-vozes code{font-size:13px;background:#2E0F3D0f;padding:2px 5px;}
 
 /* ═══ RODAPÉ ═══ */
 /* rodapé escuro: fecha a página na cor da marca, como abriu */
@@ -568,7 +564,6 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
 
 @media(max-width:900px){
   .loja__grade,.rodape__grade{grid-template-columns:1fr;}
-  .vozes__grade{grid-template-columns:1fr;}
 }
 @media(max-width:620px){
   .grade{grid-template-columns:repeat(2,1fr);gap:26px 14px;}
@@ -610,7 +605,6 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
   <symbol id="zap" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.18c-.24.68-1.42 1.31-1.96 1.36-.5.05-1.14.07-1.83-.11-.42-.13-.97-.31-1.66-.61-2.93-1.26-4.84-4.2-4.99-4.4-.14-.2-1.19-1.58-1.19-3.02 0-1.43.75-2.14 1.02-2.43.27-.29.58-.36.78-.36l.56.01c.18.01.42-.07.66.5.24.59.83 2.02.9 2.17.07.15.12.32.02.51-.1.2-.15.32-.29.49l-.44.51c-.14.15-.29.3-.13.59.17.29.74 1.22 1.59 1.98 1.09.97 2.01 1.27 2.3 1.42.29.15.46.12.63-.07.17-.2.73-.85.92-1.14.2-.29.39-.24.66-.15.27.1 1.7.8 1.99.95.29.15.49.22.56.34.07.12.07.71-.17 1.39z"/></symbol>
   <symbol id="lupa" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></symbol>
   <symbol id="sacola" viewBox="0 0 24 24"><path d="M4.5 7.5h15l-1.2 13.5H5.7z"/><path d="M8.8 7.5V6a3.2 3.2 0 016.4 0v1.5"/></symbol>
-  <symbol id="estrela" viewBox="0 0 24 24"><path d="M12 2.6l2.9 6 6.5.9-4.8 4.5 1.2 6.4-5.8-3.1-5.8 3.1 1.2-6.4L2.6 9.5l6.5-.9z"/></symbol>
   <symbol id="seta" viewBox="0 0 24 24"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13,6 19,12 13,18"/></symbol>
   <symbol id="xis" viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></symbol>
 </svg>
@@ -670,13 +664,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;}
       <div class="grade" id="grade"></div>
     </section>
 
-    <section class="vozes dentro" aria-labelledby="tit-vozes">
-      <div class="pecas__cab">
-        <h2 id="tit-vozes">Quem já levou</h2>
-        <a class="etiqueta" id="ver-insta" target="_blank" rel="noopener" style="color:var(--rosa-forte)">@lojafeitaassim</a>
-      </div>
-      <div id="vozes"></div>
-      <div id="insta"></div>
+    <section class="vitrines dentro" id="vitrines" aria-labelledby="tit-vitrines">
+      <h2 class="sr" id="tit-vitrines">Escolha por tipo de peça</h2>
     </section>
 
     <section class="loja" id="loja">
@@ -861,6 +850,17 @@ const CONFIG = {
     "Envio para todo o Brasil"
   ],
 
+  /* ── 6b. VITRINES ─────────────────────────────────────────
+     Os blocos grandes entre as peças e a seção da loja. Clicar filtra
+     a grade e sobe até ela. `cat` tem de casar com uma categoria da
+     lista abaixo, senão o bloco não filtra nada.
+     Lista vazia = a seção some.                                     */
+  vitrines: [
+    {cat:"Looks",  titulo:"Looks",  linha:"Vestido, blazer, tricô e alfaiataria", foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260806_160157_538c8274-c702-4958-95cb-446130c2c24c.png"},
+    {cat:"Bolsas", titulo:"Bolsas", linha:"Couro caramelo e estruturadas",        foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260806_160405_8c68d8aa-c8ca-48f8-bd26-3ccf8312c4bc.png"},
+    {cat:"Óculos", titulo:"Óculos", linha:"Armações para o sol de Criciúma",      foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260806_160157_2674ddea-8734-40d1-a451-90d5e4df2180.png"}
+  ],
+
   /* ── 7. CATEGORIAS — filtram as peças da grade ───────────── */
   categorias: ["Tudo","Looks","Bolsas","Óculos"],   // só categorias com peça; vazia vira beco sem saída
 
@@ -889,40 +889,6 @@ const CONFIG = {
     {ref:"FA-2001", nome:"Óculos solar retangular",        cat:"Óculos",    antes:0,      preco:149.90, tams:["Único"],                  restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_aed46c2e-db49-4b9f-b949-39bdacc79df2.png", tipo:"oculos"}
   ],
 
-  /* ── 8b. INSTAGRAM ────────────────────────────────────────
-     O site NÃO consegue puxar as fotos do Instagram sozinho: o
-     Instagram exige autenticação e bloqueia acesso automático.
-     As fotos precisam ser baixadas do seu próprio perfil e salvas
-     na pasta fotos/, uma linha aqui para cada uma.
-
-     foto: caminho do arquivo | post: link do post no Instagram
-     Lista vazia = a seção explica o que fazer, em vez de sumir.     */
-  instagram_fotos: [
-    // {foto:"fotos/insta-1.jpg", post:"https://www.instagram.com/p/XXXXXXXX/", alt:"Vestido midi na loja"},
-    // {foto:"fotos/insta-2.jpg", post:"https://www.instagram.com/p/YYYYYYYY/", alt:"Bolsa baguette"},
-  ],
-
-  /* ── 9. AVALIAÇÕES DO GOOGLE ──────────────────────────────
-     Dados reais do perfil da loja. A nota e o total são o sinal de
-     confiança mais forte da página — não invente nenhum dos dois.
-
-     texto:   o que a pessoa escreveu. As duas de hoje são só de
-              nota, sem comentário, então ficam com "". O site mostra
-              a estrela e a data e não põe palavra na boca de ninguém.
-              Quando alguém escrever, cole aqui igual ao original.
-     perfil / avaliar: troque pelo link do seu perfil no Google. O que
-              está aqui é uma busca pelo nome e endereço; funciona,
-              mas o link direto do perfil é melhor.                   */
-  google: {
-    nota:    5.0,
-    total:   2,
-    perfil:  "https://www.google.com/maps/search/?api=1&query=Feita+Assim+Pra%C3%A7a+Dr.+Nereu+Ramos+358+Crici%C3%BAma+SC",
-    avaliar: "https://www.google.com/maps/search/?api=1&query=Feita+Assim+Pra%C3%A7a+Dr.+Nereu+Ramos+358+Crici%C3%BAma+SC",
-    avaliacoes: [
-      {autora:"Edson M. Alves",       estrelas:5, quando:"4 meses atrás", texto:""},
-      {autora:"Veridiana Dias Alves", estrelas:5, quando:"7 meses atrás", texto:""}
-    ]
-  }
 };
 /* ══════════════════════════════════════════════════════════════
    ▲▲▲  FIM DO BLOCO PARA EDITAR  ▲▲▲
@@ -950,7 +916,6 @@ if(CONFIG.logo){
     m.innerHTML = '<img class="marca__img" src="'+escapar(CONFIG.logo)+'" alt="Feita Assim">';
   });
 }
-$("#ver-insta").href = CONFIG.instagram;
 $("#btn-provador").href = zapLink("Oi! Queria marcar um horário no provador.");
 
 /* ─── A CAPA ──────────────────────────────────────────────────
@@ -1285,70 +1250,47 @@ $("#confianca").innerHTML = (CONFIG.confianca || [])
   .map(f => "<li>"+escapar(f)+"</li>").join("");
 if(!(CONFIG.confianca || []).length) $("#confianca").remove();
 
-/* ─── instagram ───────────────────────────────────────────── */
-$("#insta").innerHTML = CONFIG.instagram_fotos.length
-  ? '<h3 class="vozes__tit">No Instagram</h3><div class="insta__grade">'+CONFIG.instagram_fotos.map(f =>
-      '<a class="insta__item" href="'+escapar(f.post || CONFIG.instagram)+'" target="_blank" rel="noopener">'+
-        '<img src="'+escapar(f.foto)+'" alt="'+escapar(f.alt || "")+'" loading="lazy" width="600" height="600">'+
-      '</a>').join("")+'</div>'
-  : '<h3 class="vozes__tit">No Instagram</h3>'+
-    '<p class="sem-vozes">O Instagram não deixa o site buscar as fotos sozinho — ele exige '+
-    'login e bloqueia acesso automático. Baixe as fotos que você quer aqui do seu próprio '+
-    'perfil, salve na pasta <code>fotos/</code> e liste cada uma em '+
-    '<code>CONFIG.instagram_fotos</code>. A grade aparece sozinha.</p>';
-
-/* ─── avaliações do Google ────────────────────────────────────
-   Nota e total vêm do perfil real da loja. Avaliação sem comentário
-   aparece como estrela e data, sem texto: pôr palavra na boca de quem
-   só deu estrela seria invenção, e são pessoas com nome e sobrenome.
-   Esta seção não se esconde quando está vazia — 92% das pessoas
-   hesitam em comprar sem nenhuma avaliação, e esconder o vazio
-   esconderia o maior buraco da página. */
+/* ─── vitrines ────────────────────────────────────────────────
+   Cada bloco é um botão, não um link: ele não vai para outra página,
+   ele filtra a grade aqui mesmo. Por isso reaproveita o mesmo caminho
+   do menu de categorias, inclusive a rolagem até as peças. */
 (function(){
-  const g = CONFIG.google || {};
-  const estrelas = n => '<span class="estrelas" role="img" aria-label="'+n+' de 5 estrelas">'+
-    '<svg aria-hidden="true"><use href="#estrela"/></svg>'.repeat(n)+'</span>';
+  const lista = (CONFIG.vitrines || []).filter(v => v && v.cat);
+  if(!lista.length){ $("#vitrines").remove(); return; }
 
-  if(!g.total){
-    $("#vozes").innerHTML =
-      '<p class="sem-vozes"><b>Esta é a parte que mais pesa na decisão de comprar, '+
-      'e ainda está vazia.</b> Peça a quem já levou uma avaliação no Google e '+
-      'preencha <code>CONFIG.google</code>.</p>';
-    return;
-  }
-
-  const nota = g.nota.toLocaleString("pt-BR",{minimumFractionDigits:1});
-  const lista = g.avaliacoes || [];
-  const comTexto  = lista.filter(a => (a.texto||"").trim());
-  const soEstrela = lista.filter(a => !(a.texto||"").trim());
-
-  $("#vozes").innerHTML =
-    '<a class="nota" href="'+escapar(g.perfil||"#")+'" target="_blank" rel="noopener">'+
-      '<b class="nota__n">'+nota+'</b>'+
-      '<span class="nota__d">'+estrelas(Math.round(g.nota))+
-        '<span class="nota__t">'+g.total+(g.total>1?' avaliações':' avaliação')+' no Google</span>'+
+  $("#vitrines").insertAdjacentHTML("beforeend", lista.map(v =>
+    '<button class="vitrine" type="button" data-cat="'+escapar(v.cat)+'">'+
+      (v.foto
+        ? '<img src="'+escapar(v.foto)+'" alt="" loading="lazy" width="900" height="1200">'
+        : '<span class="vitrine__semfoto"><svg viewBox="0 0 64 48.7" aria-hidden="true">'+
+          '<use href="#tulipa"/></svg></span>')+
+      '<span class="vitrine__veu"></span>'+
+      '<span class="vitrine__txt">'+
+        '<span class="vitrine__t">'+escapar(v.titulo || v.cat)+'</span>'+
+        (v.linha ? '<span class="vitrine__l">'+escapar(v.linha)+'</span>' : "")+
+        '<span class="vitrine__seta">Ver '+escapar((v.titulo||v.cat).toLowerCase())+
+          ' <svg aria-hidden="true"><use href="#seta"/></svg></span>'+
       '</span>'+
-    '</a>'+
-    (comTexto.length
-      ? '<div class="vozes__grade">'+comTexto.map(a =>
-          '<blockquote class="voz">'+estrelas(a.estrelas||5)+'<p>'+escapar(a.texto)+'</p>'+
-          '<footer>'+escapar(a.autora)+(a.quando?' · '+escapar(a.quando):'')+'</footer>'+
-          '</blockquote>').join("")+'</div>'
-      : "")+
-    (soEstrela.length
-      ? '<ul class="estreladas">'+soEstrela.map(a =>
-          '<li>'+estrelas(a.estrelas||5)+'<span>'+escapar(a.autora)+
-          (a.quando?' · '+escapar(a.quando):'')+'</span></li>').join("")+'</ul>'+
-        '<p class="estreladas__nota">'+
-        (soEstrela.length>1?'Estas avaliações são':'Esta avaliação é')+
-        ' só de nota, sem comentário escrito.</p>'
-      : "")+
-    (g.avaliar
-      ? '<a class="avaliar" href="'+escapar(g.avaliar)+'" target="_blank" rel="noopener">'+
-        'Avaliar a loja no Google</a>'+
-        '<p class="estreladas__nota">Se você já levou uma peça, uma linha sua ajuda '+
-        'muito quem está decidindo agora.</p>'
-      : "");
+    '</button>').join(""));
+
+  /* foto que não carrega volta para o bloco roxo, nunca imagem quebrada */
+  $("#vitrines").querySelectorAll(".vitrine img").forEach(img => {
+    img.addEventListener("error", () => {
+      img.outerHTML = '<span class="vitrine__semfoto">'+
+        '<svg viewBox="0 0 64 48.7" aria-hidden="true"><use href="#tulipa"/></svg></span>';
+    }, {once:true});
+  });
+
+  $("#vitrines").addEventListener("click", e => {
+    const bt = e.target.closest(".vitrine"); if(!bt) return;
+    const cat = bt.dataset.cat;
+    /* marca a categoria no menu do topo, para os dois não se contradizerem */
+    $("#trilhos").querySelectorAll(".trilho").forEach(t =>
+      t.setAttribute("aria-current", String(t.textContent === cat)));
+    filtro = cat; termo = ""; $("#q").value = "";
+    mostrarPecas();
+    irParaPecas();
+  });
 })();
 
 /* ─── O CARRINHO ────────────────────────────────────────────── */
