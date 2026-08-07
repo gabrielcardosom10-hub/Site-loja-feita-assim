@@ -147,9 +147,11 @@ hoje, e como o de retorno mais alto se voltar.
 
 ## Vitrines
 
-Três blocos grandes de categoria entre as peças e a seção da loja. É o módulo
-mais visual da página depois da capa, e é o que grandes lojas de roupa põem
-nessa posição.
+Três blocos grandes de categoria **antes** da grade de peças. A ordem importa:
+quem chega não quer ver 8 produtos em ordem aleatória, quer dizer o que veio
+procurar. As vitrines fazem essa pergunta primeiro, e a grade responde logo
+abaixo — filtrada, se a pessoa escolheu. É o módulo mais visual da página
+depois da capa.
 
 Cada bloco é **um botão, não um link**: ele não sai da página, ele filtra a
 grade e sobe até ela. Ao filtrar, marca também a categoria no menu do topo,
@@ -193,6 +195,7 @@ saiu de medição, não de olho:
   link somava à entrelinha do `<li>`. O `<li>` virou a linha;
 - a seção da loja era `1.15fr 1fr` e a coluna esquerda esticava para 406px
   com ~250px de vazio. Passou a `1fr 1fr` com `align-items:start`;
-- o bloco legal virou uma linha por informação, e o aviso "Antes de publicar"
-  ganhou tarja própria com fio rosa à esquerda — é recado para a loja, não
-  dado para a cliente.
+- o bloco legal virou uma linha por informação, **separadas por fio**: as três
+  eram um parágrafo cinza único e ninguém achava o CNPJ nem o endereço. O aviso
+  "Antes de publicar" ganhou tarja própria com fio rosa à esquerda — é recado
+  para a loja, não dado para a cliente.
