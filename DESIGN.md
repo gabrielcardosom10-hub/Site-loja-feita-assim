@@ -73,8 +73,13 @@ vazado.
 **Entreletras curtas.** A etiqueta e o botão andavam em `.18em` e a legenda em
 `.2em` caixa alta: de perto lia-se bem, mas na capa inteira as palavras
 apareciam como letras soltas, não como frase. Hoje a etiqueta e o botão estão
-em `.08em`/`.09em` e a legenda desceu para caixa baixa em `.04em`. Quem chama
+em `.03em`/`.035em` e a legenda desceu para caixa baixa em `.04em`. Quem chama
 atenção na capa é o título; a interface em volta não deve disputar.
+
+**A linha da etiqueta encurtou.** Os dois rótulos continuam nas pontas de uma
+linha — é a assinatura da capa —, mas a linha ia a `34vw`. Nessa largura os dois
+ficavam tão longe que liam como duas coisas separadas, e não como um par. Hoje
+vai a `21vw`, com teto de 290px.
 
 **O véu, e por que ele tinha faixa.** O véu é um degradê grande de ameixa por
 cima da foto, e ele vinha com quatro paradas. Num degradê que atravessa 1400px,

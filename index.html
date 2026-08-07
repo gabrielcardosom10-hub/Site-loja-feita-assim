@@ -201,11 +201,12 @@ a.marca{min-height:44px;}
 
 /* etiqueta partida: um rótulo em cada ponta da mesma linha */
 .slide__etiqueta{
-  display:flex;align-items:baseline;gap:16px;margin:0 0 22px;
-  /* largura próxima à do título, para os dois rótulos ficarem nas pontas
-     da mesma linha; nowrap impede que qualquer um quebre no meio */
-  width:min(100%,clamp(280px,34vw,440px));justify-content:space-between;
-  font-size:11.5px;font-weight:600;letter-spacing:.08em;
+  display:flex;align-items:baseline;gap:16px;margin:0 0 20px;
+  /* os dois rótulos continuam nas pontas de uma linha, mas a linha encurtou:
+     em 34vw eles ficavam longe um do outro e a etiqueta lia como duas coisas
+     separadas em vez de um par. nowrap impede que qualquer um quebre no meio */
+  width:min(100%,clamp(235px,21vw,290px));justify-content:space-between;
+  font-size:11.5px;font-weight:600;letter-spacing:.03em;
   text-transform:uppercase;color:var(--papel);
 }
 .slide__etiqueta span{white-space:nowrap;}
@@ -231,10 +232,10 @@ a.marca{min-height:44px;}
 /* botão vazado, como o da referência */
 .slide__cta{
   display:inline-flex;align-items:center;justify-content:center;
-  margin-top:30px;min-height:50px;padding:0 42px;
+  margin-top:30px;min-height:50px;padding:0 38px;
   border:1px solid var(--papel);color:var(--papel);background:none;
   font-family:var(--corpo);
-  font-size:12.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  font-size:12.5px;font-weight:600;letter-spacing:.035em;text-transform:uppercase;
   transition:background var(--t),color var(--t);
 }
 .slide__cta:hover{background:var(--papel);color:var(--tinta);}
