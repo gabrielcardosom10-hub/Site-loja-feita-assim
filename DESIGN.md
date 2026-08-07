@@ -67,8 +67,19 @@ por **fusão**, nunca deslizando: deslizar chamaria atenção para a mecânica e
 vez da roupa. O slide ativo faz uma aproximação lenta de 9 segundos.
 
 Cada slide tem etiqueta partida nas duas pontas de uma linha, título em duas
-linhas — a segunda em peso leve e rosa claro —, legenda entreletrada e botão
-vazado. **Todos os slides levam ao mesmo lugar:** página com um só destino
+linhas — a segunda em peso leve e rosa claro —, legenda em caixa baixa e botão
+vazado.
+
+**Entreletras curtas.** A etiqueta e o botão andavam em `.18em` e a legenda em
+`.2em` caixa alta: de perto lia-se bem, mas na capa inteira as palavras
+apareciam como letras soltas, não como frase. Hoje a etiqueta e o botão estão
+em `.08em`/`.09em` e a legenda desceu para caixa baixa em `.04em`. Quem chama
+atenção na capa é o título; a interface em volta não deve disputar.
+
+**Chuvisco sobre o roxo.** O véu da capa é um degradê grande de ameixa, e área
+grande de degradê em tela de 8 bits aparece em faixas. Uma textura de ruído SVG
+a 5% de opacidade por cima quebra a transição e o olho volta a ler cor lisa.
+Custo zero de rede: é `data:` no próprio CSS. **Todos os slides levam ao mesmo lugar:** página com um só destino
 converte mais do que página que oferece três.
 
 **Regras do giro automático.** Conteúdo que se move sozinho precisa de um
@@ -121,8 +132,8 @@ O site troca o texto pela imagem sozinho, no cabeçalho e no rodapé.
 
 Três decisões da página vieram de dados, não de gosto:
 
-**Sinal de confiança logo abaixo da capa.** Entrega, troca, Pix e envio numa
-faixa fina, no ponto em que a dúvida aparece. Enterrado no rodapé, esse tipo
+**Sinal de confiança logo abaixo da capa.** Entrega, área atendida, troca e Pix
+numa faixa fina, no ponto em que a dúvida aparece. Enterrado no rodapé, esse tipo
 de informação não trabalha.
 
 **Um destino só.** Os três slides da capa levam às peças. Página com um CTA
@@ -160,3 +171,28 @@ e errar o toque em botão de compra é venda perdida.
 
 Isso saiu de uma auditoria automática, não de olho: nenhuma captura de tela
 mostra que um botão tem 34px de altura.
+
+## Área de entrega
+
+A loja entrega em **Criciúma e região**, e só. Isso aparece três vezes, de
+propósito: na tarja do topo, na faixa de confiança e na legenda do primeiro
+slide. Prometer envio para o Brasil inteiro traria pedido que a loja não
+consegue atender — dizer o limite cedo custa menos que negar depois.
+
+## Alinhamento do rodapé e da seção da loja
+
+As duas últimas seções eram as mais desalinhadas da página, e o diagnóstico
+saiu de medição, não de olho:
+
+- as três colunas do rodapé mediam 525/375/375 e a primeira começava ~18px
+  abaixo das outras, porque `.marca{min-height:44px}` valia também para o
+  `<span>` do rodapé, onde não há nada para tocar. Hoje o alvo de 44px é só
+  do `a.marca` do cabeçalho, as colunas são `repeat(3,1fr)` e todas
+  compartilham o topo;
+- cada linha das listas ocupava 61px em vez de 44, porque o `inline-flex` do
+  link somava à entrelinha do `<li>`. O `<li>` virou a linha;
+- a seção da loja era `1.15fr 1fr` e a coluna esquerda esticava para 406px
+  com ~250px de vazio. Passou a `1fr 1fr` com `align-items:start`;
+- o bloco legal virou uma linha por informação, e o aviso "Antes de publicar"
+  ganhou tarja própria com fio rosa à esquerda — é recado para a loja, não
+  dado para a cliente.
