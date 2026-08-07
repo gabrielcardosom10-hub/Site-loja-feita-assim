@@ -212,7 +212,11 @@ saiu de medição, não de olho:
   link somava à entrelinha do `<li>`. O `<li>` virou a linha;
 - a seção da loja era `1.15fr 1fr` e a coluna esquerda esticava para 406px
   com ~250px de vazio. Passou a `1fr 1fr` com `align-items:start`;
-- o bloco legal virou uma linha por informação, **separadas por fio**: as três
-  eram um parágrafo cinza único e ninguém achava o CNPJ nem o endereço. O aviso
-  "Antes de publicar" ganhou tarja própria com fio rosa à esquerda — é recado
-  para a loja, não dado para a cliente.
+- o bloco legal virou uma linha por informação, **separadas por fio de ponta a
+  ponta**: as três eram um parágrafo cinza único e ninguém achava o CNPJ nem o
+  endereço. Cada linha carrega dois dados, um em cada ponta — razão social e
+  copyright, rua e cidade —, e o fio atravessa o rodapé inteiro em vez de morrer
+  no terço esquerdo, que era o que mais fazia o pé parecer torto. Na tela
+  estreita os pares empilham e voltam a alinhar à esquerda. O aviso "Antes de
+  publicar" ganhou tarja própria com fio rosa à esquerda — é recado para a loja,
+  não dado para a cliente.

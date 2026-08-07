@@ -523,21 +523,34 @@ a.marca{min-height:44px;}
   font-size:14px;color:var(--lilas);transition:color var(--t);
 }
 .rodape a:hover{color:var(--papel);}
-.rodape__sobre{font-size:14px;color:var(--lilas);margin:0;max-width:30ch;line-height:1.6;}
+.rodape__sobre{font-size:14px;color:var(--lilas);margin:0;max-width:32ch;line-height:1.6;}
 /* cada dado cadastral numa linha, separadas por fio: sem isso as três
    viravam um bloco cinza único e ninguém achava o CNPJ nem o endereço */
+/* O bloco legal ia até 78ch e parava no terço esquerdo do rodapé: os fios
+   morriam no meio da página e o pé parecia torto. Agora cada linha ocupa a
+   largura inteira e o fio atravessa de ponta a ponta. */
 .rodape__legal{
-  display:grid;margin-top:clamp(32px,4vw,48px);padding-top:20px;
+  display:grid;margin-top:clamp(32px,4vw,48px);padding-top:8px;
   border-top:1px solid var(--fio-claro);
-  font-size:12px;color:var(--lilas);line-height:1.7;max-width:78ch;
+  font-size:12px;color:var(--lilas);line-height:1.7;
 }
-.rodape__legal > span{padding:7px 0;border-bottom:1px solid var(--fio-claro);}
-.rodape__legal > span:last-child{border-bottom:0;}
+/* cada linha é uma linha só, de ponta a ponta, e pode carregar um dado
+   à esquerda e outro à direita — o copyright sozinho numa linha própria
+   só somava altura sem dizer nada */
+.rodape__legal > span{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:clamp(16px,3vw,40px);min-height:38px;padding:6px 0;
+  border-bottom:1px solid var(--fio-claro);
+}
+.rodape__legal > span:last-of-type{border-bottom:0;}
+.rodape__legal i{font-style:normal;white-space:nowrap;text-align:right;}
 /* o aviso de pendência não se mistura ao dado cadastral: ganha marca
    própria e fica claro que é recado para a loja, não para a cliente */
 .rodape__pendente{
-  margin-top:14px;padding:10px 14px;border-left:3px solid var(--rosa-claro);
+  grid-column:1/-1;display:block!important;min-height:0;
+  margin-top:18px;padding:11px 15px;border-left:3px solid var(--rosa-claro);
   border-bottom:0!important;background:#FBF7F90f;color:var(--papel);font-weight:600;
+  max-width:66ch;
 }
 .social{display:flex;gap:20px;margin-top:18px;margin-left:-12px;}
 /* 44px de área de toque com o desenho seguindo em 20px */
@@ -621,6 +634,12 @@ a.marca{min-height:44px;}
 
 @media(max-width:900px){
   .loja__grade,.rodape__grade{grid-template-columns:1fr;}
+}
+@media(max-width:620px){
+  /* na tela estreita não cabem dois dados na mesma linha: eles empilham,
+     e o da direita volta a alinhar à esquerda como todo o resto */
+  .rodape__legal > span{flex-direction:column;align-items:flex-start;gap:2px;}
+  .rodape__legal i{text-align:left;white-space:normal;}
 }
 @media(max-width:620px){
   .grade{grid-template-columns:repeat(2,1fr);gap:26px 14px;}
@@ -907,7 +926,6 @@ const CONFIG = {
   confianca: [
     "Entrega no mesmo dia em Criciúma",
     "Atendemos Criciúma e região",
-    "Troca em até 7 dias",
     "5% de desconto no Pix"
   ],
 
@@ -1131,9 +1149,9 @@ document.querySelectorAll("[data-zap]").forEach(el => {
   if(oferta) avisos.push("confirme o cupom e o valor do frete grátis da abertura, "+
                          "ou ponha null nos dois em CONFIG para tirá-los do ar");
   $("#legal").innerHTML =
-    "<span>"+escapar(CONFIG.razao)+" · CNPJ "+escapar(CONFIG.cnpj)+"</span>"+
-    "<span>"+escapar(CONFIG.rua)+" · "+escapar(CONFIG.cidade)+"</span>"+
-    "<span>© "+new Date().getFullYear()+" Feita Assim.</span>"+
+    "<span>"+escapar(CONFIG.razao)+" · CNPJ "+escapar(CONFIG.cnpj)+
+      "<i>© "+new Date().getFullYear()+" Feita Assim.</i></span>"+
+    "<span>"+escapar(CONFIG.rua)+"<i>"+escapar(CONFIG.cidade)+"</i></span>"+
     (avisos.length
       ? '<span class="rodape__pendente">Antes de publicar: '+avisos.join("; ")+'.</span>'
       : "");
