@@ -171,17 +171,31 @@ a.marca{min-height:44px;}
 /* o slide ativo aproxima devagar: dá vida sem pedir atenção */
 .slide.on .slide__foto{animation:afasta 9s cubic-bezier(.16,.8,.28,1) both;}
 
+/* O véu tinha quatro paradas. Num degradê que atravessa 1400px, cada
+   parada é uma quina na curva de opacidade, e quina em área grande de roxo
+   é exatamente o que o olho lê como faixa. Aqui a curva é uma smoothstep
+   amostrada em 19 paradas: sem quina em lugar nenhum, e passo de opacidade
+   pequeno demais para render degrau em tela de 8 bits. */
 .abertura__veu{
   position:absolute;inset:0;pointer-events:none;
   background:
-    linear-gradient(to right,#2E0F3Dcc 0%,#2E0F3D9e 36%,#2E0F3D33 62%,#2E0F3D08 86%),
-    linear-gradient(to top,#2E0F3D45 0%,#2E0F3D00 42%);
+    linear-gradient(to right,
+      #2E0F3Dd6 0%,   #2E0F3Dd5 5%,  #2E0F3Dd0 10%, #2E0F3Dc8 15%,
+      #2E0F3Dbe 20%,  #2E0F3Db2 25%, #2E0F3Da5 30%, #2E0F3D96 35%,
+      #2E0F3D86 40%,  #2E0F3D75 45%, #2E0F3D64 50%, #2E0F3D54 55%,
+      #2E0F3D44 60%,  #2E0F3D35 65%, #2E0F3D27 70%, #2E0F3D1a 75%,
+      #2E0F3D10 80%,  #2E0F3D08 85%, #2E0F3D02 90%, #2E0F3D00 95%,
+      #2E0F3D00 100%),
+    linear-gradient(to top,
+      #2E0F3D4c 0%,   #2E0F3D4a 5.2%,  #2E0F3D43 10.4%, #2E0F3D38 15.6%,
+      #2E0F3D2c 20.8%,#2E0F3D1f 26%,   #2E0F3D13 31.2%, #2E0F3D09 36.4%,
+      #2E0F3D02 41.6%,#2E0F3D00 46.8%, #2E0F3D00 100%);
 }
-/* Área grande de roxo em degradê mostra faixas em tela de 8 bits. Um chuvisco
-   fino por cima quebra a transição e o olho lê como cor lisa. */
+/* E por cima, um chuvisco: o que sobra de degrau depois da curva suave some
+   quando o ruído embaralha o último bit. É o mesmo truque do dither. */
 .abertura__veu::after{
-  content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23r)'/%3E%3C/svg%3E");
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.07;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23r)'/%3E%3C/svg%3E");
 }
 .slide__texto{position:relative;width:100%;z-index:1;}
 
@@ -843,8 +857,10 @@ const CONFIG = {
     intervalo: 7000,
     slides: [
       {
-        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260807_040101_790c75b5-26d0-4cd4-80ec-81fdbc65a206.png",
-        video: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260807_040750_619aefd6-de65-475a-9e7a-7d987b5d46dd.mp4",
+        foto: "https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260807_041632_f3182017-8624-4cbf-bd6c-be4b615a58c9.png",
+        /* o laço anterior saiu da foto antiga, a das letras; com a foto nova
+           ele não bate mais. Volta quando houver crédito para refazê-lo. */
+        video: null,
         alt: "Modelo com tricô gola alta claro, sobretudo longo e bolsa caramelo",
         etiqueta: "Coleção nova", canto: "Criciúma",
         titulo: "Ganhe o mundo", sub: "do seu jeito",

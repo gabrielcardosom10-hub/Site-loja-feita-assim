@@ -76,10 +76,22 @@ apareciam como letras soltas, não como frase. Hoje a etiqueta e o botão estão
 em `.08em`/`.09em` e a legenda desceu para caixa baixa em `.04em`. Quem chama
 atenção na capa é o título; a interface em volta não deve disputar.
 
-**Chuvisco sobre o roxo.** O véu da capa é um degradê grande de ameixa, e área
-grande de degradê em tela de 8 bits aparece em faixas. Uma textura de ruído SVG
-a 5% de opacidade por cima quebra a transição e o olho volta a ler cor lisa.
-Custo zero de rede: é `data:` no próprio CSS. **Todos os slides levam ao mesmo lugar:** página com um só destino
+**O véu, e por que ele tinha faixa.** O véu é um degradê grande de ameixa por
+cima da foto, e ele vinha com quatro paradas. Num degradê que atravessa 1400px,
+cada parada é uma quina na curva de opacidade, e quina em área grande de roxo é
+o que o olho lê como faixa. Hoje a curva é uma *smoothstep* amostrada em 21
+paradas: sem quina em lugar nenhum, e passo de opacidade pequeno demais para
+render degrau. Medido sobre um roxo chapado, a maior fila de pixels idênticos
+no miolo é de 7px, e o degradê usa 201 tons distintos em vez de 181.
+
+Por cima ainda vai um chuvisco de ruído SVG a 7%, que é o mesmo truque do
+*dither*: o que sobra de degrau some quando o ruído embaralha o último bit.
+Custo zero de rede — é `data:` no próprio CSS.
+
+**Mas o maior culpado é a foto.** O CSS já media limpo antes desta mudança. A
+faixa que aparecia vinha do ciclorama da própria foto, não do véu. O prompt da
+capa hoje pede o fundo liso de forma explícita — sem mancha, sem textura, sem
+posterização — e é dali que vem a maior parte do ganho. **Todos os slides levam ao mesmo lugar:** página com um só destino
 converte mais do que página que oferece três.
 
 **Regras do giro automático.** Conteúdo que se move sozinho precisa de um
