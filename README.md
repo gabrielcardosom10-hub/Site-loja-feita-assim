@@ -3,7 +3,7 @@
 Site da Feita Assim — loja de roupas, bolsas, óculos e acessórios femininos
 na Praça Dr. Nereu Ramos, 358 — loja 02 — Centro, Criciúma/SC.
 
-**No ar em:** https://gabrielcardosom10-hub.github.io/site-loja-feita-assim/
+**No ar em:** https://gabrielcardosom10-hub.github.io/Site-loja-feita-assim/
 
 ## O que é cada arquivo
 
