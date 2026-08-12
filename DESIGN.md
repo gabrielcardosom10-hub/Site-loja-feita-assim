@@ -220,3 +220,82 @@ saiu de medição, não de olho:
   estreita os pares empilham e voltam a alinhar à esquerda. O aviso "Antes de
   publicar" ganhou tarja própria com fio rosa à esquerda — é recado para a loja,
   não dado para a cliente.
+
+## Segurança
+
+O site é um arquivo estático, sem servidor e sem banco. Isso apaga uma
+categoria inteira de problema — não há SQL, não há sessão, não há senha para
+vazar — e deixa outra bem viva: a página monta HTML por concatenação de texto,
+e é aí que mora o risco. Quatro funções curtas, e tudo passa por uma delas.
+
+| função | o que faz |
+|---|---|
+| `escapar` | `& < > " '` viram entidade, para texto não virar marcação |
+| `urlSegura` | só http, https, mailto, tel e caminho relativo sobrevivem |
+| `zapLink` | o telefone entra na URL só com dígitos |
+| `sanear` | o carrinho volta do `localStorage` sem nada para acreditar |
+
+**Por que `escapar` não bastava.** `javascript:alert(1)` não tem um único
+caractere especial: passa limpo por qualquer escape e continua executando ao
+clique. Todo `href` e todo `src` de valor configurável passa por `urlSegura`,
+que também recusa `data:` e `//outro-host` — o segundo é protocolo herdado
+disfarçado de caminho relativo.
+
+**A parte mais importante: preço não vem do `localStorage`.** O carrinho é
+guardado no navegador, que é editável por quem estiver nele, e o total do
+carrinho é a mensagem que a loja recebe no WhatsApp. Se o preço guardado
+fosse o preço usado, a cliente escolheria quanto pagar. Em vez disso `sanear`
+descarta o que veio e busca **preço e nome de novo em `CONFIG.pecas`, pela
+referência**. Junto com isso:
+
+- referência que saiu do catálogo é descartada — e com ela a peça que a loja
+  tirou do site;
+- tamanho tem que estar entre os tamanhos daquela peça;
+- quantidade é inteiro de 1 a 20, e o carrinho para em 40 linhas. Sem esse
+  teto, um número enorme guardado ali travava a página só de desenhar.
+
+Verificado com carrinho envenenado: nome com `<img onerror>` é substituído
+pelo nome do catálogo, referência inexistente cai, tamanho inválido cai,
+`qtd: 99999` vira 20, `qtd: "-5"` vira 1, e `preço 0,01` numa peça de R$ 139,90
+volta a R$ 139,90.
+
+**Content Security Policy.** Vai como `<meta>` no `<head>`: o navegador
+bloqueia tudo que não estiver listado, inclusive script injetado. `script-src`
+precisa de `'unsafe-inline'` porque o site é um arquivo só, com o JS dentro —
+é a troca aceita para a dona editar o `CONFIG` sem recalcular hash. Em troca
+`object-src`, `base-uri`, `frame-src`, `connect-src` e `form-action` estão
+todos em `'none'`. Testado servindo por HTTP com a política ligada: zero
+violação, e o carrinho, a busca e os filtros seguem funcionando.
+
+Duas proteções não funcionam por `<meta>` e vivem no arquivo `_headers`
+(Netlify, Cloudflare Pages): `frame-ancestors`/`X-Frame-Options`, contra a
+loja ser embutida num iframe alheio, e `nosniff`. O GitHub Pages não deixa
+configurar cabeçalho, então lá elas ficam de fora.
+
+## Celular
+
+O celular não é o desktop estreito — três coisas mudam de comportamento.
+
+**O menu de categorias estava quebrado, e não era estética.** `.trilhos` tinha
+`justify-content:center` dentro de um container com `overflow-x:auto`. Nessa
+combinação o começo da lista fica **inalcançável por rolagem**: "TUDO" não
+aparecia e "LOOKS" vinha cortado no meio, lido como "OOKS". Agora o trilho
+começa na esquerda, sangra até as duas bordas e rola com encaixe.
+
+**O véu da capa mudou de eixo.** No desktop ele escurece da esquerda para a
+direita, porque o texto mora à esquerda e a modelo à direita. No celular o
+texto fica *em cima* da modelo, e degradê lateral não protege nada — ali ele
+sobe de baixo, que é onde o texto assenta. Mesma curva suave, outro eixo. O
+texto também desce para o terço inferior, e as setas saem de cima do título
+para a base, ao lado do botão de pausa.
+
+**O cabeçalho continua grudado.** 99px de 844 — 12% da tela. Sem isso, quem
+rolou até as peças não tem como voltar à sacola sem subir a página inteira, e
+é aí que a venda se perde.
+
+A altura da capa é `dvh`, não `vh`: no celular a barra de endereço entra e sai
+durante a rolagem, e `vh` conta com ela — a capa mudava de altura no meio do
+movimento.
+
+Medido em 375, 390, 360, 768 e 844×390: zero rolagem horizontal, zero controle
+abaixo de 44px, zero sobreposição entre controles clicáveis, corpo em 16px.

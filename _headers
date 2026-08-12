@@ -1,0 +1,19 @@
+# Cabeçalhos de segurança da Feita Assim.
+#
+# Este formato é lido por Netlify e por Cloudflare Pages. O GitHub Pages
+# ignora o arquivo — ele não deixa configurar cabeçalho —, e por isso a
+# política principal também vai como <meta> dentro do index.html. Só duas
+# proteções não funcionam por <meta> e dependem deste arquivo:
+# frame-ancestors e nosniff.
+/*
+  # ninguém embute a loja dentro de um iframe (anti-clickjacking)
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY
+  # o navegador respeita o tipo declarado e não tenta adivinhar outro
+  X-Content-Type-Options: nosniff
+  # não vaza o caminho da página para quem recebe o clique
+  Referrer-Policy: strict-origin-when-cross-origin
+  # a loja não usa câmera, microfone nem localização
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  # só https, por dois anos
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
