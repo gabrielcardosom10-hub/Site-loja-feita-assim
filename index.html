@@ -604,6 +604,12 @@ a.marca{min-height:44px;}
 }
 .prova__arquivo:focus-within{outline:2px solid var(--rosa-claro);outline-offset:3px;}
 
+/* A máscara da luz é a silhueta das peças pintada de branco. Os moldes
+   trazem fill e stroke próprios, então a única forma de reaproveitá-los
+   como máscara é sobrescrever a cor — e para vencer atributo de
+   apresentação inline é preciso !important. */
+.so-branco *{fill:#fff!important;stroke:#fff!important;}
+
 /* as duas marcas que a cliente posiciona na foto */
 .marca-corpo{cursor:grab;touch-action:none;opacity:.72;transition:opacity var(--t);}
 .marca-corpo:hover,.marca-corpo:focus,.marca-corpo:active{opacity:1;}
@@ -1379,7 +1385,19 @@ const CONFIG = {
                Peça sem molde simplesmente não aparece no provador.
 
        cor   — a cor com que a peça é desenhada. Use a cor real do tecido;
-               se errar, o desenho mente sobre o produto.                */
+               se errar, o desenho mente sobre o produto.
+
+       recorte — CAMINHO DE UM PNG DA PEÇA COM FUNDO TRANSPARENTE. É o que
+               mais aproxima o provador de uma foto de verdade: no lugar do
+               desenho entra a fotografia, com trama, dobra e brilho do
+               tecido real. Sem ele, a peça continua sendo desenho, e nada
+               quebra. Como fotografar:
+                 - a peça sozinha, esticada ou pendurada, de frente
+                 - fundo liso e claro, luz difusa, sem sombra dura
+                 - enquadre JUSTO na peça: a moldura do arquivo é o que
+                   define a largura dela no corpo
+                 - recorte o fundo e salve em PNG com transparência
+               Exemplo: recorte: "fotos/FA-1005-recorte.png"              */
   provador: {
     /* ligar/desligar a seção inteira */
     ligado: true,
@@ -2260,6 +2278,71 @@ escrever();
     return g;
   }
 
+  /* ── foto recortada da peça ──────────────────────────────────
+     O desenho vetorial acerta a forma e erra o tecido: ele não tem trama,
+     não tem dobra, não tem brilho. A peça fotografada tem tudo isso.
+
+     Se a peça trouxer `recorte` — um PNG dela com fundo transparente —, o
+     provador usa a fotografia no lugar do desenho, encaixada na mesma
+     caixa que o molde ocuparia. É a mesma geometria; muda o que a
+     preenche. Sem `recorte`, cai no vetor, e nada quebra.
+
+     Esta é a diferença que mais aparece, e não custa código: custa a loja
+     fotografar as peças em fundo liso e recortar. Trabalho de foto, que
+     ela vai fazer de qualquer jeito para a grade de produtos. */
+  const CAIXA = {
+    trico:        m => [m.cx-m.Ox-4, m.OY-14, 2*(m.Ox+4), (m.QY+8)-(m.OY-14)],
+    camisa:       m => [m.cx-m.Ox-4, m.OY-14, 2*(m.Ox+4), (m.QY+8)-(m.OY-14)],
+    "calca-wide": m => [m.cx-m.Qx-12, m.QY-12, 2*(m.Qx+12), (m.TY+4)-(m.QY-12)],
+    "calca-reta": m => [m.cx-m.Qx-6,  m.QY-12, 2*(m.Qx+6),  (m.TY+4)-(m.QY-12)],
+    saia:         m => [m.cx-m.Qx-16, m.QY-12, 2*(m.Qx+16), 108*m.L],
+    vestido:      m => [m.cx-m.Qx-18, m.OY-14, 2*(m.Qx+18), (m.QY+130*m.L)-(m.OY-14)],
+    blazer:       m => [m.cx-m.Ox-14, m.OY-10, 2*(m.Ox+14), (m.QY+46)-(m.OY-10)],
+    jaqueta:      m => [m.cx-m.Ox-14, m.OY-10, 2*(m.Ox+14), (m.QY+16)-(m.OY-10)],
+    sobretudo:    m => [m.cx-m.Ox-15, m.OY-10, 2*(m.Ox+15), (m.QY+156*m.L)-(m.OY-10)],
+    "bolsa-ombro":m => [m.cx+m.Qx-2,  m.QY+8,  44, 44],
+    "bolsa-mao":  m => [m.cx+m.Ox-1,  m.QY+4,  38, 38],
+    oculos:       m => [m.cx-20, 45, 40, 19]
+  };
+
+  /* Acessório encaixa na caixa; roupa de corpo é ancorada pela ALTURA e
+     centrada, com a largura saindo da proporção do arquivo. A primeira
+     versão deixava o `meet` decidir, e o sobretudo encolhia para caber numa
+     caixa estreita — virava colete. */
+  const ACESSORIO = {"bolsa-ombro":1, "bolsa-mao":1, oculos:1};
+
+  /* proporção de cada recorte, medida uma vez. null = ainda carregando
+     (desenha o vetor enquanto isso), 0 = falhou (fica no vetor de vez). */
+  const propRecorte = Object.create(null);
+  function proporcao(url){
+    if(url in propRecorte) return propRecorte[url];
+    propRecorte[url] = null;
+    const img = new Image();
+    img.onload  = () => { propRecorte[url] = img.naturalHeight
+      ? img.naturalWidth/img.naturalHeight : 0; atualizar(); };
+    /* recorte que não carrega não deixa buraco: a peça volta a ser desenho */
+    img.onerror = () => { propRecorte[url] = 0; atualizar(); };
+    img.src = url;
+    return null;
+  }
+
+  function pecaFotografada(m, p){
+    const c = (CAIXA[p.molde] || CAIXA.trico)(m);
+    if(ACESSORIO[p.molde])
+      return '<image href="'+urlSegura(p.recorte)+'" x="'+n(c[0])+'" y="'+n(c[1])+'" '+
+        'width="'+n(c[2])+'" height="'+n(c[3])+'" preserveAspectRatio="xMidYMid meet"/>';
+    const prop = proporcao(p.recorte);
+    if(!prop) return null;                      /* carregando ou falhou */
+    const h = c[3];
+    /* a proporção do arquivo manda na largura — recorte justo na peça sai
+       certo. O teto existe só para uma foto muito mal enquadrada não virar
+       tenda: acima dele a peça é estreitada, e a bainha continua no lugar. */
+    const w = Math.min(h*prop, c[2]*1.35);
+    const meio = c[0] + c[2]/2;
+    return '<image href="'+urlSegura(p.recorte)+'" x="'+n(meio - w/2)+'" y="'+n(c[1])+'" '+
+      'width="'+n(w)+'" height="'+n(h)+'" preserveAspectRatio="none"/>';
+  }
+
   /* as peças, sem corpo por baixo: na foto o corpo é o dela */
   function roupa(m){
     let svg = "";
@@ -2267,6 +2350,11 @@ escrever();
     ["baixo","cima","sobre","bolsa","oculos"].forEach(vaga => {
       const p = look[vaga];
       if(!p) return;
+      if(p.recorte){
+        const img = pecaFotografada(m, p);
+        if(img){ svg += img; return; }
+        /* sem proporção ainda: segue no desenho até a imagem chegar */
+      }
       const f = MOLDES[p.molde];
       if(f) svg += f(m, p.cor || "#6B5878");
     });
@@ -2320,8 +2408,13 @@ escrever();
      segundo, e a foto piscaria. */
   function posicionar(){
     const m = medidas(), t = escalaFoto(m);
+    const trans = "translate("+n(t.tx)+","+n(t.ty)+") scale("+(Math.round(t.k*1e4)/1e4)+")";
     const g = $("#a-roupa");
-    if(g) g.setAttribute("transform","translate("+n(t.tx)+","+n(t.ty)+") scale("+(Math.round(t.k*1e4)/1e4)+")");
+    if(g) g.setAttribute("transform", trans);
+    /* a máscara da luz é a mesma silhueta: se ela não andar junto, a luz
+       fica presa onde a roupa estava */
+    const mk = document.querySelector("#m-roupa .so-branco");
+    if(mk) mk.setAttribute("transform", trans);
     const r = foto ? Math.max(foto.w, foto.h)/34 : 10;
     [["ombro",ombro],["pe",pe]].forEach(([id,pt]) => {
       const g = $('[data-marca="'+id+'"]'); if(!g) return;
@@ -2338,16 +2431,70 @@ escrever();
     });
   }
 
+  /* ── realismo: a luz da foto atravessa a roupa ──────────────
+     Forma chapada colada por cima lê como adesivo, e foi a queixa. O que
+     separa colagem de roupa vestida não é o contorno — é a LUZ. Numa foto
+     real o corpo tem sombra sob o queixo, no vinco do braço, na dobra do
+     joelho; a peça desenhada não tinha nenhuma, e por isso flutuava.
+
+     A correção: a própria foto é redesenhada por cima das peças, em
+     `multiply`, recortada pela silhueta delas. Antes disso ela passa por um
+     filtro que tira a cor e comprime o contraste — sobra só a modelagem de
+     luz, que é o que interessa. Onde o corpo dela é escuro, o tecido
+     escurece junto; onde a luz bate, ele clareia. As dobras do corpo
+     aparecem no tecido sem que ninguém tenha desenhado dobra nenhuma.
+
+     Não é simulação de caimento: é a luz certa num recorte de forma certa.
+     Mas é a diferença entre parecer colado e parecer vestido. */
+  const FILTRO_LUZ =
+    '<filter id="f-luz" color-interpolation-filters="sRGB">'+
+      /* tira a cor: só a claridade importa */
+      '<feColorMatrix type="saturate" values="0"/>'+
+      /* comprime para perto do cinza médio; sem isto o multiply enegrece */
+      /* A primeira tentativa usou slope 0.62: o contraste da foto passava
+         quase inteiro e o corpo dela ficava CARIMBADO no casaco — o tricô
+         creme sobre pele escura virava cinza. Aqui a faixa inteira da foto
+         é espremida entre 0.66 e 0.94: sobra a insinuação de volume, e a
+         cor da peça continua sendo a cor da peça. */
+      '<feComponentTransfer>'+
+        '<feFuncR type="linear" slope="0.28" intercept="0.66"/>'+
+        '<feFuncG type="linear" slope="0.28" intercept="0.66"/>'+
+        '<feFuncB type="linear" slope="0.28" intercept="0.66"/>'+
+      '</feComponentTransfer>'+
+      /* um leve borrão: a luz do tecido é mais macia que a da pele */
+      '<feGaussianBlur stdDeviation="1.1"/>'+
+    '</filter>';
+
   function desenharFoto(){
     const boneca = $("#boneca"), m = medidas(), t = escalaFoto(m);
     const r = Math.max(foto.w, foto.h)/34;
+    const trans = "translate("+n(t.tx)+","+n(t.ty)+") scale("+(Math.round(t.k*1e4)/1e4)+")";
+    const pecas = roupa(m);
     boneca.setAttribute("viewBox", "0 0 "+foto.w+" "+foto.h);
     boneca.innerHTML =
       '<title id="boneca-desc">'+escapar(descricao())+'</title>'+
+      '<defs>'+
+        FILTRO_LUZ+
+        /* a máscara é a própria silhueta das peças, pintada de branco */
+        /* mask-type:alpha — a máscara passa a ler o canal alfa, não a
+           luminância. Sem isso, a peça FOTOGRAFADA (que é uma <image> com
+           fundo transparente) recortaria a luz pelo brilho dela: peça preta
+           não receberia luz nenhuma. */
+        '<mask id="m-roupa" maskUnits="userSpaceOnUse" style="mask-type:alpha" x="0" y="0" '+
+          'width="'+foto.w+'" height="'+foto.h+'">'+
+          '<g class="so-branco" transform="'+trans+'">'+pecas+'</g>'+
+        '</mask>'+
+        /* sombra que a peça projeta no corpo, logo abaixo da borda */
+        '<filter id="f-sombra" x="-12%" y="-12%" width="126%" height="126%">'+
+          '<feDropShadow dx="0" dy="'+n(Math.max(0.8, 2.2/t.k))+'" '+
+            'stdDeviation="'+n(Math.max(0.8, 2.6/t.k))+'" flood-color="#1a0d22" flood-opacity="0.28"/>'+
+        '</filter>'+
+      '</defs>'+
       '<image href="'+foto.url+'" x="0" y="0" width="'+foto.w+'" height="'+foto.h+'"/>'+
-      '<g id="a-roupa" transform="translate('+n(t.tx)+','+n(t.ty)+') scale('+(Math.round(t.k*1e4)/1e4)+')">'+
-        roupa(m)+
-      '</g>'+
+      '<g id="a-roupa" transform="'+trans+'" filter="url(#f-sombra)">'+pecas+'</g>'+
+      /* a foto de novo, só como luz, apenas onde há roupa */
+      '<image id="a-luz" href="'+foto.url+'" x="0" y="0" width="'+foto.w+'" height="'+foto.h+'" '+
+        'filter="url(#f-luz)" mask="url(#m-roupa)" opacity="0.85" style="mix-blend-mode:multiply"/>'+
       marcaSvg("ombro", ombro.x, ombro.y, r, "Marca da linha dos ombros")+
       marcaSvg("pe",    pe.x,    pe.y,    r, "Marca do chão, entre os pés");
   }

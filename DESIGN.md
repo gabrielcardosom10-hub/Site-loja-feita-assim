@@ -427,3 +427,63 @@ foto — enquanto o bloco da foto aparecia no modo boneca. É o mesmo tropeço
 que a barra do celular já deu neste arquivo: `display` declarado numa classe
 ganha de `[hidden]`, e a correção é um seletor de atributo, que ganha na
 especificidade e não depende da ordem.
+
+## Realismo no provador: o que dá, o que não dá, e o que custa
+
+A queixa foi justa — forma vetorial chapada sobre a foto lê como adesivo.
+Vale registrar o que a pesquisa mostrou e por que o site parou onde parou.
+
+**Como as empresas grandes fazem.** Google Shopping, Doji e Zalando usam
+**modelos de difusão** treinados para entender caimento de tecido e geometria
+do corpo. O Google roda um modelo próprio de geração de imagem sobre o
+Shopping Graph; a Doji pede seis selfies e duas fotos de corpo inteiro e leva
+cerca de meia hora para montar o avatar. Nenhum deles roda no navegador: é
+GPU em servidor, sempre.
+
+**Por que este site não pode fazer isso hoje.** O site é um arquivo estático
+no GitHub Pages. Uma chave de API dentro dele é pública, e qualquer pessoa
+gastaria a conta da loja. Try-on por difusão exige um intermediário no
+servidor — e servidor é a única coisa que este projeto não tem.
+
+**O que custaria.** As APIs de try-on cobram por imagem gerada: a FASHN v1.6
+está em US$ 0,075 por geração e a Kolors v1.5 em US$ 0,07 — cerca de
+**R$ 0,40 por prova**. Cem clientes provando três looks dão ~R$ 120 no mês. O
+que falta não é o dinheiro, é o intermediário: um worker serverless
+(Cloudflare Workers e Netlify Functions têm plano gratuito folgado) guardando
+a chave e repassando a chamada. É meia tarde de trabalho, e passa a existir
+uma peça de infraestrutura para manter.
+
+**As duas melhorias que couberam sem servidor:**
+
+1. **A luz da foto atravessa a roupa.** O que separa colagem de roupa vestida
+   não é o contorno — é a luz. Numa foto real o corpo tem sombra sob o queixo,
+   no vinco do braço, na dobra do joelho, e a peça desenhada não tinha
+   nenhuma. Agora a própria foto é redesenhada por cima das peças em
+   `multiply`, recortada pela silhueta delas, depois de passar por um filtro
+   que tira a cor e comprime o contraste. Onde o corpo dela é escuro, o tecido
+   escurece junto.
+
+   A primeira tentativa comprimia pouco (`slope 0.62`) e o corpo dela ficava
+   *carimbado* no casaco — tricô creme sobre pele escura virava cinza. Hoje a
+   foto inteira é espremida entre 0,66 e 0,94: sobra a insinuação de volume, e
+   a cor da peça continua sendo a cor da peça.
+
+2. **A peça pode ser uma fotografia, não um desenho.** O campo `recorte` no
+   `CONFIG` aponta para um PNG da peça com fundo transparente. Quando ele
+   existe, a fotografia entra no lugar do vetor, na mesma caixa que o molde
+   ocuparia — com trama, dobra e brilho do tecido real. Sem ele, ou se o
+   arquivo falhar ao carregar, a peça volta a ser desenho e nada quebra.
+
+   **É a melhoria de maior efeito, e não custa código: custa fotografia.** A
+   loja vai fotografar as peças de qualquer jeito para a grade de produtos;
+   basta uma tomada extra da peça sozinha, em fundo liso, recortada.
+
+   A caixa é ancorada pela **altura** — ombro a bainha — e a largura sai da
+   proporção do arquivo. Por isso o enquadramento importa: recorte folgado
+   vira capa. A primeira versão deixava o `preserveAspectRatio` decidir, e o
+   sobretudo encolhia para caber numa caixa estreita, virando colete.
+
+**O que continua verdade.** Nem a luz nem a foto recortada simulam caimento.
+Elas mostram comprimento, cor, textura e proporção no corpo dela — que é a
+dúvida real de quem compra roupa online. Como o tecido cai, franze e marca
+continua sendo do provador físico, e o texto ao lado da foto leva para lá.
