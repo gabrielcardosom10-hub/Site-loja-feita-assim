@@ -550,6 +550,15 @@ a.marca{min-height:44px;}
   grid-template-areas:"palco lado" "nota lado";
   align-items:start;gap:14px clamp(24px,4vw,56px);
 }
+/* com foto o palco precisa de altura própria, senão ele colapsa enquanto
+   a cliente ainda não escolheu imagem nenhuma */
+.prova--foto .prova__palco{
+  min-height:clamp(380px,54vh,520px);align-content:center;padding:8px;
+}
+.prova--foto .boneca{
+  width:auto;height:auto;max-width:100%;
+  max-height:clamp(380px,54vh,520px);border-radius:2px;
+}
 .prova__palco{
   grid-area:palco;
   position:relative;display:grid;justify-items:center;
@@ -557,10 +566,69 @@ a.marca{min-height:44px;}
   background:var(--ameixa);
 }
 .prova__lado{grid-area:lado;}
+
+/* alternar entre a boneca e a foto da cliente */
+.prova__modos{display:flex;gap:8px;margin-bottom:clamp(16px,2.5vw,22px);flex-wrap:wrap;}
+.modo{
+  min-height:44px;padding:0 18px;
+  border:1px solid var(--fio);border-radius:var(--r);background:var(--cal);
+  font-family:var(--corpo);font-size:13.5px;font-weight:600;color:var(--tinta);
+  transition:border-color var(--t),background var(--t),color var(--t);
+}
+.modo:hover{border-color:var(--tinta);}
+.modo[aria-checked="true"]{background:var(--tinta);border-color:var(--tinta);color:var(--papel);}
+
+/* o convite para escolher a foto, antes de haver foto */
+.prova__soltar{
+  position:absolute;inset:0;display:grid;align-content:center;justify-items:center;
+  gap:12px;padding:clamp(16px,3vw,28px);text-align:center;color:var(--lilas);
+}
+.prova__soltar[hidden]{display:none;}
+.prova__soltar p{margin:0;font-size:13px;line-height:1.55;max-width:30ch;}
+.prova__soltar b{color:var(--papel);}
+.prova__cofre{
+  margin-top:4px!important;padding-top:12px;border-top:1px solid var(--fio-claro);
+  font-size:12px!important;
+}
+.prova__arquivo{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:46px;padding:0 22px;border-radius:var(--r);
+  background:var(--papel);color:var(--tinta);
+  font-size:13.5px;font-weight:600;cursor:pointer;
+  transition:background var(--t);
+}
+.prova__arquivo:hover{background:var(--cal);}
+/* o input fica invisível mas continua sendo ele quem recebe foco e teclado */
+.prova__arquivo input{
+  position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;
+}
+.prova__arquivo:focus-within{outline:2px solid var(--rosa-claro);outline-offset:3px;}
+
+/* as duas marcas que a cliente posiciona na foto */
+.marca-corpo{cursor:grab;touch-action:none;opacity:.72;transition:opacity var(--t);}
+.marca-corpo:hover,.marca-corpo:focus,.marca-corpo:active{opacity:1;}
+.marca-corpo:active{cursor:grabbing;}
+.marca-corpo:focus{outline:none;}
+.marca-corpo:focus-visible .marca-anel{stroke:var(--rosa);}
+
+.prova__faixa{
+  width:100%;max-width:280px;height:44px;background:none;cursor:pointer;
+  accent-color:var(--tinta);
+}
+.prova__dica{
+  margin:0;font-size:12.5px;line-height:1.6;color:var(--cinza);max-width:40ch;
+}
+.prova__dica b{color:var(--tinta);}
+.prova__erro{
+  margin:0;padding:10px 13px;border-left:3px solid var(--rosa-forte);
+  background:#D6006A0f;color:var(--tinta);font-size:13px;line-height:1.55;
+}
+.prova__erro[hidden]{display:none;}
 .boneca{
   /* a figura é quase três vezes mais alta que larga: medir pela largura
      faria dela um poste de mil pixels. Aqui manda a altura. */
   height:clamp(360px,52vh,470px);width:auto;max-width:100%;display:block;
+  touch-action:pan-y;
   /* o desenho todo pisca de leve quando troca de peça; nada mais */
   transition:opacity var(--t);
 }
@@ -573,6 +641,10 @@ a.marca{min-height:44px;}
 .prova__lado{display:grid;gap:clamp(18px,2.5vw,26px);align-content:start;}
 .prova__voce{display:grid;gap:16px;}
 .prova__campo{display:grid;gap:9px;}
+/* display:grid vence o atributo hidden — sem esta linha, "Tom de pele" e
+   "Altura" continuavam na tela no modo foto, e o bloco da foto aparecia no
+   modo boneca. Mesmo tropeço que a barra do celular já deu neste arquivo. */
+.prova__campo[hidden],.prova__voce[hidden]{display:none;}
 .prova__rot{
   font-size:11.5px;font-weight:600;letter-spacing:.09em;
   text-transform:uppercase;color:var(--cinza);
@@ -975,33 +1047,82 @@ a.marca{min-height:44px;}
     <section class="prova dentro" id="prova" aria-labelledby="tit-prova" hidden>
       <div class="pecas__cab">
         <h2 id="tit-prova">Monte o look</h2>
-        <span class="etiqueta">Desenho, não foto</span>
+        <span class="etiqueta" id="prova-selo">Desenho, não foto</span>
+      </div>
+
+      <div class="prova__modos" role="radiogroup" aria-label="Como você quer ver o look">
+        <button class="modo" id="modo-boneca" type="button" role="radio" aria-checked="true">
+          Numa boneca
+        </button>
+        <button class="modo" id="modo-foto" type="button" role="radio" aria-checked="false" tabindex="-1">
+          Na minha foto
+        </button>
       </div>
 
       <div class="prova__grade">
-        <div class="prova__palco">
+        <div class="prova__palco" id="palco">
           <svg class="boneca" id="boneca" viewBox="44 12 132 446"
                role="img" aria-labelledby="boneca-desc"></svg>
+
+          <!-- só aparece no modo foto, antes de haver foto -->
+          <div class="prova__soltar" id="soltar" hidden>
+            <svg aria-hidden="true" viewBox="0 0 32 32" width="30" height="30">
+              <path d="M4 22 L11 14 L17 20 L22 16 L28 22" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="3" y="6" width="26" height="20" rx="2" fill="none"
+                    stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <p><b>Escolha uma foto sua</b><br>De corpo inteiro, de frente, em pé,
+              braços ao lado do corpo.</p>
+            <label class="prova__arquivo">
+              <input type="file" id="arquivo" accept="image/jpeg,image/png,image/webp">
+              <span>Escolher a foto</span>
+            </label>
+            <p class="prova__cofre">A foto <b>não sai do seu aparelho</b>. Ela não
+              é enviada para a loja nem para lugar nenhum, e some quando você
+              fecha a página.</p>
+          </div>
         </div>
-        <p class="prova__nota">
+
+        <p class="prova__nota" id="nota-boneca">
           Isto é um desenho para você ver como as peças ficam juntas. Não é
           uma foto sua, e não mostra o caimento no seu corpo — para isso a
           loja tem <a href="#loja">provador de verdade</a>.
         </p>
+        <p class="prova__nota" id="nota-foto" hidden>
+          As peças são desenhadas por cima da sua foto, na medida que você
+          marcar. Servem para ver comprimento, cor e proporção no seu corpo —
+          não mostram o caimento do tecido. Isso só o
+          <a href="#loja">provador de verdade</a> mostra.
+        </p>
 
         <div class="prova__lado">
           <div class="prova__voce" role="group" aria-label="Como você é">
-            <div class="prova__campo">
+            <div class="prova__campo" id="campo-pele">
               <span class="prova__rot" id="rot-pele">Tom de pele</span>
               <div class="prova__tons" id="tons" role="radiogroup" aria-labelledby="rot-pele"></div>
             </div>
-            <div class="prova__campo">
+            <div class="prova__campo" id="campo-altura">
               <span class="prova__rot" id="rot-altura">Altura</span>
               <div class="prova__opcoes" id="alturas" role="radiogroup" aria-labelledby="rot-altura"></div>
+            </div>
+            <div class="prova__campo" id="campo-larg" hidden>
+              <span class="prova__rot" id="rot-larg">Largura das peças</span>
+              <input class="prova__faixa" id="largura" type="range" min="70" max="150" value="100"
+                     aria-labelledby="rot-larg" aria-valuetext="normal">
             </div>
             <div class="prova__campo">
               <span class="prova__rot" id="rot-manequim">Manequim</span>
               <div class="prova__opcoes" id="manequins" role="radiogroup" aria-labelledby="rot-manequim"></div>
+            </div>
+            <div class="prova__campo" id="campo-foto" hidden>
+              <p class="prova__dica">
+                Arraste as duas marcas na foto: <b>a de cima</b> na linha dos
+                ombros, <b>a de baixo</b> no chão, entre os pés. Com o teclado,
+                use Tab até a marca e depois as setas.
+              </p>
+              <p class="prova__erro" id="prova-erro" role="alert" hidden></p>
+              <button class="prova__limpar" id="tirar-foto" type="button" hidden>Trocar de foto</button>
             </div>
           </div>
 
@@ -1920,14 +2041,21 @@ escrever();
 
   /* estado */
   let pele = 0, altura = 1, manequim = 1, look = {};
+  /* modo foto */
+  let modo = "boneca", foto = null, larguraFoto = 1;
+  let ombro = {x:0,y:0}, pe = {x:0,y:0};
+  const VIEWBOX_BONECA = "44 12 132 446";
 
   /* ── geometria ──────────────────────────────────────────────
      Um corpo só, com dois parâmetros: L estica a perna (altura) e W
      alarga o corpo (manequim). Todo molde lê estas medidas, então peça
      nova entra sem recalcular nada. */
   function medidas(){
-    const L = (cfg.alturas && cfg.alturas[altura] ? cfg.alturas[altura].escala : 1);
-    const W = [0.92,1,1.08,1.16][manequim] || 1;
+    /* Na foto quem manda na altura são as duas marcas, não o seletor: por
+       isso L fica em 1 e a escala inteira sai da distância entre elas. */
+    const L = modo === "foto" ? 1
+      : (cfg.alturas && cfg.alturas[altura] ? cfg.alturas[altura].escala : 1);
+    const W = ([0.92,1,1.08,1.16][manequim] || 1) * (modo === "foto" ? larguraFoto : 1);
     const OY = 96, CY = 168, QY = 202;
     return {
       L, W, OY, CY, QY,
@@ -2132,10 +2260,9 @@ escrever();
     return g;
   }
 
-  /* ── desenhar ── */
-  function desenhar(){
-    const m = medidas();
-    let svg = corpo(m) + base(m);
+  /* as peças, sem corpo por baixo: na foto o corpo é o dela */
+  function roupa(m){
+    let svg = "";
     /* ordem de vestir: de baixo para cima, como na vida */
     ["baixo","cima","sobre","bolsa","oculos"].forEach(vaga => {
       const p = look[vaga];
@@ -2143,13 +2270,120 @@ escrever();
       const f = MOLDES[p.molde];
       if(f) svg += f(m, p.cor || "#6B5878");
     });
+    return svg;
+  }
+
+  /* ── MODO FOTO ────────────────────────────────────────────────
+     A foto entra como <image> dentro do próprio SVG, e as peças vão por
+     cima num grupo transformado. A conta é uma só: as duas marcas dizem
+     onde estão os ombros e o chão, e disso sai a escala. Como todo molde
+     já lê as medidas de `medidas()`, nenhuma peça precisou ser reescrita
+     para funcionar na foto. */
+  function escalaFoto(m){
+    const alturaModelo = m.TY - m.OY;          /* ombro → tornozelo no modelo */
+    const alturaFoto   = Math.max(20, pe.y - ombro.y);
+    const k  = alturaFoto / alturaModelo;
+    return {k, tx: ombro.x - m.cx*k, ty: ombro.y - m.OY*k};
+  }
+
+  /* A marca é uma GUIA DE ALTURA, não um alvo no meio do corpo. A primeira
+     versão era um disco grande no centro, e ele tapava exatamente o rosto de
+     quem estava se vendo. Agora: uma linha fina atravessando a foto e uma
+     alça na borda esquerda, longe do corpo. O alvo de toque continua grande
+     — é um retângulo invisível de 48px em volta da alça. */
+  function marcaSvg(id, x, y, r, rot){
+    /* a guia começa e termina nas bordas da foto. Em coordenadas locais,
+       porque o grupo já está transladado para o ponto. */
+    const e = -x, d = (foto ? foto.w : 100) - x;
+    return '<g class="marca-corpo" data-marca="'+id+'" tabindex="0" role="button" '+
+      'transform="translate('+n(x)+','+n(y)+')" '+
+      'aria-label="'+escapar(rot)+'. Arraste, ou use as setas do teclado.">'+
+      /* a linha guia: escura por baixo, clara por cima, para aparecer em
+         foto de qualquer cor */
+      '<line x1="'+n(e)+'" y1="0" x2="'+n(d)+'" y2="0" stroke="#2E0F3D" stroke-opacity=".5" stroke-width="'+n(r*0.3)+'"/>'+
+      '<line x1="'+n(e)+'" y1="0" x2="'+n(d)+'" y2="0" stroke="#FBF7F9" stroke-opacity=".9" '+
+        'stroke-width="'+n(r*0.14)+'" stroke-dasharray="'+n(r*0.9)+' '+n(r*0.7)+'"/>'+
+      /* alça na borda esquerda, fora do corpo */
+      '<g transform="translate('+n(-x + r*1.5)+',0)">'+
+        '<rect x="'+n(-r*1.5)+'" y="'+n(-r*1.5)+'" width="'+n(r*3)+'" height="'+n(r*3)+'" fill="transparent"/>'+
+        '<circle r="'+n(r*0.95)+'" fill="#2E0F3D" fill-opacity=".72"/>'+
+        '<circle class="marca-anel" r="'+n(r*0.95)+'" fill="none" stroke="#FBF7F9" stroke-width="'+n(r*0.22)+'"/>'+
+        '<path d="M '+n(-r*0.42)+','+n(-r*0.16)+' L 0,'+n(-r*0.5)+' L '+n(r*0.42)+','+n(-r*0.16)+
+          ' M '+n(-r*0.42)+','+n(r*0.16)+' L 0,'+n(r*0.5)+' L '+n(r*0.42)+','+n(r*0.16)+'" '+
+          'fill="none" stroke="#FBF7F9" stroke-width="'+n(r*0.16)+'" stroke-linecap="round" stroke-linejoin="round"/>'+
+      '</g>'+
+    '</g>';
+  }
+
+  /* Só os transforms mudam durante o arrasto. Remontar o innerHTML a cada
+     movimento faria a <image> ser decodificada de novo trinta vezes por
+     segundo, e a foto piscaria. */
+  function posicionar(){
+    const m = medidas(), t = escalaFoto(m);
+    const g = $("#a-roupa");
+    if(g) g.setAttribute("transform","translate("+n(t.tx)+","+n(t.ty)+") scale("+(Math.round(t.k*1e4)/1e4)+")");
+    const r = foto ? Math.max(foto.w, foto.h)/34 : 10;
+    [["ombro",ombro],["pe",pe]].forEach(([id,pt]) => {
+      const g = $('[data-marca="'+id+'"]'); if(!g) return;
+      g.setAttribute("transform","translate("+n(pt.x)+","+n(pt.y)+")");
+      /* a alça mora na borda esquerda da foto: como o grupo anda com o
+         ponto, ela precisa andar de volta a mesma distância */
+      const alca = g.lastElementChild;
+      if(alca) alca.setAttribute("transform","translate("+n(-pt.x + r*1.5)+",0)");
+      /* as duas linhas guia acompanham, senão elas vazam da foto ao arrastar */
+      [...g.querySelectorAll("line")].forEach(l => {
+        l.setAttribute("x1", n(-pt.x));
+        l.setAttribute("x2", n((foto ? foto.w : 100) - pt.x));
+      });
+    });
+  }
+
+  function desenharFoto(){
+    const boneca = $("#boneca"), m = medidas(), t = escalaFoto(m);
+    const r = Math.max(foto.w, foto.h)/34;
+    boneca.setAttribute("viewBox", "0 0 "+foto.w+" "+foto.h);
+    boneca.innerHTML =
+      '<title id="boneca-desc">'+escapar(descricao())+'</title>'+
+      '<image href="'+foto.url+'" x="0" y="0" width="'+foto.w+'" height="'+foto.h+'"/>'+
+      '<g id="a-roupa" transform="translate('+n(t.tx)+','+n(t.ty)+') scale('+(Math.round(t.k*1e4)/1e4)+')">'+
+        roupa(m)+
+      '</g>'+
+      marcaSvg("ombro", ombro.x, ombro.y, r, "Marca da linha dos ombros")+
+      marcaSvg("pe",    pe.x,    pe.y,    r, "Marca do chão, entre os pés");
+  }
+
+  /* ── desenhar ── */
+  function desenhar(){
     const boneca = $("#boneca");
-    boneca.innerHTML = '<title id="boneca-desc">'+escapar(descricao())+'</title>' + svg;
+    if(modo === "foto"){
+      boneca.hidden = !foto;
+      $("#soltar").hidden = !!foto;
+      if(foto) desenharFoto();
+      /* sem foto, o SVG é esvaziado de verdade. Só escondê-lo deixaria a
+         imagem anterior viva no DOM depois de "Trocar de foto" — e foto de
+         corpo inteiro não fica pendurada em lugar nenhum depois que a dona
+         mandou tirar. */
+      else boneca.innerHTML = "";
+      return;
+    }
+    boneca.hidden = false;
+    $("#soltar").hidden = true;
+    boneca.setAttribute("viewBox", VIEWBOX_BONECA);
+    const m = medidas();
+    boneca.innerHTML = '<title id="boneca-desc">'+escapar(descricao())+'</title>'+
+      corpo(m) + base(m) + roupa(m);
   }
 
   function descricao(){
     const postas = ["cima","baixo","sobre","bolsa","oculos"]
       .map(v => look[v] && look[v].nome).filter(Boolean);
+    if(modo === "foto"){
+      return foto
+        ? (postas.length
+            ? "Sua foto com as peças desenhadas por cima: "+postas.join(", ")+"."
+            : "Sua foto, sem nenhuma peça escolhida ainda.")
+        : "Nenhuma foto escolhida ainda.";
+    }
     const quem = "Desenho de uma mulher, manequim "+(cfg.manequins||[])[manequim];
     if(!postas.length) return quem + ", com roupa de base neutra, sem nenhuma peça escolhida ainda.";
     const faltando = [!look.cima && "parte de cima", !look.baixo && "parte de baixo"].filter(Boolean);
@@ -2236,7 +2470,10 @@ escrever();
     $("#prova-limpar").hidden = !postas.length;
   }
 
-  function atualizar(){ desenhar(); pintarControles(); contar(); }
+  function atualizar(){
+    desenhar(); pintarControles(); contar();
+    const bt = $("#tirar-foto"); if(bt) bt.hidden = !(modo === "foto" && foto);
+  }
 
   /* ── eventos ── */
   /* radiogroup de verdade: setas andam entre as opções, como o teclado espera */
@@ -2296,6 +2533,161 @@ escrever();
       .map(v => look[v]).filter(Boolean);
     if(!postas.length) return;
     postas.forEach(p => { const t = tamanhoPara(p); if(t) por(p, t); });
+  });
+
+  /* ── a foto ─────────────────────────────────────────────────
+     Ela é lida no próprio aparelho e nunca sai dele. Três garantias, em
+     ordem de importância:
+
+     1. Não existe no arquivo nenhuma linha que envie a imagem para lugar
+        nenhum. Ela vira um dado na memória da página e acaba aí.
+     2. A CSP no <head> tem connect-src 'none' e form-action 'none': o
+        navegador BLOQUEIA fetch, XHR, WebSocket e envio de formulário
+        vindos desta página. Mesmo que um dia alguém escrevesse o código
+        de envio por engano, ele não sairia.
+     3. Ela não vai para o localStorage. Foto de corpo inteiro guardada no
+        navegador de um telefone que se empresta é risco de verdade, e
+        conveniência nenhuma paga isso. Fechou a página, sumiu.
+
+     De quebra, a foto é redesenhada num canvas antes de ser usada. Isso
+     descarta os metadados do arquivo original — inclusive a localização
+     de onde ela foi tirada, que muita câmera de celular grava. */
+  const erro = t => { const e = $("#prova-erro"); e.textContent = t || ""; e.hidden = !t; };
+
+  async function lerArquivo(file){
+    erro("");
+    if(!file) return;
+    if(!/^image\/(jpeg|png|webp)$/.test(file.type)){
+      erro("Esse arquivo não é uma foto JPG, PNG ou WEBP. Foto de iPhone costuma "+
+           "vir em HEIC: abra ela na galeria, use 'Duplicar' ou 'Exportar como JPEG' "+
+           "e escolha o arquivo novo.");
+      return;
+    }
+    if(file.size > 30*1024*1024){ erro("Essa foto passa de 30 MB. Escolha uma menor."); return; }
+
+    let bmp = null;
+    try{ bmp = await createImageBitmap(file, {imageOrientation:"from-image"}); }
+    catch(e){
+      /* navegador antigo ignora imageOrientation; tenta sem */
+      try{ bmp = await createImageBitmap(file); }
+      catch(e2){ erro("Não consegui abrir essa foto. Tente outra."); return; }
+    }
+    /* 1400px no maior lado: acima disso é memória gasta à toa num celular */
+    const k = Math.min(1, 1400/Math.max(bmp.width, bmp.height));
+    const w = Math.max(1, Math.round(bmp.width*k)), h = Math.max(1, Math.round(bmp.height*k));
+    const tela = document.createElement("canvas");
+    tela.width = w; tela.height = h;
+    tela.getContext("2d").drawImage(bmp, 0, 0, w, h);
+    if(bmp.close) bmp.close();
+
+    foto = {url: tela.toDataURL("image/jpeg", 0.86), w, h};
+    /* chute inicial para foto de corpo inteiro em pé; ela ajusta arrastando */
+    ombro = {x: Math.round(w/2), y: Math.round(h*0.18)};
+    pe    = {x: Math.round(w/2), y: Math.round(h*0.96)};
+    atualizar();
+    const mo = $('[data-marca="ombro"]'); if(mo) mo.focus();
+  }
+
+  $("#arquivo").addEventListener("change", e => {
+    lerArquivo(e.target.files && e.target.files[0]);
+    e.target.value = "";   /* permite escolher o mesmo arquivo de novo */
+  });
+  $("#tirar-foto").addEventListener("click", () => {
+    foto = null; erro(""); atualizar(); $("#arquivo").focus();
+  });
+  /* e ao sair da página, nada fica para trás */
+  window.addEventListener("pagehide", () => { foto = null; });
+
+  /* ── arrastar as marcas ── */
+  /* converte o ponto do dedo/ponteiro para as coordenadas do SVG; sem isso
+     a marca anda em desacordo com a foto assim que ela é redimensionada */
+  function noSvg(ev){
+    const svg = $("#boneca"), ctm = svg.getScreenCTM();
+    if(!ctm) return null;
+    const pt = svg.createSVGPoint();
+    pt.x = ev.clientX; pt.y = ev.clientY;
+    return pt.matrixTransform(ctm.inverse());
+  }
+  let arrastando = null;
+  $("#boneca").addEventListener("pointerdown", e => {
+    const g = e.target.closest(".marca-corpo"); if(!g) return;
+    arrastando = g.dataset.marca;
+    g.setPointerCapture(e.pointerId);
+    g.focus();
+    e.preventDefault();
+  });
+  $("#boneca").addEventListener("pointermove", e => {
+    if(!arrastando || !foto) return;
+    const q = noSvg(e); if(!q) return;
+    const alvo = arrastando === "ombro" ? ombro : pe;
+    alvo.x = Math.max(0, Math.min(foto.w, q.x));
+    alvo.y = Math.max(0, Math.min(foto.h, q.y));
+    /* o ombro nunca passa do chão, senão a escala vira negativa */
+    if(ombro.y > pe.y - 20){
+      if(arrastando === "ombro") ombro.y = pe.y - 20; else pe.y = ombro.y + 20;
+    }
+    posicionar();
+  });
+  const soltar = () => { if(arrastando){ arrastando = null; atualizar(); } };
+  $("#boneca").addEventListener("pointerup", soltar);
+  $("#boneca").addEventListener("pointercancel", soltar);
+
+  /* teclado: a marca anda com as setas, 1% da foto por toque */
+  $("#boneca").addEventListener("keydown", e => {
+    const g = e.target.closest(".marca-corpo"); if(!g || !foto) return;
+    const d = {ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+    if(!d) return;
+    e.preventDefault();
+    const passo = (e.shiftKey ? 0.04 : 0.01) * Math.max(foto.w, foto.h);
+    const alvo = g.dataset.marca === "ombro" ? ombro : pe;
+    alvo.x = Math.max(0, Math.min(foto.w, alvo.x + d[0]*passo));
+    alvo.y = Math.max(0, Math.min(foto.h, alvo.y + d[1]*passo));
+    if(ombro.y > pe.y - 20){
+      if(g.dataset.marca === "ombro") ombro.y = pe.y - 20; else pe.y = ombro.y + 20;
+    }
+    posicionar();
+    const foco = g.dataset.marca;
+    clearTimeout(g._t);
+    g._t = setTimeout(() => { atualizar(); const v = $('[data-marca="'+foco+'"]'); if(v) v.focus(); }, 260);
+  });
+
+  $("#largura").addEventListener("input", e => {
+    larguraFoto = (+e.target.value || 100)/100;
+    e.target.setAttribute("aria-valuetext",
+      larguraFoto === 1 ? "normal" : Math.round(larguraFoto*100)+" por cento");
+    if(foto) posicionar();
+  });
+
+  /* ── trocar de modo ── */
+  function trocarModo(novo){
+    modo = novo;
+    const naFoto = modo === "foto";
+    secao.classList.toggle("prova--foto", naFoto);
+    $("#modo-boneca").setAttribute("aria-checked", String(!naFoto));
+    $("#modo-foto").setAttribute("aria-checked", String(naFoto));
+    $("#modo-boneca").tabIndex = naFoto ? -1 : 0;
+    $("#modo-foto").tabIndex = naFoto ? 0 : -1;
+    /* tom de pele e altura só fazem sentido na boneca: na foto a pele é a
+       dela e a altura sai das marcas */
+    $("#campo-pele").hidden = naFoto;
+    $("#campo-altura").hidden = naFoto;
+    $("#campo-larg").hidden = !naFoto;
+    $("#campo-foto").hidden = !naFoto;
+    $("#nota-boneca").hidden = naFoto;
+    $("#nota-foto").hidden = !naFoto;
+    $("#prova-selo").textContent = naFoto ? "Sua foto, no seu aparelho" : "Desenho, não foto";
+    $("#tirar-foto").hidden = !foto;
+    erro("");
+    atualizar();
+  }
+  $("#modo-boneca").addEventListener("click", () => trocarModo("boneca"));
+  $("#modo-foto").addEventListener("click", () => trocarModo("foto"));
+  $(".prova__modos").addEventListener("keydown", e => {
+    if(!/^Arrow(Left|Right|Up|Down)$/.test(e.key)) return;
+    e.preventDefault();
+    const novo = modo === "boneca" ? "foto" : "boneca";
+    trocarModo(novo);
+    $(novo === "foto" ? "#modo-foto" : "#modo-boneca").focus();
   });
 
   montarControles();

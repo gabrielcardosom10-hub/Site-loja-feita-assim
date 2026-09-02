@@ -368,3 +368,62 @@ jeans…"* —, então quem não vê a figura ouve o mesmo que ela mostra.
 os controles: escolher uma peça e não ver o efeito é o mesmo que não ter
 provador. A nota explicativa ficou **fora** do bloco grudado — dentro dele,
 comia metade da área útil.
+
+## O provador na foto da cliente
+
+Segundo modo do provador: a cliente escolhe uma foto de corpo inteiro, marca
+onde estão os ombros e o chão, e as mesmas peças são desenhadas por cima —
+no corpo dela, na escala dela.
+
+**Por que isto foi possível sem reescrever nada.** Todo molde já lia a
+geometria de `medidas()`. Bastou uma conta: as duas marcas dão a distância
+ombro→chão na foto, isso vira a escala, e as peças entram num grupo
+transformado. Nenhum molde precisou de uma linha nova para funcionar sobre
+fotografia. Quando um sistema tem uma fonte única de medida, o segundo uso
+sai quase de graça.
+
+**Duas marcas, não sete.** A tentação era pedir ombro, cintura, quadril,
+joelho, tornozelo. Cada ponto a mais é gente desistindo no meio. Duas marcas
+e um controle de largura cobrem o que importa — altura e porte — e o resto
+sai da proporção do molde. Elas também não são discos no meio do corpo: a
+primeira versão era, e o disco tapava exatamente o rosto de quem estava se
+vendo. Hoje são linhas de altura com a alça na borda da foto.
+
+**A foto não sai do aparelho, e isso é verificável.** Não por promessa — por
+construção, em três camadas:
+
+1. Não existe no arquivo nenhuma linha que envie a imagem para lugar nenhum.
+2. A CSP do `<head>` traz `connect-src 'none'` e `form-action 'none'`: o
+   navegador **bloqueia** fetch, XHR, WebSocket e envio de formulário vindos
+   desta página. Mesmo que alguém escrevesse o código de envio por engano,
+   ele não sairia. Testado: um `fetch` POST para fora é recusado pela CSP.
+3. Ela não vai para o `localStorage` nem para o `sessionStorage`. Foto de
+   corpo inteiro guardada no navegador de um telefone que se empresta é risco
+   de verdade, e conveniência nenhuma paga isso. "Trocar de foto" esvazia o
+   SVG — só escondê-lo deixaria a imagem viva no DOM.
+
+De quebra, a foto é redesenhada num `<canvas>` antes de ser usada. Isso
+descarta os metadados do arquivo original, **inclusive a localização de onde
+ela foi tirada**, que muita câmera de celular grava. E limita a 1400px no
+maior lado, que é memória de sobra num celular.
+
+**O que este modo não é.** Não é simulação de caimento, e a tela diz. As
+peças são desenhos chapados por cima da imagem: mostram comprimento, cor e
+proporção no corpo dela — que é a dúvida real de quem compra roupa online —
+e não mostram como o tecido cai, franze ou marca. Isso continua sendo do
+provador físico, e o texto ao lado da foto leva para lá.
+
+Também depende da pose: foto de frente, em pé, braços ao lado do corpo. Com
+a pessoa sentada ou de lado, as peças não encontram o corpo. O convite na
+tela pede a pose certa antes de a cliente escolher o arquivo.
+
+**HEIC.** Foto de iPhone costuma vir em HEIC, que o navegador não abre. Em
+vez de falhar em silêncio, o erro diz o que fazer: abrir na galeria, duplicar
+ou exportar como JPEG, e escolher o arquivo novo.
+
+**Um tropeço que vale registrar.** `.prova__campo{display:grid}` vencia o
+atributo `hidden`, e "Tom de pele" e "Altura" continuavam na tela no modo
+foto — enquanto o bloco da foto aparecia no modo boneca. É o mesmo tropeço
+que a barra do celular já deu neste arquivo: `display` declarado numa classe
+ganha de `[hidden]`, e a correção é um seletor de atributo, que ganha na
+especificidade e não depende da ordem.
