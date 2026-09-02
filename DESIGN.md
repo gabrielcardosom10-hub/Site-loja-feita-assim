@@ -299,3 +299,72 @@ movimento.
 
 Medido em 375, 390, 360, 768 e 844×390: zero rolagem horizontal, zero controle
 abaixo de 44px, zero sobreposição entre controles clicáveis, corpo em 16px.
+
+## O provador
+
+Um avatar desenhado em SVG, montado a cada troca de peça. Não usa imagem
+nenhuma: o corpo, a roupa e as bolsas são caminhos calculados na hora, o que
+significa zero requisição de rede e nenhuma foto para manter.
+
+**Por que desenho e não foto.** O que a cliente pediria de verdade é a roupa
+sobre uma foto dela. Isso exige servidor e uma API de IA processando a imagem;
+num arquivo estático a chave da API ficaria pública e qualquer pessoa gastaria
+a conta da loja. Em vez de fingir, o provador mostra o que ele de fato sabe —
+**a combinação**: cor, comprimento, proporção, o que fecha com o quê. E a
+tela diz isso, com todas as letras, ao lado da figura.
+
+Isso não é só honestidade defensiva. Provador que promete caimento e entrega
+aproximação queima a confiança que a loja levou anos construindo, e a Feita
+Assim tem provador de verdade a poucas quadras de quem compra. O desenho
+manda para lá, com link.
+
+**Três decisões que parecem detalhe e não são:**
+
+| decisão | motivo |
+|---|---|
+| A figura é geométrica, não quase-realista | O "quase" viraria promessa. Ilustração assumida não mente. |
+| Tom de pele é escolha da cliente | Cinco tons. Figura única e clara, numa loja brasileira, exclui a maior parte de quem compra. |
+| Base neutra cinza nas vagas vazias | Sem ela, escolher só um casaco deixava o torso nu. Loja de roupa não vende casaco mostrando corpo nu. O cinza não é peça nenhuma do catálogo — é o manequim. |
+
+**Como a loja acrescenta peça.** Dois campos no `CONFIG`, ao lado dos que já
+existem:
+
+- `molde` — qual desenho vestir. Hoje: `trico`, `camisa`, `calca-wide`,
+  `calca-reta`, `saia`, `vestido`, `blazer`, `jaqueta`, `sobretudo`,
+  `bolsa-ombro`, `bolsa-mao`, `oculos`. Peça sem molde não aparece no
+  provador, e nada quebra.
+- `cor` — a cor com que ela é desenhada. Use a cor real do tecido; se errar,
+  o desenho mente sobre o produto.
+
+Um molde novo é uma função a mais no objeto `MOLDES`, que recebe as medidas do
+corpo e devolve SVG. As medidas vêm de um lugar só (`medidas()`), então peça
+nova entra sem recalcular nada.
+
+**Anatomia, e dois erros que valeram a pena consertar.** O braço descia em
+`Ox-6` e a cintura ficava em `Cx`: sobravam 13px de fundo roxo na axila, que
+liam como um corte na roupa. Hoje o braço desce colado ao corpo — ombro,
+cotovelo na altura da cintura, pulso na altura do quadril —, e manga e braço
+leem da mesma função, então nunca saem de registro. A linha do ombro também
+tinha um recorte em degrau; virou curva contínua.
+
+**Contorno em tudo.** Cada peça leva um traço de si mesma, escurecido a 80%.
+Sem ele, tricô creme sobre pele clara — ou bolsa preta sobre jaqueta preta —
+viram uma mancha só, e o desenho deixa de informar exatamente onde mais
+importa.
+
+**Tamanho.** O manequim escolhido é o tamanho que vai para o carrinho. Peça
+numerada não tem P/M/G, então `CONFIG.provador.equivalencia` traduz — a mesma
+tabela de medidas da loja — e o provador usa o primeiro número que a peça
+realmente tem. O botão diz qual é antes de você apertar: *"Adicionar 5 peças
+no tamanho M"*. Ninguém descobre o tamanho depois.
+
+**Teclado e leitor de tela.** Tom de pele, altura e manequim são `radiogroup`
+de verdade: as setas andam entre as opções, e só o item marcado fica no Tab.
+O `<title>` do SVG é reescrito a cada troca e descreve o look inteiro —
+*"Desenho de uma mulher, manequim G, vestindo: Tricô gola alta, Calça wide leg
+jeans…"* —, então quem não vê a figura ouve o mesmo que ela mostra.
+
+**No celular** a figura gruda logo abaixo do cabeçalho enquanto a cliente rola
+os controles: escolher uma peça e não ver o efeito é o mesmo que não ter
+provador. A nota explicativa ficou **fora** do bloco grudado — dentro dele,
+comia metade da área útil.
