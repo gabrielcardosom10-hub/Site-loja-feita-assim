@@ -617,6 +617,48 @@ a.marca{min-height:44px;}
 .marca-corpo:focus{outline:none;}
 .marca-corpo:focus-visible .marca-anel{stroke:var(--rosa);}
 
+/* ── provar com IA ── */
+.ia{display:grid;gap:9px;padding-top:12px;border-top:1px solid var(--fio);}
+.ia[hidden]{display:none;}
+.ia__botao{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:48px;padding:0 22px;width:100%;
+  background:var(--rosa-forte);color:var(--cal);border-radius:var(--r);
+  font-family:var(--corpo);font-size:14px;font-weight:600;
+  transition:background var(--t);
+}
+.ia__botao:hover:not(:disabled){background:var(--tinta);}
+.ia__botao:disabled{background:#CFC7D6;color:#453352;cursor:default;}
+
+/* o consentimento: aparece uma vez, antes do primeiro envio */
+.consent{
+  position:fixed;inset:0;z-index:60;display:grid;place-items:center;
+  padding:20px;background:#2E0F3Dcc;
+}
+.consent[hidden]{display:none;}
+.consent__caixa{
+  background:var(--cal);border-radius:var(--r);padding:clamp(20px,4vw,32px);
+  max-width:52ch;max-height:88vh;overflow:auto;display:grid;gap:14px;
+}
+.consent__caixa h3{
+  font-family:var(--display);font-weight:700;font-size:20px;margin:0;color:var(--tinta);
+}
+.consent__caixa p{margin:0;font-size:14px;line-height:1.65;color:var(--tinta);}
+.consent__caixa ul{margin:0;padding-left:20px;display:grid;gap:7px;font-size:14px;line-height:1.6;color:var(--tinta);}
+.consent__caixa b{font-weight:700;}
+.consent__pes{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;}
+.consent__sim{
+  min-height:48px;padding:0 22px;background:var(--tinta);color:var(--papel);
+  border-radius:var(--r);font-family:var(--corpo);font-size:14px;font-weight:600;
+}
+.consent__sim:hover{background:var(--rosa-forte);}
+.consent__nao{
+  min-height:48px;padding:0 18px;color:var(--cinza);
+  font-family:var(--corpo);font-size:14px;
+  text-decoration:underline;text-underline-offset:4px;
+}
+.consent__nao:hover{color:var(--tinta);}
+
 /* ── tamanho recomendado ── */
 .prova__abrir-medidas{
   justify-self:start;min-height:44px;padding:0 2px;color:var(--rosa-forte);
@@ -1124,7 +1166,7 @@ a.marca{min-height:44px;}
               <input type="file" id="arquivo" accept="image/jpeg,image/png,image/webp">
               <span>Escolher a foto</span>
             </label>
-            <p class="prova__cofre">A foto <b>não sai do seu aparelho</b>. Ela não
+            <p class="prova__cofre" id="cofre">A foto <b>não sai do seu aparelho</b>. Ela não
               é enviada para a loja nem para lugar nenhum, e some quando você
               fecha a página.</p>
           </div>
@@ -1140,6 +1182,8 @@ a.marca{min-height:44px;}
           marcar. Servem para ver comprimento, cor e proporção no seu corpo —
           não mostram o caimento do tecido. Isso só o
           <a href="#loja">provador de verdade</a> mostra.
+          <span id="nota-ia" hidden>O botão <b>Provar de verdade com IA</b> é
+          a exceção: ele <b>envia a sua foto</b> para fora, e pergunta antes.</span>
         </p>
 
         <div class="prova__lado">
@@ -1187,6 +1231,19 @@ a.marca{min-height:44px;}
                 use Tab até a marca e depois as setas.
               </p>
               <p class="prova__erro" id="prova-erro" role="alert" hidden></p>
+
+              <div class="ia" id="ia" hidden>
+                <button class="ia__botao" id="ia-provar" type="button">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17">
+                    <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"
+                          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                    <circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.8" fill="none"/>
+                  </svg>
+                  <span id="ia-txt">Provar de verdade com IA</span>
+                </button>
+                <p class="prova__dica" id="ia-estado" role="status"></p>
+              </div>
+
               <button class="prova__limpar" id="tirar-foto" type="button" hidden>Trocar de foto</button>
             </div>
           </div>
@@ -1253,6 +1310,32 @@ a.marca{min-height:44px;}
   </main>
 
 </div><!-- /coluna -->
+
+<div class="consent" id="consent" hidden role="dialog" aria-modal="true"
+     aria-labelledby="consent-tit" aria-describedby="consent-txt">
+  <div class="consent__caixa">
+    <h3 id="consent-tit">Sua foto vai sair do seu aparelho</h3>
+    <div id="consent-txt">
+      <p>Até agora a sua foto ficou só no seu celular. Para a inteligência
+        artificial vestir a peça em você de verdade, ela precisa ser
+        <b>enviada para a empresa que roda o programa</b>, que fica fora do
+        Brasil. Não dá para fazer diferente: esse programa não roda no
+        celular.</p>
+      <ul>
+        <li>Vai <b>a sua foto</b> e a foto da peça — mais nada. Sem nome, sem
+          telefone, sem o seu pedido.</li>
+        <li>A Feita Assim <b>não recebe nem guarda</b> a sua foto.</li>
+        <li id="consent-guarda"></li>
+        <li>Você pode continuar usando o provador em desenho, que
+          <b>não envia nada</b>.</li>
+      </ul>
+    </div>
+    <div class="consent__pes">
+      <button class="consent__sim" id="consent-sim" type="button">Entendi, pode enviar</button>
+      <button class="consent__nao" id="consent-nao" type="button">Agora não</button>
+    </div>
+  </div>
+</div>
 
 <div class="scrim" id="scrim"></div>
 <aside class="carrinho" id="carrinho" aria-labelledby="tit-carrinho">
@@ -1487,6 +1570,27 @@ const CONFIG = {
        manequim — a mesma equivalência da tabela de medidas da loja.
        O provador usa o primeiro número que a peça realmente tem. */
     equivalencia: {P:["36","38"], M:["38","40"], G:["40","42"], GG:["42","44"]},
+
+    /* ── PROVAR COM IA ─────────────────────────────────────────
+       Desligado enquanto `endpoint` estiver vazio, e o botão nem aparece.
+
+       Para ligar, publique o intermediário da pasta `servidor/` (o LEIA-ME
+       de lá tem o passo a passo) e ponha o endereço aqui. DEPOIS troque, na
+       CSP no topo deste arquivo, `connect-src 'none'` pelo mesmo endereço —
+       sem isso o navegador bloqueia a chamada, de propósito.
+
+       ATENÇÃO, E ISTO É O MAIS IMPORTANTE DESTE BLOCO: com a IA ligada, a
+       foto da cliente PASSA A SAIR DO APARELHO. Ela vai para a empresa que
+       roda o modelo, fora do Brasil. Não há como fazer diferente — o modelo
+       roda em servidor. O site pede consentimento antes do primeiro envio e
+       diz para onde vai; a loja é a controladora desses dados perante a
+       LGPD. Confira na política do fornecedor por quanto tempo a imagem
+       fica guardada, e escreva isso em `guarda`.                          */
+    ia: {
+      endpoint: "",
+      fornecedor: "FASHN",
+      guarda: "Confirme com o fornecedor por quanto tempo a imagem fica guardada."
+    },
 
     /* ── TABELA DE MEDIDAS ─────────────────────────────────────
        CONFIRA ESTES NÚMEROS COM AS PEÇAS DA LOJA ANTES DE PUBLICAR.
@@ -2846,7 +2950,10 @@ escrever();
   }
 
   function atualizar(){
-    desenhar(); pintarControles(); pintarTamanhos(); contar();
+    /* qualquer mexida nos controles descarta o resultado da IA: manter a
+       imagem antiga na tela enquanto a escolha mudou seria mentir */
+    iaVerUrl = null;
+    desenhar(); pintarControles(); pintarTamanhos(); contar(); pintarIA();
     const bt = $("#tirar-foto"); if(bt) bt.hidden = !(modo === "foto" && foto);
   }
 
@@ -2912,6 +3019,131 @@ escrever();
       const t = tamanhoPara(p, vaga); if(t) por(p, t);
     });
   });
+
+  /* ── PROVAR COM IA ──────────────────────────────────────────
+     O desenho mostra a combinação; a IA mostra a peça vestida. A diferença
+     é que a IA roda em servidor, e por isso a foto sai do aparelho.
+
+     Nada aqui acontece sem consentimento explícito, e ele é pedido uma vez
+     por sessão — não fica guardado. Guardar consentimento num navegador que
+     se empresta seria consentir pela próxima pessoa.
+
+     O site nunca vê a chave da API: quem a guarda é o worker da pasta
+     `servidor/`. Daqui só sai a foto e o endereço da peça. */
+  const IA = (cfg.ia || {});
+  let consentiu = false, iaOcupado = false, iaVerUrl = null;
+
+  const iaLigada = () => !!(IA.endpoint && /^https:\/\//.test(IA.endpoint));
+
+  /* Só uma peça por vez: o modelo veste uma coisa. Escolhe a de cima, e na
+     falta dela a de baixo — que é a ordem em que a dúvida costuma vir. */
+  function pecaParaIA(){
+    for(const vaga of ["cima","sobre","baixo"]){
+      const p = look[vaga];
+      if(p && p.foto) return {p, vaga, categoria:
+        vaga === "baixo" ? "bottoms" : (p.molde === "vestido" ? "one-pieces" : "tops")};
+    }
+    return null;
+  }
+
+  function iaEstado(txt){ const e = $("#ia-estado"); if(e) e.textContent = txt || ""; }
+
+  function pintarIA(){
+    const cx = $("#ia");
+    if(!cx) return;
+    const alvo = pecaParaIA();
+    cx.hidden = !(iaLigada() && modo === "foto" && foto);
+    const bt = $("#ia-provar");
+    bt.disabled = iaOcupado || !alvo;
+    $("#ia-txt").textContent = iaOcupado ? "Provando…"
+      : alvo ? "Provar "+alvo.p.nome+" de verdade" : "Escolha uma peça de roupa";
+    if(!iaOcupado && !alvo) iaEstado("A IA veste uma peça por vez.");
+  }
+
+  function pedirConsentimento(){
+    return new Promise(resolve => {
+      if(consentiu) return resolve(true);
+      const cx = $("#consent");
+      $("#consent-guarda").textContent = IA.guarda ||
+        "Confirme com a loja por quanto tempo a imagem fica guardada.";
+      cx.hidden = false;
+      const antes = document.activeElement;
+      $("#consent-sim").focus();
+      const fim = valor => {
+        cx.hidden = true;
+        $("#consent-sim").removeEventListener("click", sim);
+        $("#consent-nao").removeEventListener("click", nao);
+        document.removeEventListener("keydown", tecla);
+        if(antes && antes.focus) antes.focus();
+        resolve(valor);
+      };
+      const sim = () => { consentiu = true; fim(true); };
+      const nao = () => fim(false);
+      const tecla = e => { if(e.key === "Escape") fim(false); };
+      $("#consent-sim").addEventListener("click", sim);
+      $("#consent-nao").addEventListener("click", nao);
+      document.addEventListener("keydown", tecla);
+    });
+  }
+
+  async function provarComIA(){
+    const alvo = pecaParaIA();
+    if(!alvo || iaOcupado || !foto) return;
+    if(!(await pedirConsentimento())){ iaEstado("Tudo bem — nada foi enviado."); return; }
+
+    iaOcupado = true; pintarIA(); iaEstado("Enviando a sua foto…");
+    try{
+      const r = await fetch(IA.endpoint.replace(/\/$/, "") + "/provar", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({foto: foto.url, peca: alvo.p.foto, categoria: alvo.categoria})
+      });
+      const d = await r.json().catch(() => ({}));
+      if(!r.ok){ iaEstado(d.mensagem || d.erro || "Não deu para provar agora."); return; }
+
+      iaEstado("A IA está vestindo a peça. Costuma levar meio minuto.");
+      const pronto = await esperarIA(d.id);
+      if(!pronto) return;
+      iaVerUrl = pronto;
+      mostrarResultadoIA(pronto, alvo.p.nome);
+    }catch(e){
+      /* fetch bloqueado pela CSP cai aqui, e é o engano mais provável de quem
+         ligou a IA sem trocar connect-src */
+      iaEstado("Não consegui falar com o provador. Se você é da loja: confira "+
+               "o endereço no CONFIG e o connect-src da CSP.");
+    }finally{
+      iaOcupado = false; pintarIA();
+    }
+  }
+
+  async function esperarIA(id){
+    const ate = Date.now() + 90000;      /* 90s e desiste */
+    while(Date.now() < ate){
+      await new Promise(r => setTimeout(r, 2500));
+      let d;
+      try{
+        const r = await fetch(IA.endpoint.replace(/\/$/, "") + "/provar/" + encodeURIComponent(id));
+        d = await r.json();
+      }catch(e){ iaEstado("A conexão caiu no meio."); return null; }
+      if(d.erro){ iaEstado(d.erro); return null; }
+      if(d.estado === "completed" && d.imagem) return d.imagem;
+      if(d.estado === "failed"){ iaEstado("A IA não conseguiu com esta foto. "+
+        "Costuma ser pose ou enquadramento: de frente, em pé, corpo inteiro."); return null; }
+    }
+    iaEstado("Demorou demais. Tente de novo daqui a pouco.");
+    return null;
+  }
+
+  function mostrarResultadoIA(url, nome){
+    const boneca = $("#boneca");
+    boneca.setAttribute("viewBox", "0 0 "+foto.w+" "+foto.h);
+    boneca.innerHTML =
+      '<title id="boneca-desc">Sua foto com '+escapar(nome)+
+        ' vestido pela inteligência artificial.</title>'+
+      '<image href="'+urlSegura(url)+'" x="0" y="0" width="'+foto.w+'" height="'+foto.h+
+        '" preserveAspectRatio="xMidYMid meet"/>';
+    iaEstado("Pronto. Mexer em qualquer controle volta para o desenho.");
+  }
 
   /* ── a foto ─────────────────────────────────────────────────
      Ela é lida no próprio aparelho e nunca sai dele. Três garantias, em
@@ -3057,6 +3289,8 @@ escrever();
   ["m-busto","m-cintura","m-quadril"].forEach(id =>
     $("#"+id).addEventListener("input", () => { contarMedidas(); atualizar(); }));
 
+  if($("#ia-provar")) $("#ia-provar").addEventListener("click", provarComIA);
+
   $("#largura").addEventListener("input", e => {
     larguraFoto = (+e.target.value || 100)/100;
     e.target.setAttribute("aria-valuetext",
@@ -3081,7 +3315,19 @@ escrever();
     $("#campo-foto").hidden = !naFoto;
     $("#nota-boneca").hidden = naFoto;
     $("#nota-foto").hidden = !naFoto;
-    $("#prova-selo").textContent = naFoto ? "Sua foto, no seu aparelho" : "Desenho, não foto";
+    $("#prova-selo").textContent = naFoto
+      ? (iaLigada() ? "Sua foto" : "Sua foto, no seu aparelho")
+      : "Desenho, não foto";
+    /* com a IA ligada, "não sai do aparelho" deixa de ser verdade em um
+       caminho — e o texto tem de dizer isso, não a versão antiga */
+    const notaIa = $("#nota-ia"); if(notaIa) notaIa.hidden = !iaLigada();
+    const cofre = $("#cofre");
+    if(cofre) cofre.innerHTML = iaLigada()
+      ? 'A foto fica <b>no seu aparelho</b> para o provador em desenho. Só sai '+
+        'se você pedir para a inteligência artificial provar — e aí a gente '+
+        'avisa antes.'
+      : 'A foto <b>não sai do seu aparelho</b>. Ela não é enviada para a loja '+
+        'nem para lugar nenhum, e some quando você fecha a página.';
     $("#tirar-foto").hidden = !foto;
     erro("");
     atualizar();
@@ -3098,6 +3344,7 @@ escrever();
 
   montarControles();
   contarMedidas();
+  trocarModo("boneca");   /* deixa os textos coerentes com a IA ligada ou não */
   atualizar();
 })();
 

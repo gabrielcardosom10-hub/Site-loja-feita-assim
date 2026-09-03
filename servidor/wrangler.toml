@@ -1,0 +1,29 @@
+# Configuração do intermediário do provador com IA.
+# Os valores marcados com <> precisam ser trocados antes de publicar.
+
+name = "feita-assim-provador"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+# De onde o site pode chamar. Separe por vírgula, sem barra no fim.
+ORIGENS = "https://gabrielcardosom10-hub.github.io"
+
+# De onde as FOTOS DAS PEÇAS podem vir. Sem esta lista, o endereço público
+# viraria um gerador de try-on de graça para qualquer imagem da internet,
+# na conta da loja.
+HOSTS_PECA = "d8j0ntlcm91z4.cloudfront.net,gabrielcardosom10-hub.github.io"
+
+# TETO DE GASTO. É o controle que de fato segura a conta.
+# 60 provas por dia ≈ US$ 4,50 ≈ R$ 25. Comece baixo e suba com calma.
+TETO_DIA = "60"
+# Quantas provas cada pessoa pode fazer por dia.
+TETO_IP = "8"
+
+# Contadores do teto. Crie com:  npx wrangler kv namespace create CONTAS
+[[kv_namespaces]]
+binding = "CONTAS"
+id = "<COLE_AQUI_O_ID_QUE_O_COMANDO_ACIMA_DEVOLVEU>"
+
+# A chave da API NÃO vai neste arquivo. Ela entra como secret:
+#   npx wrangler secret put FASHN_KEY

@@ -541,3 +541,56 @@ de um arquivo estático é pública.
 biométrico; fazer isso sem ter o que entregar em troca não se justifica em
 nenhuma leitura. O dia em que existir o intermediário no servidor, o fluxo de
 captura se escreve em uma tarde — e aí ele terá para que servir.
+
+## O provador com IA, e o servidor que ele exigiu
+
+O try-on de verdade — a peça vestida no corpo dela, com caimento — roda em
+GPU, em servidor. Não havia como fugir disso, e agora existe o servidor: um
+worker do Cloudflare, na pasta `servidor/`.
+
+**Por que um intermediário e não a chamada direta.** O site é estático. Uma
+chave de API dentro dele é pública, e qualquer pessoa gastaria a conta da
+loja. O worker guarda a chave; o site nunca a vê.
+
+**O controle que de fato importa é o teto de gasto, não o CORS.** O endereço
+do worker é público — tem de ser, o site é público — e CORS só vale dentro do
+navegador: quem chamar por fora não manda origem nenhuma. Por isso a defesa
+real é um contador diário global que corta tudo ao chegar no limite, mais um
+teto por IP. Sem eles, uma noite de abuso vira uma fatura de milhares.
+
+Três outras travas, todas testadas com a API simulada:
+
+- **A peça só pode vir de um host autorizado.** Sem isso o endereço público
+  viraria um gerador de try-on de graça para qualquer imagem da internet, na
+  conta da loja.
+- **O contador sobe antes de a API ser chamada**, não depois. Se a API demora
+  e a pessoa insiste, o teto continua valendo.
+- **A foto entra com limite de tamanho e de tipo**, e nunca é gravada nem
+  registrada em log.
+
+### O que muda na privacidade, e não dá para disfarçar
+
+Enquanto o provador era só desenho, a foto não saía do aparelho, e a CSP com
+`connect-src 'none'` garantia isso **por construção** — não por promessa.
+
+**Com a IA ligada isso deixa de ser verdade em um caminho.** A foto vai para a
+empresa que roda o modelo, fora do Brasil. O site trata isso assim:
+
+- **Consentimento explícito antes do primeiro envio**, numa caixa que diz o
+  que vai, para onde, e o que a loja recebe (nada). Isso não é gentileza: é
+  obrigação da LGPD, e a loja é a controladora.
+- **O consentimento não é guardado.** Vale pela sessão. Guardá-lo num
+  navegador que se empresta seria consentir pela próxima pessoa.
+- **Os textos da tela mudam sozinhos.** Com a IA desligada, o site promete que
+  a foto não sai. Com ela ligada, o mesmo lugar passa a dizer que sai se ela
+  pedir. Promessa que não acompanha o código vira mentira na primeira semana.
+
+### A trava que também é um freio
+
+Ligar a IA exige **duas** mudanças: o endereço no `CONFIG` e o `connect-src`
+na CSP. Esquecer a segunda faz o navegador bloquear a chamada — e isso é de
+propósito. É a mesma trava que hoje garante que a foto não sai; ela só cede
+quando alguém decide, por escrito, que vai ceder.
+
+Quando isso acontece, a mensagem na tela diz exatamente o que consertar. Foi
+o primeiro caso que o teste pegou, e ficou como teste permanente.
