@@ -617,6 +617,43 @@ a.marca{min-height:44px;}
 .marca-corpo:focus{outline:none;}
 .marca-corpo:focus-visible .marca-anel{stroke:var(--rosa);}
 
+/* ── tamanho recomendado ── */
+.prova__abrir-medidas{
+  justify-self:start;min-height:44px;padding:0 2px;color:var(--rosa-forte);
+  font-family:var(--corpo);font-size:13px;
+  text-decoration:underline;text-underline-offset:4px;
+}
+.prova__abrir-medidas:hover{color:var(--tinta);}
+.medidas{display:grid;gap:10px;padding:14px 0 2px;border-top:1px solid var(--fio);}
+.medidas[hidden]{display:none;}
+.medidas__campos{display:flex;flex-wrap:wrap;gap:10px;}
+.medida{
+  display:inline-flex;align-items:center;gap:7px;
+  min-height:44px;padding:0 12px;
+  border:1px solid var(--fio);border-radius:var(--r);background:var(--cal);
+  font-size:13px;color:var(--cinza);
+}
+.medida span{white-space:nowrap;}
+.medida input{
+  /* 44px também no campo: o label tem alvo grande, mas quem recebe o
+     toque de quem mira o número é o input */
+  width:52px;min-height:44px;border:0;background:none;
+  font-family:var(--corpo);font-size:15px;color:var(--tinta);text-align:right;
+}
+.medida input:focus{outline:none;}
+.medida:focus-within{border-color:var(--tinta);}
+.medida i{font-style:normal;font-size:12px;color:var(--cinza);}
+
+/* o tamanho recomendado, ao lado de cada peça escolhida */
+.vaga__tam{
+  display:inline-flex;align-items:center;gap:6px;margin-left:2px;
+  font-size:12px;font-weight:600;color:var(--rosa-forte);white-space:nowrap;
+}
+.vaga__tam span{font-weight:500;color:var(--cinza);font-size:11.5px;}
+.vaga__tam b{
+  display:inline-grid;place-items:center;min-width:26px;min-height:22px;padding:0 6px;
+  border-radius:var(--r);background:var(--rosa-forte);color:var(--cal);font-size:12px;
+}
 .prova__faixa{
   width:100%;max-width:280px;height:44px;background:none;cursor:pointer;
   accent-color:var(--tinta);
@@ -716,7 +753,10 @@ a.marca{min-height:44px;}
   transition:background var(--t);
 }
 .prova__mandar:hover:not(:disabled){background:var(--rosa-forte);}
-.prova__mandar:disabled{background:#2E0F3D3d;cursor:default;}
+/* Desativado ainda precisa ser LIDO: é ele que diz o que fazer para
+   habilitar. O tinta a 24% deixava texto claro sobre fundo quase branco,
+   1,67:1 — e o teste só acusou depois que passou a compor o alfa. */
+.prova__mandar:disabled{background:#CFC7D6;color:#453352;cursor:default;}
 .prova__mandar svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;}
 .prova__limpar{
   min-height:44px;padding:0 4px;color:var(--cinza);
@@ -1118,8 +1158,27 @@ a.marca{min-height:44px;}
                      aria-labelledby="rot-larg" aria-valuetext="normal">
             </div>
             <div class="prova__campo">
-              <span class="prova__rot" id="rot-manequim">Manequim</span>
+              <span class="prova__rot" id="rot-manequim">O tamanho que você veste hoje</span>
               <div class="prova__opcoes" id="manequins" role="radiogroup" aria-labelledby="rot-manequim"></div>
+              <button class="prova__abrir-medidas" id="abrir-medidas" type="button"
+                      aria-expanded="false" aria-controls="medidas">
+                Prefiro informar minhas medidas
+              </button>
+              <div class="medidas" id="medidas" hidden>
+                <p class="prova__dica">
+                  Com a fita métrica por cima da roupa de baixo, sem apertar.
+                  Preencha o que souber — cada medida sozinha já ajuda.
+                </p>
+                <div class="medidas__campos">
+                  <label class="medida"><span>Busto</span>
+                    <input type="number" id="m-busto" inputmode="numeric" min="60" max="160" step="1"><i>cm</i></label>
+                  <label class="medida"><span>Cintura</span>
+                    <input type="number" id="m-cintura" inputmode="numeric" min="50" max="150" step="1"><i>cm</i></label>
+                  <label class="medida"><span>Quadril</span>
+                    <input type="number" id="m-quadril" inputmode="numeric" min="60" max="170" step="1"><i>cm</i></label>
+                </div>
+                <p class="prova__dica" id="medidas-saida" role="status"></p>
+              </div>
             </div>
             <div class="prova__campo" id="campo-foto" hidden>
               <p class="prova__dica">
@@ -1358,11 +1417,11 @@ const CONFIG = {
      antes:   preço cheio, só se a peça realmente já custou isso.
               0 = não tem "de/por" e nenhuma marca de desconto.  */
   pecas: [
-    {ref:"FA-1001", nome:"Calça wide leg jeans",          cat:"Looks",      antes:279.90, preco:139.90, tams:["36","38","40","42","44"], restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223235_f25f524d-836d-4398-8d0e-b889de8308cd.png", tipo:"look",   molde:"calca-wide",  cor:"#3F5A78"},
-    {ref:"FA-1002", nome:"Blazer de alfaiataria off-white", cat:"Looks",    antes:0,      preco:329.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_c41cd411-9209-4f31-b192-2964580cb50c.png", tipo:"look",   molde:"blazer",      cor:"#EBE4DA"},
-    {ref:"FA-1003", nome:"Jaqueta de couro preta",         cat:"Looks",     antes:0,      preco:459.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_12c3a06b-82e4-41ce-b970-9b63e9bf321c.png", tipo:"look",   molde:"jaqueta",     cor:"#26222C"},
-    {ref:"FA-1004", nome:"Tricô gola alta",                cat:"Looks",     antes:189.90, preco:149.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_b79e3cba-fad1-4c38-bcd5-58e96c3227db.png", tipo:"look",   molde:"trico",       cor:"#E3D6C2"},
-    {ref:"FA-1005", nome:"Sobretudo longo",                cat:"Looks",     antes:0,      preco:399.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_c4e5d9f0-3b47-4acd-84b3-56354cd14ab8.png", tipo:"look",   molde:"sobretudo",   cor:"#AD7C4E"},
+    {ref:"FA-1001", nome:"Calça wide leg jeans",          cat:"Looks",      antes:279.90, preco:139.90, tams:["36","38","40","42","44"], restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223235_f25f524d-836d-4398-8d0e-b889de8308cd.png", tipo:"look",   molde:"calca-wide",  cor:"#3F5A78", modelagem:"normal"},
+    {ref:"FA-1002", nome:"Blazer de alfaiataria off-white", cat:"Looks",    antes:0,      preco:329.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_c41cd411-9209-4f31-b192-2964580cb50c.png", tipo:"look",   molde:"blazer",      cor:"#EBE4DA", modelagem:"justa"},
+    {ref:"FA-1003", nome:"Jaqueta de couro preta",         cat:"Looks",     antes:0,      preco:459.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_12c3a06b-82e4-41ce-b970-9b63e9bf321c.png", tipo:"look",   molde:"jaqueta",     cor:"#26222C", modelagem:"justa"},
+    {ref:"FA-1004", nome:"Tricô gola alta",                cat:"Looks",     antes:189.90, preco:149.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_b79e3cba-fad1-4c38-bcd5-58e96c3227db.png", tipo:"look",   molde:"trico",       cor:"#E3D6C2", modelagem:"normal"},
+    {ref:"FA-1005", nome:"Sobretudo longo",                cat:"Looks",     antes:0,      preco:399.90, tams:["P","M","G"],              restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_c4e5d9f0-3b47-4acd-84b3-56354cd14ab8.png", tipo:"look",   molde:"sobretudo",   cor:"#AD7C4E", modelagem:"ampla"},
     {ref:"FA-3001", nome:"Bolsa de ombro em couro caramelo", cat:"Bolsas",  antes:0,      preco:289.90, tams:["Único"],                  restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_a643090c-9bb5-4d0a-a3ff-ab391393551a.png", tipo:"bolsa",  molde:"bolsa-ombro", cor:"#A2662F"},
     {ref:"FA-3002", nome:"Bolsa estruturada preta",        cat:"Bolsas",    antes:229.90, preco:179.90, tams:["Único"],                  restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_8cc38d69-d40d-4f6a-bd2c-89c26889d992.png", tipo:"bolsa",  molde:"bolsa-mao",   cor:"#26222C"},
     {ref:"FA-2001", nome:"Óculos solar retangular",        cat:"Óculos",    antes:0,      preco:149.90, tams:["Único"],                  restam:null, foto:"https://d8j0ntlcm91z4.cloudfront.net/user_3DDzmaNE9hB5TKtHS8rnmHrjGMP/hf_20260804_223149_aed46c2e-db49-4b9f-b949-39bdacc79df2.png", tipo:"oculos", molde:"oculos",      cor:"#26222C"}
@@ -1397,7 +1456,12 @@ const CONFIG = {
                  - enquadre JUSTO na peça: a moldura do arquivo é o que
                    define a largura dela no corpo
                  - recorte o fundo e salve em PNG com transparência
-               Exemplo: recorte: "fotos/FA-1005-recorte.png"              */
+               Exemplo: recorte: "fotos/FA-1005-recorte.png"
+
+       modelagem — como a peça veste, e só isso muda o tamanho que o site
+               recomenda: "justa" (sobe um tamanho), "normal" (mantém) ou
+               "ampla" (mantém, e a cliente pode descer se quiser folga
+               menor). Sem o campo, vale "normal".                       */
   provador: {
     /* ligar/desligar a seção inteira */
     ligado: true,
@@ -1422,7 +1486,30 @@ const CONFIG = {
     /* Peça numerada não tem P/M/G. Aqui está de que número é cada
        manequim — a mesma equivalência da tabela de medidas da loja.
        O provador usa o primeiro número que a peça realmente tem. */
-    equivalencia: {P:["36","38"], M:["38","40"], G:["40","42"], GG:["42","44"]}
+    equivalencia: {P:["36","38"], M:["38","40"], G:["40","42"], GG:["42","44"]},
+
+    /* ── TABELA DE MEDIDAS ─────────────────────────────────────
+       CONFIRA ESTES NÚMEROS COM AS PEÇAS DA LOJA ANTES DE PUBLICAR.
+       Eles são a referência do mercado brasileiro, não as medidas das
+       suas peças — e recomendar tamanho errado é pior do que não
+       recomendar nada: gera troca, que é exatamente o que isto existe
+       para evitar. Meça três peças de cada tamanho e ajuste.
+
+       São medidas do CORPO, em centímetros, que cada tamanho veste —
+       não as medidas da roupa esticada.
+
+       Enquanto `conferida` for false, o rodapé avisa a loja e a
+       recomendação sai com a ressalva na tela. Depois de conferir,
+       troque para true e a ressalva some.                            */
+    medidas: {
+      conferida: false,
+      tabela: {
+        P:  {busto:[82,88],  cintura:[63,69], quadril:[90,96]},
+        M:  {busto:[88,94],  cintura:[69,75], quadril:[96,102]},
+        G:  {busto:[94,101], cintura:[75,82], quadril:[102,109]},
+        GG: {busto:[101,109],cintura:[82,90], quadril:[109,117]}
+      }
+    }
   },
 
 };
@@ -1638,6 +1725,10 @@ document.querySelectorAll("[data-zap]").forEach(el => {
   const oferta = CONFIG.freteGratis || (CONFIG.cupom && CONFIG.cupom.desconto);
   const avisos = [];
   if(provisorio) avisos.push("preencha o WhatsApp, o telefone e o CNPJ");
+  if(((CONFIG.provador||{}).medidas||{}).conferida !== true)
+    avisos.push("confira a tabela de medidas do provador com as peças reais e "+
+                "ponha conferida:true — recomendar tamanho errado gera a troca "+
+                "que ela existe para evitar");
   if(oferta) avisos.push("confirme o cupom e o valor do frete grátis da abertura, "+
                          "ou ponha null nos dois em CONFIG para tirá-los do ar");
   $("#legal").innerHTML =
@@ -2538,18 +2629,110 @@ escrever();
       (faltando.length ? " Sem "+faltando.join(" nem ")+" escolhida: aparece a base neutra." : "");
   }
 
+  /* ── TAMANHO RECOMENDADO ────────────────────────────────────
+     Dois caminhos, e nenhum deles inventa número.
+
+     1. As medidas. Busto, cintura e quadril caem na tabela da loja. É o
+        caminho preciso, e o que a tela pede quando a cliente quer certeza.
+     2. O tamanho que ela já veste. Sem fita métrica, o dado mais confiável
+        que existe é a experiência dela — e ele não precisa de nada.
+
+     O que NÃO existe aqui: estimar circunferência a partir de altura e
+     peso. Dá para fazer a conta, e ela erra o suficiente para gerar a
+     troca que este recurso existe para evitar. Preferi pedir a medida.
+
+     Sobre a modelagem: peça justa sobe um tamanho, peça ampla mantém. Nunca
+     desço sozinho — roupa apertada volta, roupa folgada fica. */
+  const ESCALA = ["P","M","G","GG"];
+
+  /* qual medida do corpo manda em cada vaga */
+  const MEDIDA_DA_VAGA = {cima:"busto", sobre:"busto", baixo:"quadril"};
+
+  function medidasInformadas(){
+    const ler = id => {
+      const v = parseFloat(($("#"+id)||{}).value);
+      return Number.isFinite(v) && v >= 40 && v <= 200 ? v : null;
+    };
+    return {busto: ler("m-busto"), cintura: ler("m-cintura"), quadril: ler("m-quadril")};
+  }
+
+  /* devolve o tamanho da tabela em que a medida cai, ou o mais próximo */
+  function tamanhoPelaMedida(qual, valor){
+    const tab = ((cfg.medidas || {}).tabela) || {};
+    let melhor = null, menorDistancia = Infinity;
+    for(const t of ESCALA){
+      const faixa = tab[t] && tab[t][qual];
+      if(!faixa) continue;
+      if(valor >= faixa[0] && valor <= faixa[1]) return t;
+      const d = valor < faixa[0] ? faixa[0]-valor : valor-faixa[1];
+      if(d < menorDistancia){ menorDistancia = d; melhor = t; }
+    }
+    return melhor;
+  }
+
+  /* o tamanho que o site recomenda para UMA peça, e por quê */
+  function recomendar(p, vaga){
+    const med = medidasInformadas();
+    const qual = MEDIDA_DA_VAGA[vaga];
+    let base = null, porque = "";
+
+    if(qual && med[qual] != null){
+      base = tamanhoPelaMedida(qual, med[qual]);
+      porque = "pelo seu "+qual+" de "+med[qual]+" cm";
+    }else{
+      base = (cfg.manequins || ESCALA)[manequim];
+      porque = "a partir do "+base+" que você veste";
+    }
+    if(!base) return null;
+
+    /* modelagem justa pede um tamanho a mais */
+    let i = ESCALA.indexOf(base);
+    const mod = p.modelagem || "normal";
+    if(mod === "justa" && i >= 0 && i < ESCALA.length-1){
+      i++; porque += ", e esta peça veste justa";
+    }
+    const tam = i >= 0 ? ESCALA[i] : base;
+    return {tam, porque, mod};
+  }
+
   /* qual tamanho vai para o carrinho. Peça numerada não tem P/M/G: a
      equivalência do CONFIG traduz, e o primeiro número que a peça
      realmente tem é o escolhido. */
-  function tamanhoPara(p){
+  /* Traduz o tamanho recomendado para um que a peça realmente tem.
+     A versão anterior caía no tamanho do MEIO quando não achava — e assim
+     recomendava GG na etiqueta e mandava M para o carrinho. Agora procura
+     o vizinho, subindo primeiro: roupa apertada volta, roupa folgada fica. */
+  function traduzir(p, alvo){
     const tams = Array.isArray(p.tams) ? p.tams : [];
     if(!tams.length) return null;
-    const man = (cfg.manequins || [])[manequim];
-    if(tams.includes(man)) return man;
-    const eq = (cfg.equivalencia || {})[man] || [];
-    for(const t of eq) if(tams.includes(t)) return t;
-    if(tams.length === 1) return tams[0];
-    return tams[Math.floor(tams.length/2)];
+    const numero = t => {
+      const eq = (cfg.equivalencia || {})[t] || [];
+      for(const x of eq) if(tams.includes(x)) return x;
+      return null;
+    };
+    /* exato:true quando a peça tem mesmo o tamanho pedido — inclusive na
+       numeração, que é o MESMO tamanho escrito de outro jeito. Sem esta
+       distinção a calça 40 aparecia como "sem G", e 40 É o G dela. */
+    if(tams.includes(alvo)) return {tam:alvo, exato:true};
+    const n0 = numero(alvo); if(n0) return {tam:n0, exato:true};
+    const i = ESCALA.indexOf(alvo);
+    if(i >= 0){
+      for(let j = i+1; j < ESCALA.length; j++){
+        if(tams.includes(ESCALA[j])) return {tam:ESCALA[j], exato:false};
+        const x = numero(ESCALA[j]); if(x) return {tam:x, exato:false};
+      }
+      for(let j = i-1; j >= 0; j--){
+        if(tams.includes(ESCALA[j])) return {tam:ESCALA[j], exato:false};
+        const x = numero(ESCALA[j]); if(x) return {tam:x, exato:false};
+      }
+    }
+    return {tam: tams.length === 1 ? tams[0] : tams[tams.length-1], exato:false};
+  }
+
+  function tamanhoPara(p, vaga){
+    const r = vaga ? recomendar(p, vaga) : null;
+    const t = traduzir(p, (r && r.tam) || (cfg.manequins || [])[manequim]);
+    return t && t.tam;
   }
 
   /* ── os controles ── */
@@ -2584,6 +2767,37 @@ escrever();
       '</div></div>').join("");
   }
 
+  /* Mostra o tamanho recomendado ao lado da peça escolhida. Fica junto da
+     peça, e não num resumo no fim: é ali que a dúvida aparece. */
+  function pintarTamanhos(){
+    const conferida = ((cfg.medidas || {}).conferida) === true;
+    $("#vagas").querySelectorAll(".peca-op").forEach(b => {
+      const vaga = b.closest("[data-vaga]").dataset.vaga;
+      const posta = look[vaga];
+      const velha = b.querySelector(".vaga__tam");
+      if(velha) velha.remove();
+      if(!posta || posta.ref !== b.dataset.ref) return;
+      if(!MEDIDA_DA_VAGA[vaga]) return;          /* bolsa e óculos não têm tamanho */
+      const r = recomendar(posta, vaga);
+      if(!r) return;
+      /* mostra o tamanho QUE VAI PARA O CARRINHO, não o ideal teórico: se
+         a peça não tem o ideal, dizer o ideal seria mentir na etiqueta */
+      const vai = traduzir(posta, r.tam);
+      if(!vai || !vai.tam) return;
+      const faltou = !vai.exato;
+      const eti = document.createElement("span");
+      eti.className = "vaga__tam";
+      eti.innerHTML = '<b>'+escapar(vai.tam)+'</b>' +
+        (faltou ? '<span>sem '+escapar(r.tam)+'</span>' : "");
+      eti.title = (faltou
+          ? "O ideal seria "+r.tam+" ("+r.porque+"), mas esta peça só tem até "+vai.tam
+          : "Recomendado "+r.porque) +
+        (conferida ? "" : ". A loja ainda não conferiu a tabela de medidas.");
+      eti.setAttribute("aria-label", eti.title);
+      b.appendChild(eti);
+    });
+  }
+
   function pintarControles(){
     [...$("#tons").children].forEach((b,i) => {
       b.setAttribute("aria-checked", String(i===pele)); b.tabIndex = i===pele ? 0 : -1; });
@@ -2611,14 +2825,28 @@ escrever();
 
     const bt = $("#prova-add");
     bt.disabled = !postas.length;
+    /* o botão diz os tamanhos que vão de fato: se as peças recomendam
+       tamanhos diferentes — e recomendam, quando uma veste justa —, dizer
+       um só seria mentira na hora do clique */
+    const tams = [];
+    ["cima","baixo","sobre"].forEach(vaga => {
+      const p = look[vaga]; if(!p) return;
+      const t = tamanhoPara(p, vaga);
+      if(t && tams.indexOf(t) < 0) tams.push(t);
+    });
     $("#prova-add-txt").textContent = postas.length
-      ? "Adicionar "+postas.length+(postas.length>1?" peças":" peça")+" no tamanho "+man
+      ? "Adicionar "+postas.length+(postas.length>1?" peças":" peça")+
+        (tams.length === 1 ? " no tamanho "+tams[0]
+         : tams.length > 1
+           /* "M, 38 e G" — vírgula até o penúltimo, "e" no último */
+           ? " nos tamanhos "+tams.slice(0,-1).join(", ")+" e "+tams[tams.length-1]
+           : "")
       : "Escolha uma peça";
     $("#prova-limpar").hidden = !postas.length;
   }
 
   function atualizar(){
-    desenhar(); pintarControles(); contar();
+    desenhar(); pintarControles(); pintarTamanhos(); contar();
     const bt = $("#tirar-foto"); if(bt) bt.hidden = !(modo === "foto" && foto);
   }
 
@@ -2679,7 +2907,10 @@ escrever();
     const postas = ["cima","baixo","sobre","bolsa","oculos"]
       .map(v => look[v]).filter(Boolean);
     if(!postas.length) return;
-    postas.forEach(p => { const t = tamanhoPara(p); if(t) por(p, t); });
+    ["cima","baixo","sobre","bolsa","oculos"].forEach(vaga => {
+      const p = look[vaga]; if(!p) return;
+      const t = tamanhoPara(p, vaga); if(t) por(p, t);
+    });
   });
 
   /* ── a foto ─────────────────────────────────────────────────
@@ -2798,6 +3029,34 @@ escrever();
     g._t = setTimeout(() => { atualizar(); const v = $('[data-marca="'+foco+'"]'); if(v) v.focus(); }, 260);
   });
 
+  /* ── medidas ── */
+  $("#abrir-medidas").addEventListener("click", () => {
+    const cx = $("#medidas"), abrindo = cx.hidden;
+    cx.hidden = !abrindo;
+    $("#abrir-medidas").setAttribute("aria-expanded", String(abrindo));
+    $("#abrir-medidas").textContent = abrindo
+      ? "Voltar a escolher pelo tamanho que visto"
+      : "Prefiro informar minhas medidas";
+    if(abrindo) $("#m-busto").focus();
+    atualizar();
+  });
+
+  function contarMedidas(){
+    const med = medidasInformadas();
+    const ditas = Object.keys(med).filter(k => med[k] != null);
+    const conferida = ((cfg.medidas || {}).conferida) === true;
+    const saida = $("#medidas-saida");
+    if(!ditas.length){
+      saida.textContent = "Enquanto não houver medida, vale o tamanho que você escolheu acima.";
+      return;
+    }
+    const partes = ditas.map(k => k+" "+med[k]+" cm → "+(tamanhoPelaMedida(k, med[k]) || "?"));
+    saida.textContent = partes.join(" · ") +
+      (conferida ? "" : " · A loja ainda não conferiu esta tabela, então trate como palpite.");
+  }
+  ["m-busto","m-cintura","m-quadril"].forEach(id =>
+    $("#"+id).addEventListener("input", () => { contarMedidas(); atualizar(); }));
+
   $("#largura").addEventListener("input", e => {
     larguraFoto = (+e.target.value || 100)/100;
     e.target.setAttribute("aria-valuetext",
@@ -2838,6 +3097,7 @@ escrever();
   });
 
   montarControles();
+  contarMedidas();
   atualizar();
 })();
 

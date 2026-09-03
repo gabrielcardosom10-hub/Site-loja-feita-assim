@@ -487,3 +487,57 @@ uma peça de infraestrutura para manter.
 Elas mostram comprimento, cor, textura e proporção no corpo dela — que é a
 dúvida real de quem compra roupa online. Como o tecido cai, franze e marca
 continua sendo do provador físico, e o texto ao lado da foto leva para lá.
+
+## O tamanho certo
+
+O que mais devolve peça numa loja a distância não é a cor errada — é o
+tamanho. O provador passou a recomendar um, e por dois caminhos que não
+inventam número.
+
+**1. As medidas.** Busto, cintura e quadril caem na tabela da loja. É o
+caminho preciso, e a tela pede quando a cliente quer certeza.
+
+**2. O tamanho que ela já veste.** Sem fita métrica, o dado mais confiável
+que existe é a experiência dela — e não custa nada.
+
+**O que deliberadamente não existe aqui: estimar circunferência a partir de
+altura e peso.** Dá para fazer a conta, e ela erra o suficiente para gerar
+exatamente a troca que o recurso existe para evitar. Preferi pedir a medida
+a chutar por ela.
+
+**A modelagem da peça entra na conta.** `modelagem: "justa"` sobe um tamanho,
+`"ampla"` mantém. Nunca desço sozinho: roupa apertada volta, roupa folgada
+fica.
+
+**A etiqueta mostra o tamanho que VAI PARA O CARRINHO, não o ideal teórico.**
+Essa distinção custou um bug: a primeira versão recomendava GG na etiqueta e
+mandava M para o carrinho, porque o blazer não tem GG e o código caía no
+tamanho do meio da lista. Hoje `traduzir()` procura o vizinho subindo
+primeiro, e quando o ideal não existe a etiqueta diz — "G, sem GG" — em vez
+de fingir que deu certo.
+
+A tradução para numeração também precisou de cuidado: 40 **é** o G da calça,
+não um tamanho diferente. Sem marcar isso, a calça aparecia como "sem G"
+tendo exatamente o tamanho pedido.
+
+**A tabela vem preenchida e marcada como não conferida.** Os números são a
+referência do mercado brasileiro, não as medidas das peças da loja. Enquanto
+`conferida` for `false`, o rodapé avisa a dona e a recomendação sai com a
+ressalva na tela. Recomendar tamanho errado é pior do que não recomendar.
+
+## O avatar do Minimal Club, e por que ele não cabe aqui
+
+O pedido foi o fluxo do Minimal Club: três ou quatro fotos do rosto, e um
+avatar fotorrealista de corpo inteiro vestindo o look. Vale registrar por que
+o site não faz isso, para ninguém tentar de novo pelo caminho errado.
+
+Gerar um corpo com o rosto de uma pessoa a partir de selfies é **difusão com
+identidade preservada** — GPU em servidor, sempre. A Doji pede seis selfies e
+duas fotos de corpo inteiro e leva meia hora para montar o avatar; o Google
+roda um modelo próprio. Nenhum roda no navegador, e uma chave de API dentro
+de um arquivo estático é pública.
+
+**Por isso o site não pede as fotos do rosto.** Coletar rosto é coletar dado
+biométrico; fazer isso sem ter o que entregar em troca não se justifica em
+nenhuma leitura. O dia em que existir o intermediário no servidor, o fluxo de
+captura se escreve em uma tarde — e aí ele terá para que servir.
