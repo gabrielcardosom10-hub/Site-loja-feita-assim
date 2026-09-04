@@ -1,124 +1,136 @@
 # O provador com IA — o intermediário
 
-O site é um arquivo estático. Uma chave de API dentro dele seria pública, e
-qualquer pessoa gastaria a conta da loja. Este worker fica no meio: ele guarda
-a chave, e o site nunca a vê.
+O site é estático. Uma chave de API dentro dele seria pública, e qualquer
+pessoa gastaria a conta da loja. O intermediário fica no meio: ele guarda a
+chave, e o navegador nunca a vê.
 
-Roda no **Cloudflare Workers**, que tem plano gratuito folgado (100 mil
-requisições por dia). O que se paga é a API de try-on, por imagem gerada.
+**O site está na Vercel, então o caminho é o de cima.** O worker do Cloudflare
+continua aqui como alternativa, para o caso de a hospedagem mudar de novo.
 
-## Antes de começar
+---
 
-1. Uma conta na **Cloudflare** — gratuita, em cloudflare.com.
-2. Uma conta na **FASHN** com créditos — fashn.ai. A chave fica em Settings →
-   API. **Não me mande essa chave, nem cole em conversa nenhuma:** ela entra
-   direto no Cloudflare pelo comando do passo 4.
-3. **Node.js** instalado no computador.
+## Caminho 1 — Vercel (é o do seu site)
 
-## Publicar, passo a passo
+O arquivo é `api/provar.js`, na raiz do projeto. Ele **sobe junto com o site**:
+não há comando para rodar, nem segunda conta para criar.
 
-Abra o terminal dentro desta pasta (`servidor/`) e rode, em ordem:
+### Ligar
+
+1. Crie uma conta na **fashn.ai** e compre créditos. A chave fica em
+   Settings → API.
+   **Não me mande essa chave, nem cole em conversa nenhuma.**
+2. No painel da Vercel, abra o projeto → **Settings** → **Environment
+   Variables** e crie:
+
+| nome | valor | para quê |
+|---|---|---|
+| `FASHN_KEY` | a sua chave | **obrigatória** — sem ela o provador responde que não foi configurado |
+| `ORIGENS` | `https://site-loja-feita-assim.vercel.app` | de onde o site pode chamar |
+| `HOSTS_PECA` | `d8j0ntlcm91z4.cloudfront.net,site-loja-feita-assim.vercel.app` | de onde as fotos das peças podem vir |
+| `TETO_HORA` | `20` | provas por hora, no site todo |
+| `TETO_IP` | `6` | provas por hora, por pessoa |
+
+3. **Redeploy** (a Vercel só aplica variáveis novas num deploy novo).
+4. No `index.html`, em `CONFIG.provador.ia`, troque `endpoint: ""` por
+   `endpoint: "/api/provar"` e publique.
+
+O passo 4 é de propósito o último. Com o botão no ar e a função sem chave, a
+cliente consentiria em mandar a foto dela para fora e receberia um erro —
+consentimento gasto à toa é pior do que botão nenhum.
+
+Pronto. O botão "Provar de verdade com IA" aparece no provador, no modo
+"Na minha foto".
+
+### Conferir
+
+Abra `https://site-loja-feita-assim.vercel.app/api/provar` no navegador. Com a
+chave configurada ele responde `{"erro":"identificador inválido"}` — o que é o
+esperado, porque faltou o `?id=`. Se responder `{"erro":"sem chave"}`, a
+variável não chegou: confira o nome e refaça o deploy.
+
+---
+
+## O teto de gasto — leia antes de ligar
+
+O endereço é público, e tem de ser. Existem **dois** tetos, e eles não têm o
+mesmo peso:
+
+**O que segura de verdade é o saldo pré-pago na FASHN.** Ele não depende de
+nenhuma linha deste código estar certa. Compre crédito limitado; é o único
+teto que não falha.
+
+**O daqui é por hora e por IP.** Ele é rígido só se você configurar o Upstash
+(abaixo). Sem Upstash ele vale dentro de cada instância quente da função — a
+Vercel cria várias — então ele **ajuda contra rajada e não substitui o saldo**.
+
+Custo de referência: **US$ 0,075 por imagem**, cerca de **R$ 0,42**. Confira a
+cotação e o preço atual antes de decidir.
+
+| provas/hora | pico teórico por dia | custo |
+|---|---|---|
+| 20 | 480 | ~US$ 36 |
+| 6 | 144 | ~US$ 11 |
+
+O pico teórico só acontece se o site ficar 24h no limite. Na prática o saldo
+pré-pago é o que você deve dimensionar.
+
+### Teto rígido (opcional, grátis)
+
+Para o teto por hora valer entre todas as instâncias:
+
+1. Crie um banco gratuito no **upstash.com** (Redis).
+2. Copie `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` para as
+   variáveis de ambiente da Vercel.
+3. Redeploy.
+
+A função usa automaticamente quando as duas existem, e volta ao modo memória
+se o Upstash cair — o provador não para por causa disso.
+
+---
+
+## Privacidade — o que muda ao ligar
+
+Enquanto o provador era só desenho, a foto **não saía do aparelho**, e a CSP
+com `connect-src 'self'` garantia isso por construção.
+
+**Com a IA ligada, a foto é enviada para a FASHN**, que fica fora do Brasil.
+Não há como fazer diferente: o modelo roda em servidor.
+
+Por isso o site pede **consentimento explícito** antes do primeiro envio e diz
+para onde a foto vai. Isso é obrigação da LGPD, e **a loja é a controladora
+desses dados**. Antes de publicar:
+
+- confira na política da FASHN por quanto tempo a imagem fica guardada;
+- escreva isso em `CONFIG.provador.ia.guarda`, no `index.html` — esse texto
+  aparece na caixa de consentimento.
+
+A função não guarda a foto, não a escreve em log e não a manda para nenhum
+outro lugar.
+
+---
+
+## Caminho 2 — Cloudflare Workers (alternativa)
+
+Só se o site sair da Vercel. O arquivo é `worker.js`, nesta pasta.
 
 ```bash
-# 1. entrar na sua conta Cloudflare (abre o navegador)
 npx wrangler login
-
-# 2. criar o armazenamento dos contadores de teto
-npx wrangler kv namespace create CONTAS
-```
-
-O comando 2 devolve algo como `id = "abc123..."`. **Cole esse id no
-`wrangler.toml`**, no lugar de `<COLE_AQUI_...>`.
-
-```bash
-# 3. guardar a chave da FASHN (ela é pedida na hora, não fica em arquivo)
+npx wrangler kv namespace create CONTAS   # cole o id no wrangler.toml
 npx wrangler secret put FASHN_KEY
-
-# 4. publicar
 npx wrangler deploy
 ```
 
-No fim ele imprime o endereço, algo como:
-
-```
-https://feita-assim-provador.SEU-NOME.workers.dev
-```
-
-## Ligar no site
-
-Duas mudanças no `index.html`, e as duas são obrigatórias:
-
-**1. No `CONFIG`,** dentro de `provador`, ponha o endereço:
-
-```js
-ia: { endpoint: "https://feita-assim-provador.SEU-NOME.workers.dev" },
-```
-
-**2. Na CSP, no topo do arquivo,** troque
-
-```
-connect-src 'none';
-```
-
-por
-
-```
-connect-src https://feita-assim-provador.SEU-NOME.workers.dev;
-```
-
-Sem essa segunda mudança o navegador **bloqueia** a chamada — de propósito. É
-a mesma trava que hoje garante que a foto não sai do aparelho.
-
-## Conferir se está de pé
-
-```bash
-curl https://feita-assim-provador.SEU-NOME.workers.dev/saude
-```
-
-Deve responder `{"ok":true,"hoje":0,"teto":60}`.
-
-## O teto de gasto
-
-`TETO_DIA` é o número de provas por dia. **Ele é o que segura a conta.** O
-endereço é público — tem de ser, o site é público — e CORS só vale dentro do
-navegador: quem chamar por fora não manda origem nenhuma. O teto vale para
-todo mundo.
-
-| TETO_DIA | custo por dia | por mês |
-|---|---|---|
-| 30 | ~US$ 2,25 | ~R$ 380 |
-| 60 | ~US$ 4,50 | ~R$ 760 |
-| 200 | ~US$ 15 | ~R$ 2.500 |
-
-Cotação de US$ 0,075 por imagem e dólar a R$ 5,60 — **confira os dois antes
-de decidir.** Comece em 30 e suba olhando o consumo.
-
-Para mudar o teto depois, edite `wrangler.toml` e rode `npx wrangler deploy`
-de novo.
+Depois ponha o endereço em `CONFIG.provador.ia.endpoint` e troque, na CSP do
+`index.html`, `connect-src 'self'` pelo endereço do worker — sem isso o
+navegador bloqueia a chamada, de propósito.
 
 ## O que fazer se algo der errado
 
 | sintoma | causa provável |
 |---|---|
-| o site diz "não consegui falar com o provador" | a CSP não foi trocada, ou o endereço está errado |
-| `403 origem não autorizada` | `ORIGENS` no `wrangler.toml` não bate com o endereço do site |
+| "o provador não foi configurado" | falta `FASHN_KEY`, ou faltou o redeploy |
+| "não consegui falar com o provador" | o caminho em `CONFIG` não bate com o da função |
+| `403 origem não autorizada` | `ORIGENS` não bate com o endereço do site |
 | `400 a peça não é de um endereço autorizado` | falta o host das fotos em `HOSTS_PECA` |
-| `429 teto do dia` | o limite diário acabou; ele volta à meia-noite UTC |
+| `429 teto da hora` | o limite acabou; ele volta na hora seguinte |
 | `502` com mensagem da API | chave inválida ou sem crédito na FASHN |
-
-## Privacidade — o que muda
-
-Enquanto o provador era só desenho, a foto **não saía do aparelho**, e a CSP
-com `connect-src 'none'` garantia isso por construção.
-
-**Com a IA ligada, isso deixa de ser verdade.** A foto da cliente é enviada
-para a API de try-on, que é uma empresa fora do Brasil. Não há como fazer
-diferente: o modelo roda em servidor.
-
-Por isso o site pede **consentimento explícito** antes do primeiro envio e diz
-para onde a foto vai. Isso não é gentileza: é obrigação da LGPD, e a loja é a
-controladora desses dados. Antes de publicar, confira na política da FASHN por
-quanto tempo elas guardam a imagem, e diga isso à cliente.
-
-Este worker não guarda a foto, não a escreve em log e não a manda para nenhum
-outro lugar.

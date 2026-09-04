@@ -20,9 +20,14 @@
        base-uri  'none'    ninguém reescreve a base dos links relativos
        frame-src 'none'    a página não embute terceiros
        form-action 'none'  nenhum formulário sai para fora (a busca é local)
+     connect-src é 'self' — e só. O provador com IA mora em /api/ do PRÓPRIO
+     site, então o navegador nunca precisa falar com outro domínio. Isso é
+     melhor do que liberar um endereço de fora: some a categoria inteira de
+     "para onde mais esta página consegue mandar dado".
+
      Falta uma coisa que <meta> não consegue: frame-ancestors, contra a loja
-     ser embutida num iframe alheio. Essa só vale como cabeçalho HTTP, e está
-     no arquivo _headers ao lado deste.
+     ser embutida num iframe alheio. Essa vale como cabeçalho HTTP, e está no
+     `vercel.json` — que a Vercel aplica, diferente do GitHub Pages.
      img-src aceita https: porque as fotos hoje moram fora; quando elas
      estiverem em fotos/, troque por 'self' e feche mais um dedo. -->
 <meta http-equiv="Content-Security-Policy" content="
@@ -32,7 +37,7 @@
   font-src https://fonts.gstatic.com;
   script-src 'unsafe-inline';
   media-src 'self' https:;
-  connect-src 'none';
+  connect-src 'self';
   object-src 'none';
   base-uri 'none';
   frame-src 'none';
@@ -542,14 +547,27 @@ a.marca{min-height:44px;}
   border-top:1px solid var(--fio);
 }
 .prova[hidden]{display:none;}
-/* Três áreas: a figura, a nota embaixo dela e os controles ao lado. Em
-   áreas nomeadas porque no celular a ordem muda e a figura precisa poder
-   grudar sozinha, sem a nota junto. */
+/* A figura no meio, grande, e as peças embaixo dela em prateleiras — a
+   forma que loja de roupa usa quando o provador É a página, e não um
+   painel de controle ao lado. O corpo manda; os controles servem.
+
+   Uma coluna só, em todas as larguras: no desktop a figura fica centrada
+   com respiro dos dois lados, o que a faz parecer o assunto. Duas colunas
+   faziam dela metade de um formulário. */
 .prova__grade{
-  display:grid;grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr);
-  grid-template-areas:"palco lado" "nota lado";
-  align-items:start;gap:14px clamp(24px,4vw,56px);
+  /* minmax(0,1fr), não 1fr. "1fr" é minmax(AUTO,1fr), e o mínimo automático
+     é o min-content do item — a prateleira sangra para fora com margem
+     negativa, e isso inflava a coluna para além da tela: no celular a seção
+     inteira saía deslocada para a direita e cortada. É a armadilha clássica
+     de grid com filho rolável. */
+  display:grid;grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"palco" "titulo" "legenda" "nota" "lado";
+  justify-items:center;gap:16px;
 }
+#prova-titulo{grid-area:titulo;margin-top:4px;}
+#prova-legenda{grid-area:legenda;}
+.prova__nota{max-width:56ch;text-align:center;}
+.prova__lado{width:100%;min-width:0;max-width:min(100%,880px);}
 /* com foto o palco precisa de altura própria, senão ele colapsa enquanto
    a cliente ainda não escolheu imagem nenhuma */
 .prova--foto .prova__palco{
@@ -564,6 +582,7 @@ a.marca{min-height:44px;}
   position:relative;display:grid;justify-items:center;
   padding:clamp(16px,2.5vw,26px);border-radius:var(--r);
   background:var(--ameixa);
+  width:100%;max-width:min(100%,520px);
 }
 .prova__lado{grid-area:lado;}
 
@@ -668,7 +687,7 @@ a.marca{min-height:44px;}
 .prova__abrir-medidas:hover{color:var(--tinta);}
 .medidas{display:grid;gap:10px;padding:14px 0 2px;border-top:1px solid var(--fio);}
 .medidas[hidden]{display:none;}
-.medidas__campos{display:flex;flex-wrap:wrap;gap:10px;}
+.medidas__campos{display:flex;flex-wrap:wrap;gap:10px;min-width:0;}
 .medida{
   display:inline-flex;align-items:center;gap:7px;
   min-height:44px;padding:0 12px;
@@ -712,7 +731,7 @@ a.marca{min-height:44px;}
 .boneca{
   /* a figura é quase três vezes mais alta que larga: medir pela largura
      faria dela um poste de mil pixels. Aqui manda a altura. */
-  height:clamp(360px,52vh,470px);width:auto;max-width:100%;display:block;
+  height:clamp(380px,58vh,540px);width:auto;max-width:100%;display:block;
   touch-action:pan-y;
   /* o desenho todo pisca de leve quando troca de peça; nada mais */
   transition:opacity var(--t);
@@ -723,7 +742,66 @@ a.marca{min-height:44px;}
 }
 .prova__nota a{color:var(--rosa-forte);text-decoration:underline;text-underline-offset:3px;}
 
-.prova__lado{display:grid;gap:clamp(18px,2.5vw,26px);align-content:start;}
+/* minmax(0,1fr) também aqui: coluna implícita de grid é `auto`, cujo mínimo
+   é o min-content do filho. O painel "Como você é" tem campos que não
+   encolhem, e sem esta linha ele empurrava 277px para fora da tela no
+   celular — a mesma armadilha da grade de cima. */
+.prova__lado{
+  display:grid;grid-template-columns:minmax(0,1fr);
+  gap:clamp(18px,2.5vw,26px);align-content:start;
+}
+.voce,.prova__campo,.prova__vagas,.prova__pe{min-width:0;}
+
+/* a legenda do look, sob a figura — o "look de hoje" */
+.prova__legenda{
+  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
+  gap:6px 10px;margin:0;text-align:center;
+  font-size:14px;color:var(--tinta);line-height:1.5;
+}
+.prova__legenda .sep{color:var(--fio);}
+.prova__legenda em{font-style:normal;color:var(--cinza);}
+.prova__etiqueta{
+  font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cinza);margin:0;text-align:center;
+}
+
+/* Os ajustes de corpo ficam recolhidos: a tela é a figura e as peças, não
+   um formulário. O resumo na aba mostra o que está valendo, para ninguém
+   precisar abrir só para conferir. */
+.voce{border:1px solid var(--fio);border-radius:var(--r);background:var(--cal);}
+.voce__abrir{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  min-height:52px;padding:0 16px;cursor:pointer;list-style:none;
+  font-size:13.5px;font-weight:600;color:var(--tinta);
+}
+.voce__abrir::-webkit-details-marker{display:none;}
+.voce__abrir b{font-weight:500;color:var(--cinza);text-align:right;min-width:0;}
+.voce__abrir::after{
+  content:"";flex:none;width:8px;height:8px;margin-left:2px;
+  border-right:1.6px solid var(--cinza);border-bottom:1.6px solid var(--cinza);
+  transform:rotate(45deg) translate(-2px,-2px);transition:transform var(--t);
+}
+.voce[open] .voce__abrir::after{transform:rotate(-135deg) translate(-2px,-2px);}
+.voce__abrir:hover{background:#2E0F3D08;}
+.voce .prova__voce{padding:4px 16px 18px;}
+
+/* as prateleiras: uma faixa por categoria, rolando na horizontal */
+.prateleiras{display:grid;gap:clamp(16px,2.4vw,24px);}
+.prateleira__cab{
+  display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  margin-bottom:10px;
+}
+.prateleira__cab h3{
+  margin:0;font-family:var(--display);font-weight:600;font-size:17px;
+  letter-spacing:-.015em;color:var(--tinta);
+}
+.prateleira__n{font-size:12.5px;color:var(--cinza);}
+.prateleira__trilho{
+  display:flex;flex-wrap:nowrap;gap:10px;overflow-x:auto;scrollbar-width:none;
+  scroll-snap-type:x proximity;
+  margin:0 calc(var(--lado) * -1);padding:2px var(--lado) 6px;
+}
+.prateleira__trilho::-webkit-scrollbar{display:none;}
 .prova__voce{display:grid;gap:16px;}
 .prova__campo{display:grid;gap:9px;}
 /* display:grid vence o atributo hidden — sem esta linha, "Tom de pele" e
@@ -758,20 +836,25 @@ a.marca{min-height:44px;}
 .tom:hover span{box-shadow:0 0 0 2px var(--cinza);}
 .tom[aria-checked="true"] span{box-shadow:0 0 0 2px var(--papel),0 0 0 4px var(--tinta);}
 
-/* as vagas do look: cima, baixo, sobre, bolsa, óculos */
-.prova__vagas{display:grid;gap:2px;border-top:1px solid var(--fio);}
-.vaga{
-  display:grid;grid-template-columns:78px 1fr;align-items:center;
-  gap:14px;padding:11px 0;border-bottom:1px solid var(--fio);
+/* as prateleiras do look: cima, baixo, sobre, bolsa, óculos.
+   .vaga, .vaga__rot e .vaga__itens moravam aqui e ficaram órfãs quando a
+   lista virou prateleira. .vaga__itens ainda trazia flex-wrap:wrap e, por
+   ser declarada depois, vencia o nowrap da prateleira — os botões
+   empilhavam em vez de rolar. Removidas em vez de sobrescritas. */
+/* ARMADILHA DO GRID, terceira aparição neste bloco: coluna implícita é
+   `auto`, e o mínimo de `auto` é o min-content do filho. A prateleira sangra
+   para fora com margem negativa, e sem minmax(0,·) ela esticava a coluna
+   para 667px numa tela de 390. Todo grid daqui que contenha algo rolável ou
+   sangrado leva minmax(0,1fr) e os filhos levam min-width:0. */
+.prova__vagas{
+  display:grid;grid-template-columns:minmax(0,1fr);
+  gap:clamp(16px,2.4vw,24px);padding-top:4px;
 }
-.vaga__rot{
-  font-size:11.5px;font-weight:600;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--cinza);
-}
-.vaga__itens{display:flex;flex-wrap:wrap;gap:7px;}
+.prateleira{min-width:0;}
 .peca-op{
-  display:inline-flex;align-items:center;gap:8px;
-  min-height:44px;padding:0 13px 0 8px;
+  display:inline-flex;align-items:center;gap:8px;flex:none;
+  scroll-snap-align:start;white-space:nowrap;
+  min-height:46px;padding:0 14px 0 9px;
   border:1px solid var(--fio);border-radius:var(--r);background:var(--cal);
   font-family:var(--corpo);font-size:13px;color:var(--tinta);text-align:left;
   transition:border-color var(--t),background var(--t);
@@ -810,9 +893,14 @@ a.marca{min-height:44px;}
 .prova__limpar[hidden]{display:none;}
 
 @media(max-width:900px){
+  /* O template já é de uma coluna; o que muda aqui é só a figura grudar.
+     ATENÇÃO ao mexer: área nomeada que não aparece no template cai no
+     auto-placement, que é o FIM do grid. Foi o que aconteceu quando esta
+     regra ficou com três áreas e o desktop passou a ter cinco — a figura
+     desapareceu do topo e reapareceu por cima do botão de comprar. */
   .prova__grade{
-    grid-template-columns:1fr;
-    grid-template-areas:"palco" "nota" "lado";
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"palco" "titulo" "legenda" "nota" "lado";
   }
   /* a figura acompanha a rolagem: escolher uma peça e não ver o efeito
      é o mesmo que não ter provador. 104px é onde o cabeçalho termina. */
@@ -820,7 +908,6 @@ a.marca{min-height:44px;}
   .boneca{height:clamp(240px,34vh,300px);}
 }
 @media(max-width:620px){
-  .vaga{grid-template-columns:1fr;gap:8px;padding:13px 0;}
   .prova__palco{padding:9px;}
   .boneca{height:clamp(210px,33vh,260px);}
 }
@@ -1172,6 +1259,9 @@ a.marca{min-height:44px;}
           </div>
         </div>
 
+        <p class="prova__etiqueta" id="prova-titulo">O seu look</p>
+        <p class="prova__legenda" id="prova-legenda"></p>
+
         <p class="prova__nota" id="nota-boneca">
           Isto é um desenho para você ver como as peças ficam juntas. Não é
           uma foto sua, e não mostra o caimento no seu corpo — para isso a
@@ -1187,6 +1277,11 @@ a.marca{min-height:44px;}
         </p>
 
         <div class="prova__lado">
+          <details class="voce" id="voce">
+            <summary class="voce__abrir">
+              <span>Como você é</span>
+              <b id="voce-resumo"></b>
+            </summary>
           <div class="prova__voce" role="group" aria-label="Como você é">
             <div class="prova__campo" id="campo-pele">
               <span class="prova__rot" id="rot-pele">Tom de pele</span>
@@ -1247,6 +1342,7 @@ a.marca{min-height:44px;}
               <button class="prova__limpar" id="tirar-foto" type="button" hidden>Trocar de foto</button>
             </div>
           </div>
+          </details>
 
           <div class="prova__vagas" id="vagas"></div>
 
@@ -1574,10 +1670,11 @@ const CONFIG = {
     /* ── PROVAR COM IA ─────────────────────────────────────────
        Desligado enquanto `endpoint` estiver vazio, e o botão nem aparece.
 
-       Para ligar, publique o intermediário da pasta `servidor/` (o LEIA-ME
-       de lá tem o passo a passo) e ponha o endereço aqui. DEPOIS troque, na
-       CSP no topo deste arquivo, `connect-src 'none'` pelo mesmo endereço —
-       sem isso o navegador bloqueia a chamada, de propósito.
+       O intermediário é `api/provar.js`, e ele sobe junto com o site na
+       Vercel. Não há comando para rodar nem segunda conta para criar: falta
+       só pôr a chave da FASHN nas variáveis de ambiente do projeto, em
+       Settings → Environment Variables → FASHN_KEY. O LEIA-ME da pasta
+       `servidor/` tem o passo a passo e as variáveis opcionais.
 
        ATENÇÃO, E ISTO É O MAIS IMPORTANTE DESTE BLOCO: com a IA ligada, a
        foto da cliente PASSA A SAIR DO APARELHO. Ela vai para a empresa que
@@ -1587,6 +1684,17 @@ const CONFIG = {
        LGPD. Confira na política do fornecedor por quanto tempo a imagem
        fica guardada, e escreva isso em `guarda`.                          */
     ia: {
+      /* VAZIO = DESLIGADO, e é assim que ele vem. Só preencha DEPOIS de a
+         chave estar na Vercel e o redeploy ter sido feito.
+
+         O motivo de não vir preenchido: com o botão no ar e a função sem
+         chave, a cliente consentiria em mandar a foto dela para fora e
+         receberia um erro. Consentimento gasto à toa é pior do que botão
+         nenhum.
+
+         Quando for ligar, ponha exatamente: "/api/provar"
+         Caminho do próprio site — nenhum domínio de fora, e por isso a CSP
+         continua em connect-src 'self'. */
       endpoint: "",
       fornecedor: "FASHN",
       guarda: "Confirme com o fornecedor por quanto tempo a imagem fica guardada."
@@ -2873,15 +2981,26 @@ escrever();
       botao("opcao","",i===manequim,"radio").replace("></button>",
         ' aria-label="Manequim '+escapar(t)+'">'+escapar(t)+'</button>')).join("");
 
-    $("#vagas").innerHTML = usadas.map(v =>
-      '<div class="vaga"><span class="vaga__rot">'+escapar(v.rot)+'</span>'+
-      '<div class="vaga__itens" data-vaga="'+escapar(v.id)+'">'+
-        daVaga(v).map(p =>
-          '<button class="peca-op" type="button" aria-pressed="false" '+
-            'data-ref="'+escapar(p.ref)+'">'+
-            '<i style="background:'+corSegura(p.cor)+'"></i>'+
-            escapar(p.nome)+'</button>').join("")+
-      '</div></div>').join("");
+    /* uma prateleira por categoria, rolando na horizontal. Em vez de uma
+       lista que cresce para baixo e empurra o botão de comprar para fora da
+       tela, cada faixa cabe numa linha e rola com o dedo. */
+    $("#vagas").innerHTML = usadas.map(v => {
+      const itens = daVaga(v);
+      return '<section class="prateleira">'+
+        '<div class="prateleira__cab">'+
+          '<h3 id="prat-'+escapar(v.id)+'">'+escapar(v.rot)+'</h3>'+
+          '<span class="prateleira__n">'+itens.length+
+            (itens.length > 1 ? " peças" : " peça")+'</span>'+
+        '</div>'+
+        '<div class="prateleira__trilho" data-vaga="'+escapar(v.id)+'" '+
+          'role="group" aria-labelledby="prat-'+escapar(v.id)+'">'+
+          itens.map(p =>
+            '<button class="peca-op" type="button" aria-pressed="false" '+
+              'data-ref="'+escapar(p.ref)+'">'+
+              '<i style="background:'+corSegura(p.cor)+'"></i>'+
+              escapar(p.nome)+'</button>').join("")+
+        '</div></section>';
+    }).join("");
   }
 
   /* Mostra o tamanho recomendado ao lado da peça escolhida. Fica junto da
@@ -2928,6 +3047,41 @@ escrever();
     });
   }
 
+  /* A legenda sob a figura: as peças do look, em linha, como a etiqueta de
+     um editorial. Quando não há nada, ela convida em vez de sumir — bloco
+     que aparece e desaparece faz a página pular. */
+  function pintarResumo(){
+    const alvo = $("#voce-resumo"); if(!alvo) return;
+    const partes = [];
+    if(modo === "foto"){
+      partes.push("sua foto");
+    }else{
+      const pl = (cfg.peles || [])[pele];
+      if(pl && pl.nome) partes.push(pl.nome.toLowerCase());
+      const al = (cfg.alturas || [])[altura];
+      if(al && al.nome) partes.push(al.nome);
+    }
+    const med = medidasInformadas();
+    const ditas = Object.keys(med).filter(k => med[k] != null);
+    partes.push(ditas.length
+      ? ditas.map(k => k.slice(0,1).toUpperCase()+" "+med[k]).join(" · ")
+      : "veste " + (cfg.manequins || [])[manequim]);
+    alvo.textContent = partes.join(" · ");
+  }
+
+  function pintarLegenda(){
+    const alvo = $("#prova-legenda"); if(!alvo) return;
+    const postas = ["cima","baixo","sobre","bolsa","oculos"]
+      .map(v => look[v]).filter(Boolean);
+    if(!postas.length){
+      alvo.innerHTML = '<em>Escolha as peças abaixo para montar o look.</em>';
+      return;
+    }
+    alvo.innerHTML = postas
+      .map(p => escapar(p.nome))
+      .join('<span class="sep">·</span>');
+  }
+
   function contar(){
     const postas = ["cima","baixo","sobre","bolsa","oculos"]
       .map(v => look[v]).filter(Boolean);
@@ -2966,7 +3120,8 @@ escrever();
     /* qualquer mexida nos controles descarta o resultado da IA: manter a
        imagem antiga na tela enquanto a escolha mudou seria mentir */
     iaVerUrl = null;
-    desenhar(); pintarControles(); pintarTamanhos(); contar(); pintarIA();
+    desenhar(); pintarControles(); pintarTamanhos(); pintarLegenda();
+    pintarResumo(); contar(); pintarIA();
     const bt = $("#tirar-foto"); if(bt) bt.hidden = !(modo === "foto" && foto);
   }
 
@@ -3046,7 +3201,12 @@ escrever();
   const IA = (cfg.ia || {});
   let consentiu = false, iaOcupado = false, iaVerUrl = null;
 
-  const iaLigada = () => !!(IA.endpoint && /^https:\/\//.test(IA.endpoint));
+  /* aceita caminho do próprio site (/api/provar) ou endereço https completo */
+  const iaLigada = () => !!(IA.endpoint && /^(https:\/\/|\/)/.test(IA.endpoint));
+  const iaUrl = id => {
+    const base = IA.endpoint.replace(/\/$/, "");
+    return id ? base + "?id=" + encodeURIComponent(id) : base;
+  };
 
   /* Só uma peça por vez: o modelo veste uma coisa. Escolhe a de cima, e na
      falta dela a de baixo — que é a ordem em que a dúvida costuma vir. */
@@ -3106,7 +3266,7 @@ escrever();
 
     iaOcupado = true; pintarIA(); iaEstado("Enviando a sua foto…");
     try{
-      const r = await fetch(IA.endpoint.replace(/\/$/, "") + "/provar", {
+      const r = await fetch(iaUrl(), {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({foto: foto.url, peca: alvo.p.foto, categoria: alvo.categoria})
@@ -3123,7 +3283,8 @@ escrever();
       /* fetch bloqueado pela CSP cai aqui, e é o engano mais provável de quem
          ligou a IA sem trocar connect-src */
       iaEstado("Não consegui falar com o provador. Se você é da loja: confira "+
-               "o endereço no CONFIG e o connect-src da CSP.");
+               "se a FASHN_KEY está nas variáveis de ambiente da Vercel, e se "+
+               "o endereço no CONFIG bate com o caminho da função.");
     }finally{
       iaOcupado = false; pintarIA();
     }
@@ -3135,7 +3296,7 @@ escrever();
       await new Promise(r => setTimeout(r, 2500));
       let d;
       try{
-        const r = await fetch(IA.endpoint.replace(/\/$/, "") + "/provar/" + encodeURIComponent(id));
+        const r = await fetch(iaUrl(id));
         d = await r.json();
       }catch(e){ iaEstado("A conexão caiu no meio."); return null; }
       if(d.erro){ iaEstado(d.erro); return null; }
@@ -3333,6 +3494,9 @@ escrever();
       : "Desenho, não foto";
     /* com a IA ligada, "não sai do aparelho" deixa de ser verdade em um
        caminho — e o texto tem de dizer isso, não a versão antiga */
+    /* no modo foto os ajustes deixam de ser opcionais — é ali que se
+       escolhe a foto e a largura —, então o painel abre sozinho */
+    const voce = $("#voce"); if(voce) voce.open = naFoto;
     const notaIa = $("#nota-ia"); if(notaIa) notaIa.hidden = !iaLigada();
     const cofre = $("#cofre");
     if(cofre) cofre.innerHTML = iaLigada()

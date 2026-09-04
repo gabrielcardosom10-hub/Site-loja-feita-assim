@@ -623,3 +623,80 @@ pós-carga roda, porque `script-src 'unsafe-inline'` é a troca declarada para
 a dona editar o `CONFIG` sem build. O que a CSP garante mesmo assim: código
 de fora não carrega, e dado não sai — os dois testes que transformariam uma
 injeção em roubo falham para o atacante.
+
+## A mudança para a Vercel, e o que ela destravou
+
+O site saiu do GitHub Pages e foi para a Vercel. Duas coisas que não davam lá
+passaram a dar:
+
+**Cabeçalhos de segurança de verdade.** O `vercel.json` aplica o que o `<meta>`
+nunca conseguiu: `frame-ancestors 'none'` e `X-Frame-Options` contra a loja ser
+embutida em iframe alheio, `nosniff`, HSTS com preload, `Permissions-Policy`
+fechando câmera, microfone, localização e pagamento, e as duas políticas de
+isolamento de origem. O `_headers` do Netlify continua no repositório para o
+caso de a hospedagem mudar de novo.
+
+**O intermediário da IA mora no mesmo site.** `api/provar.js` sobe junto com o
+`index.html` — sem segunda conta, sem `wrangler`, sem comando. E por morar no
+mesmo domínio, a CSP ficou em `connect-src 'self'` em vez de precisar liberar
+um endereço de fora. Isso é melhor do que parece: some a categoria inteira de
+"para onde mais esta página consegue mandar dado".
+
+**O endpoint vem vazio, e é de propósito.** Ligar é uma linha, mas ela é o
+último passo do LEIA-ME. Com o botão no ar e a função sem chave, a cliente
+consentiria em mandar a foto dela para fora e receberia um erro — consentimento
+gasto à toa é pior do que botão nenhum. Virou teste: "função sem chave: a
+cliente recebe explicação, não silêncio".
+
+**Sobre o teto de gasto, uma correção de honestidade.** Na Vercel o contador
+por hora só é rígido com Upstash configurado; sem ele, cada instância quente da
+função tem o seu. O LEIA-ME agora diz isso com todas as letras e aponta o teto
+que não falha: **o saldo pré-pago na FASHN**. Ele não depende de nenhuma linha
+deste código estar certa.
+
+## O provador no formato do Minimal Club
+
+A referência que a loja mandou tem uma hierarquia clara: a figura no meio,
+grande; o nome das peças do look logo abaixo; e prateleiras de categoria
+rolando por baixo. O provador estava em duas colunas — figura de um lado,
+painel de controles do outro —, o que fazia dela metade de um formulário.
+
+O que mudou:
+
+- **Uma coluna só, em qualquer largura.** A figura fica centrada com respiro
+  dos dois lados, e isso a faz parecer o assunto da página.
+- **"O seu look"**, com os nomes das peças em linha sob a figura. Quando não há
+  nada escolhido, a linha convida em vez de sumir — bloco que aparece e some
+  faz a página pular.
+- **Prateleiras horizontais** por categoria, com a contagem ao lado do título.
+  Em vez de uma lista que cresce para baixo e empurra o botão de comprar para
+  fora da tela, cada faixa cabe numa linha e rola com o dedo.
+- **Os ajustes de corpo ficaram recolhidos** num `<details>` com resumo na aba
+  ("clara · 1,60–1,70 · veste M"). No modo foto ele abre sozinho, porque ali
+  ele deixa de ser opcional.
+
+### A armadilha do grid, três vezes na mesma tarde
+
+`grid-template-columns: 1fr` é `minmax(auto, 1fr)`, e o mínimo `auto` é o
+**min-content do filho**. Qualquer filho que sangre para fora — uma prateleira
+com margem negativa, um painel com campos que não encolhem — estica a coluna
+para além da tela.
+
+Aconteceu três vezes seguidas, em três grids diferentes do provador, com o
+mesmo sintoma: no celular a seção inteira saía deslocada para a direita e
+cortada. A regra ficou escrita no CSS: **todo grid daqui que contenha algo
+rolável ou sangrado leva `minmax(0,1fr)`, e os filhos levam `min-width:0`.**
+
+### Dois erros dos meus próprios testes
+
+Enquanto caçava isso, dois testes mentiram e precisaram ser consertados:
+
+1. Mediam `window.innerWidth` para achar o centro da tela. Sob emulação de
+   celular esse valor pode ser o do viewport visual, não o de layout — e o
+   teste acusou descentralização onde não havia. Agora usam
+   `documentElement.clientWidth`.
+2. Contavam como vazamento qualquer elemento que passasse da borda direita.
+   Mas passar da borda **dentro de um container com overflow** é o desenho:
+   a prateleira que rola, a capa com zoom, a gaveta fechada. O ruído escondia
+   os vazamentos de verdade. Agora o teste sobe a árvore e ignora quem está
+   dentro de algo que rola ou esconde.
