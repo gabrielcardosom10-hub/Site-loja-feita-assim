@@ -603,7 +603,40 @@ a.marca{min-height:44px;}
   gap:12px;padding:clamp(16px,3vw,28px);text-align:center;color:var(--lilas);
 }
 .prova__soltar[hidden]{display:none;}
-.prova__soltar p{margin:0;font-size:13px;line-height:1.55;max-width:30ch;}
+.prova__soltar p{margin:0;font-size:13px;line-height:1.55;max-width:34ch;}
+.rostos__tit{font-size:16px!important;}
+.rostos__tit b{font-family:var(--display);font-weight:700;}
+
+/* as quatro janelas do rosto, como na referência */
+.rostos{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:14px clamp(14px,4vw,26px);margin:6px 0 2px;justify-items:center;
+}
+/* o rótulo fica FORA do círculo, como na referência: dentro dele "Olhando
+   para cima" não cabia e saía cortado */
+.rosto{
+  position:relative;display:grid;justify-items:center;gap:7px;
+  cursor:pointer;text-align:center;
+}
+.rosto__janela{
+  position:relative;display:grid;place-items:center;overflow:hidden;
+  width:clamp(72px,19vw,92px);aspect-ratio:1;border-radius:50%;
+  border:1px dashed #FBF7F95c;background:#FBF7F912;color:var(--lilas);
+  transition:border-color var(--t),background var(--t);
+}
+.rosto:hover .rosto__janela{border-color:var(--papel);background:#FBF7F91f;}
+.rosto:focus-within .rosto__janela{outline:2px solid var(--rosa-claro);outline-offset:3px;}
+.rosto input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
+.rosto__ico{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;}
+.rosto__ico[hidden]{display:none;}
+.rosto__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.rosto__img[hidden]{display:none;}
+.rosto b{
+  font-size:11px;font-weight:600;color:var(--lilas);line-height:1.3;
+  max-width:13ch;
+}
+.rosto--cheio .rosto__janela{border-style:solid;border-color:var(--rosa-claro);}
+.rosto--cheio b{color:var(--papel);}
 .prova__soltar b{color:var(--papel);}
 .prova__cofre{
   margin-top:4px!important;padding-top:12px;border-top:1px solid var(--fio-claro);
@@ -622,19 +655,6 @@ a.marca{min-height:44px;}
   position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;
 }
 .prova__arquivo:focus-within{outline:2px solid var(--rosa-claro);outline-offset:3px;}
-
-/* A máscara da luz é a silhueta das peças pintada de branco. Os moldes
-   trazem fill e stroke próprios, então a única forma de reaproveitá-los
-   como máscara é sobrescrever a cor — e para vencer atributo de
-   apresentação inline é preciso !important. */
-.so-branco *{fill:#fff!important;stroke:#fff!important;}
-
-/* as duas marcas que a cliente posiciona na foto */
-.marca-corpo{cursor:grab;touch-action:none;opacity:.72;transition:opacity var(--t);}
-.marca-corpo:hover,.marca-corpo:focus,.marca-corpo:active{opacity:1;}
-.marca-corpo:active{cursor:grabbing;}
-.marca-corpo:focus{outline:none;}
-.marca-corpo:focus-visible .marca-anel{stroke:var(--rosa);}
 
 /* ── provar com IA ── */
 .ia{display:grid;gap:9px;padding-top:12px;border-top:1px solid var(--fio);}
@@ -1229,8 +1249,8 @@ a.marca{min-height:44px;}
         <button class="modo" id="modo-boneca" type="button" role="radio" aria-checked="true">
           Numa boneca
         </button>
-        <button class="modo" id="modo-foto" type="button" role="radio" aria-checked="false" tabindex="-1">
-          Na minha foto
+        <button class="modo" id="modo-foto" type="button" role="radio" aria-checked="false" tabindex="-1" hidden>
+          No meu avatar
         </button>
       </div>
 
@@ -1239,23 +1259,16 @@ a.marca{min-height:44px;}
           <svg class="boneca" id="boneca" viewBox="44 12 132 446"
                role="img" aria-labelledby="boneca-desc"></svg>
 
-          <!-- só aparece no modo foto, antes de haver foto -->
+          <!-- as fotos do rosto, antes de existir avatar -->
           <div class="prova__soltar" id="soltar" hidden>
-            <svg aria-hidden="true" viewBox="0 0 32 32" width="30" height="30">
-              <path d="M4 22 L11 14 L17 20 L22 16 L28 22" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <rect x="3" y="6" width="26" height="20" rx="2" fill="none"
-                    stroke="currentColor" stroke-width="2"/>
-            </svg>
-            <p><b>Escolha uma foto sua</b><br>De corpo inteiro, de frente, em pé,
-              braços ao lado do corpo.</p>
-            <label class="prova__arquivo">
-              <input type="file" id="arquivo" accept="image/jpeg,image/png,image/webp">
-              <span>Escolher a foto</span>
-            </label>
-            <p class="prova__cofre" id="cofre">A foto <b>não sai do seu aparelho</b>. Ela não
-              é enviada para a loja nem para lugar nenhum, e some quando você
-              fecha a página.</p>
+            <p class="rostos__tit"><b>Tire 4 fotos do seu rosto</b></p>
+            <p>Para montar o seu avatar a gente precisa de você de frente,
+              dos dois lados e olhando para cima. Só a primeira é obrigatória.</p>
+            <div class="rostos" id="rostos"></div>
+            <button class="prova__arquivo" id="criar-avatar" type="button" disabled>
+              <span id="criar-txt">Faltam as fotos</span>
+            </button>
+            <p class="prova__cofre" id="cofre"></p>
           </div>
         </div>
 
@@ -1268,12 +1281,12 @@ a.marca{min-height:44px;}
           loja tem <a href="#loja">provador de verdade</a>.
         </p>
         <p class="prova__nota" id="nota-foto" hidden>
-          As peças são desenhadas por cima da sua foto, na medida que você
-          marcar. Servem para ver comprimento, cor e proporção no seu corpo —
-          não mostram o caimento do tecido. Isso só o
-          <a href="#loja">provador de verdade</a> mostra.
-          <span id="nota-ia" hidden>O botão <b>Provar de verdade com IA</b> é
-          a exceção: ele <b>envia a sua foto</b> para fora, e pergunta antes.</span>
+          O avatar é montado por inteligência artificial a partir das fotos do
+          seu rosto, e a peça é vestida nele de verdade — não desenhada por
+          cima. Mesmo assim é uma aproximação: o caimento do tecido no seu
+          corpo só o <a href="#loja">provador de verdade</a> mostra.
+          <span id="nota-ia" hidden>As suas fotos <b>saem do aparelho</b> para
+          isso acontecer, e a gente pergunta antes.</span>
         </p>
 
         <div class="prova__lado">
@@ -1290,11 +1303,6 @@ a.marca{min-height:44px;}
             <div class="prova__campo" id="campo-altura">
               <span class="prova__rot" id="rot-altura">Altura</span>
               <div class="prova__opcoes" id="alturas" role="radiogroup" aria-labelledby="rot-altura"></div>
-            </div>
-            <div class="prova__campo" id="campo-larg" hidden>
-              <span class="prova__rot" id="rot-larg">Largura das peças</span>
-              <input class="prova__faixa" id="largura" type="range" min="70" max="150" value="100"
-                     aria-labelledby="rot-larg" aria-valuetext="normal">
             </div>
             <div class="prova__campo">
               <span class="prova__rot" id="rot-manequim">O tamanho que você veste hoje</span>
@@ -1321,9 +1329,8 @@ a.marca{min-height:44px;}
             </div>
             <div class="prova__campo" id="campo-foto" hidden>
               <p class="prova__dica">
-                Arraste as duas marcas na foto: <b>a de cima</b> na linha dos
-                ombros, <b>a de baixo</b> no chão, entre os pés. Com o teclado,
-                use Tab até a marca e depois as setas.
+                O avatar é montado a partir das suas fotos e reaproveitado em
+                todas as peças. Trocar uma foto monta um avatar novo.
               </p>
               <p class="prova__erro" id="prova-erro" role="alert" hidden></p>
 
@@ -1339,7 +1346,7 @@ a.marca{min-height:44px;}
                 <p class="prova__dica" id="ia-estado" role="status"></p>
               </div>
 
-              <button class="prova__limpar" id="tirar-foto" type="button" hidden>Trocar de foto</button>
+              <button class="prova__limpar" id="tirar-foto" type="button" hidden>Trocar as fotos</button>
             </div>
           </div>
           </details>
@@ -1410,19 +1417,19 @@ a.marca{min-height:44px;}
 <div class="consent" id="consent" hidden role="dialog" aria-modal="true"
      aria-labelledby="consent-tit" aria-describedby="consent-txt">
   <div class="consent__caixa">
-    <h3 id="consent-tit">Sua foto vai sair do seu aparelho</h3>
+    <h3 id="consent-tit">As fotos do seu rosto vão sair do aparelho</h3>
     <div id="consent-txt">
-      <p>Até agora a sua foto ficou só no seu celular. Para a inteligência
-        artificial vestir a peça em você de verdade, ela precisa ser
-        <b>enviada para a empresa que roda o programa</b>, que fica fora do
-        Brasil. Não dá para fazer diferente: esse programa não roda no
-        celular.</p>
+      <p>Para montar o seu avatar, as <b>fotos do seu rosto</b> precisam ser
+        enviadas para a empresa que roda o programa, que fica fora do Brasil.
+        Não dá para fazer diferente: esse programa não roda no celular.</p>
       <ul>
-        <li>Vai <b>a sua foto</b> e a foto da peça — mais nada. Sem nome, sem
-          telefone, sem o seu pedido.</li>
-        <li>A Feita Assim <b>não recebe nem guarda</b> a sua foto.</li>
+        <li>Foto de rosto é <b>dado do seu corpo</b>. Pense antes, como você
+          pensaria antes de mandar para um desconhecido.</li>
+        <li>Vão <b>as fotos do rosto</b> e a foto da peça — mais nada. Sem
+          nome, sem telefone, sem o seu pedido.</li>
+        <li>A Feita Assim <b>não recebe nem guarda</b> as suas fotos.</li>
         <li id="consent-guarda"></li>
-        <li>Você pode continuar usando o provador em desenho, que
+        <li>Você pode continuar no provador em <b>desenho</b>, que
           <b>não envia nada</b>.</li>
       </ul>
     </div>
@@ -2363,8 +2370,16 @@ escrever();
   /* estado */
   let pele = 0, altura = 1, manequim = 1, look = {};
   /* modo foto */
-  let modo = "boneca", foto = null, larguraFoto = 1;
+  let modo = "boneca", foto = null;
   let ombro = {x:0,y:0}, pe = {x:0,y:0};
+  /* as fotos do rosto e o avatar gerado a partir delas */
+  const ANGULOS = [
+    {id:"frente", rot:"De frente"},
+    {id:"esq",    rot:"Lado esquerdo"},
+    {id:"dir",    rot:"Lado direito"},
+    {id:"cima",   rot:"Olhando para cima"}
+  ];
+  let rostos = {}, avatar = null, avatarVestido = null;
   const VIEWBOX_BONECA = "44 12 132 446";
 
   /* ── geometria ──────────────────────────────────────────────
@@ -2372,11 +2387,8 @@ escrever();
      alarga o corpo (manequim). Todo molde lê estas medidas, então peça
      nova entra sem recalcular nada. */
   function medidas(){
-    /* Na foto quem manda na altura são as duas marcas, não o seletor: por
-       isso L fica em 1 e a escala inteira sai da distância entre elas. */
-    const L = modo === "foto" ? 1
-      : (cfg.alturas && cfg.alturas[altura] ? cfg.alturas[altura].escala : 1);
-    const W = ([0.92,1,1.08,1.16][manequim] || 1) * (modo === "foto" ? larguraFoto : 1);
+    const L = (cfg.alturas && cfg.alturas[altura] ? cfg.alturas[altura].escala : 1);
+    const W = [0.92,1,1.08,1.16][manequim] || 1;
     const OY = 96, CY = 168, QY = 202;
     return {
       L, W, OY, CY, QY,
@@ -2677,155 +2689,17 @@ escrever();
     return svg;
   }
 
-  /* ── MODO FOTO ────────────────────────────────────────────────
-     A foto entra como <image> dentro do próprio SVG, e as peças vão por
-     cima num grupo transformado. A conta é uma só: as duas marcas dizem
-     onde estão os ombros e o chão, e disso sai a escala. Como todo molde
-     já lê as medidas de `medidas()`, nenhuma peça precisou ser reescrita
-     para funcionar na foto. */
-  function escalaFoto(m){
-    const alturaModelo = m.TY - m.OY;          /* ombro → tornozelo no modelo */
-    const alturaFoto   = Math.max(20, pe.y - ombro.y);
-    const k  = alturaFoto / alturaModelo;
-    return {k, tx: ombro.x - m.cx*k, ty: ombro.y - m.OY*k};
-  }
-
-  /* A marca é uma GUIA DE ALTURA, não um alvo no meio do corpo. A primeira
-     versão era um disco grande no centro, e ele tapava exatamente o rosto de
-     quem estava se vendo. Agora: uma linha fina atravessando a foto e uma
-     alça na borda esquerda, longe do corpo. O alvo de toque continua grande
-     — é um retângulo invisível de 48px em volta da alça. */
-  function marcaSvg(id, x, y, r, rot){
-    /* a guia começa e termina nas bordas da foto. Em coordenadas locais,
-       porque o grupo já está transladado para o ponto. */
-    const e = -x, d = (foto ? foto.w : 100) - x;
-    return '<g class="marca-corpo" data-marca="'+id+'" tabindex="0" role="button" '+
-      'transform="translate('+n(x)+','+n(y)+')" '+
-      'aria-label="'+escapar(rot)+'. Arraste, ou use as setas do teclado.">'+
-      /* a linha guia: escura por baixo, clara por cima, para aparecer em
-         foto de qualquer cor */
-      '<line x1="'+n(e)+'" y1="0" x2="'+n(d)+'" y2="0" stroke="#2E0F3D" stroke-opacity=".5" stroke-width="'+n(r*0.3)+'"/>'+
-      '<line x1="'+n(e)+'" y1="0" x2="'+n(d)+'" y2="0" stroke="#FBF7F9" stroke-opacity=".9" '+
-        'stroke-width="'+n(r*0.14)+'" stroke-dasharray="'+n(r*0.9)+' '+n(r*0.7)+'"/>'+
-      /* alça na borda esquerda, fora do corpo */
-      '<g transform="translate('+n(-x + r*1.5)+',0)">'+
-        '<rect x="'+n(-r*1.5)+'" y="'+n(-r*1.5)+'" width="'+n(r*3)+'" height="'+n(r*3)+'" fill="transparent"/>'+
-        '<circle r="'+n(r*0.95)+'" fill="#2E0F3D" fill-opacity=".72"/>'+
-        '<circle class="marca-anel" r="'+n(r*0.95)+'" fill="none" stroke="#FBF7F9" stroke-width="'+n(r*0.22)+'"/>'+
-        '<path d="M '+n(-r*0.42)+','+n(-r*0.16)+' L 0,'+n(-r*0.5)+' L '+n(r*0.42)+','+n(-r*0.16)+
-          ' M '+n(-r*0.42)+','+n(r*0.16)+' L 0,'+n(r*0.5)+' L '+n(r*0.42)+','+n(r*0.16)+'" '+
-          'fill="none" stroke="#FBF7F9" stroke-width="'+n(r*0.16)+'" stroke-linecap="round" stroke-linejoin="round"/>'+
-      '</g>'+
-    '</g>';
-  }
-
-  /* Só os transforms mudam durante o arrasto. Remontar o innerHTML a cada
-     movimento faria a <image> ser decodificada de novo trinta vezes por
-     segundo, e a foto piscaria. */
-  function posicionar(){
-    const m = medidas(), t = escalaFoto(m);
-    const trans = "translate("+n(t.tx)+","+n(t.ty)+") scale("+(Math.round(t.k*1e4)/1e4)+")";
-    const g = $("#a-roupa");
-    if(g) g.setAttribute("transform", trans);
-    /* a máscara da luz é a mesma silhueta: se ela não andar junto, a luz
-       fica presa onde a roupa estava */
-    const mk = document.querySelector("#m-roupa .so-branco");
-    if(mk) mk.setAttribute("transform", trans);
-    const r = foto ? Math.max(foto.w, foto.h)/34 : 10;
-    [["ombro",ombro],["pe",pe]].forEach(([id,pt]) => {
-      const g = $('[data-marca="'+id+'"]'); if(!g) return;
-      g.setAttribute("transform","translate("+n(pt.x)+","+n(pt.y)+")");
-      /* a alça mora na borda esquerda da foto: como o grupo anda com o
-         ponto, ela precisa andar de volta a mesma distância */
-      const alca = g.lastElementChild;
-      if(alca) alca.setAttribute("transform","translate("+n(-pt.x + r*1.5)+",0)");
-      /* as duas linhas guia acompanham, senão elas vazam da foto ao arrastar */
-      [...g.querySelectorAll("line")].forEach(l => {
-        l.setAttribute("x1", n(-pt.x));
-        l.setAttribute("x2", n((foto ? foto.w : 100) - pt.x));
-      });
-    });
-  }
-
-  /* ── realismo: a luz da foto atravessa a roupa ──────────────
-     Forma chapada colada por cima lê como adesivo, e foi a queixa. O que
-     separa colagem de roupa vestida não é o contorno — é a LUZ. Numa foto
-     real o corpo tem sombra sob o queixo, no vinco do braço, na dobra do
-     joelho; a peça desenhada não tinha nenhuma, e por isso flutuava.
-
-     A correção: a própria foto é redesenhada por cima das peças, em
-     `multiply`, recortada pela silhueta delas. Antes disso ela passa por um
-     filtro que tira a cor e comprime o contraste — sobra só a modelagem de
-     luz, que é o que interessa. Onde o corpo dela é escuro, o tecido
-     escurece junto; onde a luz bate, ele clareia. As dobras do corpo
-     aparecem no tecido sem que ninguém tenha desenhado dobra nenhuma.
-
-     Não é simulação de caimento: é a luz certa num recorte de forma certa.
-     Mas é a diferença entre parecer colado e parecer vestido. */
-  const FILTRO_LUZ =
-    '<filter id="f-luz" color-interpolation-filters="sRGB">'+
-      /* tira a cor: só a claridade importa */
-      '<feColorMatrix type="saturate" values="0"/>'+
-      /* comprime para perto do cinza médio; sem isto o multiply enegrece */
-      /* A primeira tentativa usou slope 0.62: o contraste da foto passava
-         quase inteiro e o corpo dela ficava CARIMBADO no casaco — o tricô
-         creme sobre pele escura virava cinza. Aqui a faixa inteira da foto
-         é espremida entre 0.66 e 0.94: sobra a insinuação de volume, e a
-         cor da peça continua sendo a cor da peça. */
-      '<feComponentTransfer>'+
-        '<feFuncR type="linear" slope="0.28" intercept="0.66"/>'+
-        '<feFuncG type="linear" slope="0.28" intercept="0.66"/>'+
-        '<feFuncB type="linear" slope="0.28" intercept="0.66"/>'+
-      '</feComponentTransfer>'+
-      /* um leve borrão: a luz do tecido é mais macia que a da pele */
-      '<feGaussianBlur stdDeviation="1.1"/>'+
-    '</filter>';
-
-  function desenharFoto(){
-    const boneca = $("#boneca"), m = medidas(), t = escalaFoto(m);
-    const r = Math.max(foto.w, foto.h)/34;
-    const trans = "translate("+n(t.tx)+","+n(t.ty)+") scale("+(Math.round(t.k*1e4)/1e4)+")";
-    const pecas = roupa(m);
-    boneca.setAttribute("viewBox", "0 0 "+foto.w+" "+foto.h);
-    boneca.innerHTML =
-      '<title id="boneca-desc">'+escapar(descricao())+'</title>'+
-      '<defs>'+
-        FILTRO_LUZ+
-        /* a máscara é a própria silhueta das peças, pintada de branco */
-        /* mask-type:alpha — a máscara passa a ler o canal alfa, não a
-           luminância. Sem isso, a peça FOTOGRAFADA (que é uma <image> com
-           fundo transparente) recortaria a luz pelo brilho dela: peça preta
-           não receberia luz nenhuma. */
-        '<mask id="m-roupa" maskUnits="userSpaceOnUse" style="mask-type:alpha" x="0" y="0" '+
-          'width="'+foto.w+'" height="'+foto.h+'">'+
-          '<g class="so-branco" transform="'+trans+'">'+pecas+'</g>'+
-        '</mask>'+
-        /* sombra que a peça projeta no corpo, logo abaixo da borda */
-        '<filter id="f-sombra" x="-12%" y="-12%" width="126%" height="126%">'+
-          '<feDropShadow dx="0" dy="'+n(Math.max(0.8, 2.2/t.k))+'" '+
-            'stdDeviation="'+n(Math.max(0.8, 2.6/t.k))+'" flood-color="#1a0d22" flood-opacity="0.28"/>'+
-        '</filter>'+
-      '</defs>'+
-      '<image href="'+foto.url+'" x="0" y="0" width="'+foto.w+'" height="'+foto.h+'"/>'+
-      '<g id="a-roupa" transform="'+trans+'" filter="url(#f-sombra)">'+pecas+'</g>'+
-      /* a foto de novo, só como luz, apenas onde há roupa */
-      '<image id="a-luz" href="'+foto.url+'" x="0" y="0" width="'+foto.w+'" height="'+foto.h+'" '+
-        'filter="url(#f-luz)" mask="url(#m-roupa)" opacity="0.85" style="mix-blend-mode:multiply"/>'+
-      marcaSvg("ombro", ombro.x, ombro.y, r, "Marca da linha dos ombros")+
-      marcaSvg("pe",    pe.x,    pe.y,    r, "Marca do chão, entre os pés");
-  }
-
   /* ── desenhar ── */
   function desenhar(){
     const boneca = $("#boneca");
     if(modo === "foto"){
-      boneca.hidden = !foto;
-      $("#soltar").hidden = !!foto;
-      if(foto) desenharFoto();
-      /* sem foto, o SVG é esvaziado de verdade. Só escondê-lo deixaria a
-         imagem anterior viva no DOM depois de "Trocar de foto" — e foto de
-         corpo inteiro não fica pendurada em lugar nenhum depois que a dona
-         mandou tirar. */
+      boneca.hidden = !avatar;
+      $("#soltar").hidden = !!avatar;
+      if(avatar) mostrarAvatar(look.cima || look.sobre || look.baixo
+        ? (pecaParaIA() && pecaParaIA().p.nome) : null);
+      /* sem avatar, o SVG é esvaziado de verdade. Só escondê-lo deixaria a
+         imagem anterior viva no DOM — e rosto de cliente não fica pendurado
+         em lugar nenhum depois que ela mandou trocar. */
       else boneca.innerHTML = "";
       return;
     }
@@ -2841,11 +2715,11 @@ escrever();
     const postas = ["cima","baixo","sobre","bolsa","oculos"]
       .map(v => look[v] && look[v].nome).filter(Boolean);
     if(modo === "foto"){
-      return foto
-        ? (postas.length
-            ? "Sua foto com as peças desenhadas por cima: "+postas.join(", ")+"."
-            : "Sua foto, sem nenhuma peça escolhida ainda.")
-        : "Nenhuma foto escolhida ainda.";
+      if(!avatar) return "Nenhum avatar montado ainda.";
+      const posta = pecaParaIA();
+      return posta && avatarVestido
+        ? "Seu avatar vestindo "+posta.p.nome+"."
+        : "Seu avatar, sem nenhuma peça vestida ainda.";
     }
     const quem = "Desenho de uma mulher, manequim "+(cfg.manequins||[])[manequim];
     if(!postas.length) return quem + ", com roupa de base neutra, sem nenhuma peça escolhida ainda.";
@@ -3121,8 +2995,8 @@ escrever();
        imagem antiga na tela enquanto a escolha mudou seria mentir */
     iaVerUrl = null;
     desenhar(); pintarControles(); pintarTamanhos(); pintarLegenda();
-    pintarResumo(); contar(); pintarIA();
-    const bt = $("#tirar-foto"); if(bt) bt.hidden = !(modo === "foto" && foto);
+    pintarResumo(); contar(); pintarIA(); pintarRostos();
+    const bt = $("#tirar-foto"); if(bt) bt.hidden = !(modo === "foto" && avatar);
   }
 
   /* ── eventos ── */
@@ -3174,9 +3048,14 @@ escrever();
       else if(vaga === "baixo" && look.cima && look.cima.molde === "vestido") delete look.cima;
     }
     atualizar();
+    /* com avatar montado, escolher a peça já veste: pedir mais um toque
+       depois de a pessoa ter montado o avatar é atrito sem motivo */
+    if(modo === "foto" && avatar && !iaOcupado && pecaParaIA()) provarComIA();
   });
 
-  $("#prova-limpar").addEventListener("click", () => { look = {}; atualizar(); });
+  $("#prova-limpar").addEventListener("click", () => {
+    look = {}; avatarVestido = null; atualizar();
+  });
 
   $("#prova-add").addEventListener("click", () => {
     const postas = ["cima","baixo","sobre","bolsa","oculos"]
@@ -3225,12 +3104,12 @@ escrever();
     const cx = $("#ia");
     if(!cx) return;
     const alvo = pecaParaIA();
-    cx.hidden = !(iaLigada() && modo === "foto" && foto);
+    cx.hidden = !(iaLigada() && modo === "foto" && avatar);
     const bt = $("#ia-provar");
     bt.disabled = iaOcupado || !alvo;
-    $("#ia-txt").textContent = iaOcupado ? "Provando…"
-      : alvo ? "Provar "+alvo.p.nome+" de verdade" : "Escolha uma peça de roupa";
-    if(!iaOcupado && !alvo) iaEstado("A IA veste uma peça por vez.");
+    $("#ia-txt").textContent = iaOcupado ? "Vestindo…"
+      : alvo ? "Vestir "+alvo.p.nome+" no meu avatar" : "Escolha uma peça de roupa";
+    if(!iaOcupado && !alvo && avatar) iaEstado("A IA veste uma peça por vez.");
   }
 
   function pedirConsentimento(){
@@ -3259,26 +3138,54 @@ escrever();
     });
   }
 
+  let criandoAvatar = false;
+
+  async function criarAvatar(){
+    if(!rostos.frente || criandoAvatar) return;
+    if(!(await pedirConsentimento())){ iaEstado("Tudo bem — nada foi enviado."); return; }
+    criandoAvatar = true; pintarRostos(); erro(""); iaEstado("Montando o seu avatar…");
+    try{
+      const lista = ANGULOS.map(a => rostos[a.id]).filter(Boolean);
+      const r = await fetch(iaUrl(), {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({acao: "avatar", rostos: lista})
+      });
+      const d = await r.json().catch(() => ({}));
+      if(!r.ok){ erro(d.mensagem || d.erro || "Não deu para montar o avatar agora."); return; }
+      const pronto = await esperarIA(d.id, "avatar");
+      if(!pronto) return;
+      avatar = pronto; avatarVestido = null;
+      iaEstado("Avatar pronto. Escolha as peças abaixo.");
+      atualizar();
+    }catch(e){
+      erro("Não consegui falar com o provador. Se você é da loja: confira se a "+
+           "FASHN_KEY está nas variáveis de ambiente da Vercel.");
+    }finally{
+      criandoAvatar = false; pintarRostos();
+    }
+  }
+
   async function provarComIA(){
     const alvo = pecaParaIA();
-    if(!alvo || iaOcupado || !foto) return;
-    if(!(await pedirConsentimento())){ iaEstado("Tudo bem — nada foi enviado."); return; }
+    if(!alvo || iaOcupado || !avatar) return;
 
-    iaOcupado = true; pintarIA(); iaEstado("Enviando a sua foto…");
+    iaOcupado = true; pintarIA(); erro(""); iaEstado("Vestindo a peça no seu avatar…");
     try{
       const r = await fetch(iaUrl(), {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({foto: foto.url, peca: alvo.p.foto, categoria: alvo.categoria})
+        /* veste sempre no avatar limpo, nunca no resultado anterior: cada
+           passada de IA degrada um pouco a imagem, e empilhar três provas
+           deixaria o rosto irreconhecível */
+        body: JSON.stringify({foto: avatar, peca: alvo.p.foto, categoria: alvo.categoria})
       });
       const d = await r.json().catch(() => ({}));
       if(!r.ok){ iaEstado(d.mensagem || d.erro || "Não deu para provar agora."); return; }
 
-      iaEstado("A IA está vestindo a peça. Costuma levar meio minuto.");
-      const pronto = await esperarIA(d.id);
+      const pronto = await esperarIA(d.id, "provar");
       if(!pronto) return;
-      iaVerUrl = pronto;
-      mostrarResultadoIA(pronto, alvo.p.nome);
+      avatarVestido = pronto;
+      mostrarAvatar(alvo.p.nome);
     }catch(e){
       /* fetch bloqueado pela CSP cai aqui, e é o engano mais provável de quem
          ligou a IA sem trocar connect-src */
@@ -3290,33 +3197,45 @@ escrever();
     }
   }
 
-  async function esperarIA(id){
-    const ate = Date.now() + 90000;      /* 90s e desiste */
+  async function esperarIA(id, etapa){
+    const ate = Date.now() + 120000;     /* 2 min e desiste */
     while(Date.now() < ate){
       await new Promise(r => setTimeout(r, 2500));
       let d;
       try{
         const r = await fetch(iaUrl(id));
         d = await r.json();
-      }catch(e){ iaEstado("A conexão caiu no meio."); return null; }
-      if(d.erro){ iaEstado(d.erro); return null; }
+      }catch(e){ erro("A conexão caiu no meio."); return null; }
+      if(d.erro){ erro(d.erro); return null; }
       if(d.estado === "completed" && d.imagem) return d.imagem;
-      if(d.estado === "failed"){ iaEstado("A IA não conseguiu com esta foto. "+
-        "Costuma ser pose ou enquadramento: de frente, em pé, corpo inteiro."); return null; }
+      if(d.estado === "failed"){
+        erro(etapa === "avatar"
+          ? "Não deu para montar o avatar com essas fotos. Tente fotos mais "+
+            "nítidas, com o rosto bem visível e boa luz."
+          : "A IA não conseguiu vestir esta peça. Tente outra, ou monte o "+
+            "avatar de novo com outras fotos.");
+        return null;
+      }
     }
-    iaEstado("Demorou demais. Tente de novo daqui a pouco.");
+    erro("Demorou demais. Tente de novo daqui a pouco.");
     return null;
   }
 
-  function mostrarResultadoIA(url, nome){
+  /* Sem peça escolhida mostra o avatar; com peça, o avatar vestido. Nunca
+     desenho por cima de foto — foi justamente isso que ficou parecendo
+     adesivo, e a loja recusou com razão. */
+  function mostrarAvatar(nome){
     const boneca = $("#boneca");
-    boneca.setAttribute("viewBox", "0 0 "+foto.w+" "+foto.h);
+    const url = avatarVestido || avatar;
+    if(!url) return;
+    boneca.setAttribute("viewBox", "0 0 900 1200");
     boneca.innerHTML =
-      '<title id="boneca-desc">Sua foto com '+escapar(nome)+
-        ' vestido pela inteligência artificial.</title>'+
-      '<image href="'+urlSegura(url)+'" x="0" y="0" width="'+foto.w+'" height="'+foto.h+
-        '" preserveAspectRatio="xMidYMid meet"/>';
-    iaEstado("Pronto. Mexer em qualquer controle volta para o desenho.");
+      '<title id="boneca-desc">'+escapar(nome
+        ? "Seu avatar vestindo "+nome+"."
+        : "Seu avatar, sem nenhuma peça escolhida ainda.")+'</title>'+
+      '<image href="'+urlSegura(url)+'" x="0" y="0" width="900" height="1200" '+
+        'preserveAspectRatio="xMidYMid meet"/>';
+    if(nome) iaEstado("Pronto. Escolha outra peça para trocar.");
   }
 
   /* ── a foto ─────────────────────────────────────────────────
@@ -3338,23 +3257,78 @@ escrever();
      de onde ela foi tirada, que muita câmera de celular grava. */
   const erro = t => { const e = $("#prova-erro"); e.textContent = t || ""; e.hidden = !t; };
 
+  /* ── AS FOTOS DO ROSTO ───────────────────────────────────────
+     A referência que a loja mandou pede quatro ângulos, e o motivo é
+     técnico: mais ângulos, mais traços do rosto o modelo consegue manter.
+     Só a de frente é obrigatória — exigir as quatro faria muita gente
+     desistir na terceira, e uma já produz avatar. */
+  /* As janelas são montadas UMA vez e depois só repintadas. Remontar o
+     HTML a cada foto recriava os <input>, e com isso: o foco se perdia no
+     meio do preenchimento, e um campo escolhido antes deixava de existir
+     enquanto a pessoa ainda mexia nele. */
+  function montarRostos(){
+    const cx = $("#rostos"); if(!cx || cx.dataset.pronto) return;
+    cx.dataset.pronto = "1";
+    cx.innerHTML = ANGULOS.map(a =>
+      '<label class="rosto" data-angulo="'+a.id+'">'+
+        '<span class="rosto__janela">'+
+          '<svg class="rosto__ico" aria-hidden="true" viewBox="0 0 24 24">'+
+            '<path d="M4 8h3l1.5-2h7L17 8h3v11H4z" stroke-linejoin="round"/>'+
+            '<circle cx="12" cy="13" r="3.4"/></svg>'+
+          '<img class="rosto__img" alt="" hidden>'+
+        '</span>'+
+        '<b>'+escapar(a.rot)+'</b>'+
+        '<input type="file" accept="image/jpeg,image/png,image/webp" '+
+          'aria-label="'+escapar(a.rot)+'">'+
+      '</label>').join("");
+  }
+
+  function pintarJanelas(){
+    const cx = $("#rostos"); if(!cx) return;
+    ANGULOS.forEach(a => {
+      const jan = cx.querySelector('[data-angulo="'+a.id+'"]'); if(!jan) return;
+      const tem = !!rostos[a.id];
+      jan.classList.toggle("rosto--cheio", tem);
+      const img = jan.querySelector(".rosto__img"), ico = jan.querySelector(".rosto__ico");
+      if(tem) img.src = rostos[a.id]; else img.removeAttribute("src");
+      img.hidden = !tem; ico.hidden = tem;
+      jan.querySelector("input").setAttribute("aria-label",
+        a.rot + (tem ? ", já escolhida. Toque para trocar" : ""));
+    });
+  }
+
+  function pintarRostos(){
+    pintarJanelas();
+    const quantos = ANGULOS.filter(a => rostos[a.id]).length;
+    const bt = $("#criar-avatar"); if(!bt) return;
+    bt.disabled = !rostos.frente || criandoAvatar;
+    $("#criar-txt").textContent = criandoAvatar ? "Montando o seu avatar…"
+      : !rostos.frente ? "Comece pela foto de frente"
+      : "Montar meu avatar (" + quantos + (quantos > 1 ? " fotos)" : " foto)");
+    const cofre = $("#cofre");
+    if(cofre) cofre.innerHTML = iaLigada()
+      ? 'As fotos <b>saem do seu aparelho</b> para o programa que monta o '+
+        'avatar. A gente explica tudo antes de enviar.'
+      : 'O provador com avatar ainda não foi ligado pela loja.';
+  }
+
   async function lerArquivo(file){
     erro("");
-    if(!file) return;
+    if(!file) return null;
     if(!/^image\/(jpeg|png|webp)$/.test(file.type)){
       erro("Esse arquivo não é uma foto JPG, PNG ou WEBP. Foto de iPhone costuma "+
            "vir em HEIC: abra ela na galeria, use 'Duplicar' ou 'Exportar como JPEG' "+
            "e escolha o arquivo novo.");
-      return;
+      return null;
     }
-    if(file.size > 30*1024*1024){ erro("Essa foto passa de 30 MB. Escolha uma menor."); return; }
+    if(file.size > 30*1024*1024){ erro("Essa foto passa de 30 MB. Escolha uma menor."); return null; }
 
     let bmp = null;
     try{ bmp = await createImageBitmap(file, {imageOrientation:"from-image"}); }
     catch(e){
       /* navegador antigo ignora imageOrientation; tenta sem */
       try{ bmp = await createImageBitmap(file); }
-      catch(e2){ erro("Não consegui abrir essa foto. Tente outra."); return; }
+      catch(e2){ erro("Não consegui abrir essa foto. Tente outra."); return null; }
     }
     /* 1400px no maior lado: acima disso é memória gasta à toa num celular */
     const k = Math.min(1, 1400/Math.max(bmp.width, bmp.height));
@@ -3364,75 +3338,31 @@ escrever();
     tela.getContext("2d").drawImage(bmp, 0, 0, w, h);
     if(bmp.close) bmp.close();
 
-    foto = {url: tela.toDataURL("image/jpeg", 0.86), w, h};
-    /* chute inicial para foto de corpo inteiro em pé; ela ajusta arrastando */
-    ombro = {x: Math.round(w/2), y: Math.round(h*0.18)};
-    pe    = {x: Math.round(w/2), y: Math.round(h*0.96)};
-    atualizar();
-    const mo = $('[data-marca="ombro"]'); if(mo) mo.focus();
+    return tela.toDataURL("image/jpeg", 0.86);
   }
 
-  $("#arquivo").addEventListener("change", e => {
-    lerArquivo(e.target.files && e.target.files[0]);
-    e.target.value = "";   /* permite escolher o mesmo arquivo de novo */
+  /* uma janela por ângulo: cada <input> sabe qual ângulo preenche */
+  $("#rostos").addEventListener("change", async e => {
+    const campo = e.target.closest("input[type=file]"); if(!campo) return;
+    const angulo = campo.closest("[data-angulo]").dataset.angulo;
+    const url = await lerArquivo(campo.files && campo.files[0]);
+    campo.value = "";
+    if(!url) return;
+    rostos[angulo] = url;
+    /* trocar uma foto invalida o avatar: mostrar o antigo com fotos novas
+       na tela seria dizer que ele veio delas */
+    avatar = null; avatarVestido = null;
+    atualizar();
   });
+  $("#criar-avatar").addEventListener("click", criarAvatar);
   $("#tirar-foto").addEventListener("click", () => {
-    foto = null; erro(""); atualizar(); $("#arquivo").focus();
+    rostos = {}; avatar = null; avatarVestido = null; foto = null;
+    erro(""); iaEstado(""); atualizar();
+    const um = $("#rostos input"); if(um) um.focus();
   });
   /* e ao sair da página, nada fica para trás */
-  window.addEventListener("pagehide", () => { foto = null; });
-
-  /* ── arrastar as marcas ── */
-  /* converte o ponto do dedo/ponteiro para as coordenadas do SVG; sem isso
-     a marca anda em desacordo com a foto assim que ela é redimensionada */
-  function noSvg(ev){
-    const svg = $("#boneca"), ctm = svg.getScreenCTM();
-    if(!ctm) return null;
-    const pt = svg.createSVGPoint();
-    pt.x = ev.clientX; pt.y = ev.clientY;
-    return pt.matrixTransform(ctm.inverse());
-  }
-  let arrastando = null;
-  $("#boneca").addEventListener("pointerdown", e => {
-    const g = e.target.closest(".marca-corpo"); if(!g) return;
-    arrastando = g.dataset.marca;
-    g.setPointerCapture(e.pointerId);
-    g.focus();
-    e.preventDefault();
-  });
-  $("#boneca").addEventListener("pointermove", e => {
-    if(!arrastando || !foto) return;
-    const q = noSvg(e); if(!q) return;
-    const alvo = arrastando === "ombro" ? ombro : pe;
-    alvo.x = Math.max(0, Math.min(foto.w, q.x));
-    alvo.y = Math.max(0, Math.min(foto.h, q.y));
-    /* o ombro nunca passa do chão, senão a escala vira negativa */
-    if(ombro.y > pe.y - 20){
-      if(arrastando === "ombro") ombro.y = pe.y - 20; else pe.y = ombro.y + 20;
-    }
-    posicionar();
-  });
-  const soltar = () => { if(arrastando){ arrastando = null; atualizar(); } };
-  $("#boneca").addEventListener("pointerup", soltar);
-  $("#boneca").addEventListener("pointercancel", soltar);
-
-  /* teclado: a marca anda com as setas, 1% da foto por toque */
-  $("#boneca").addEventListener("keydown", e => {
-    const g = e.target.closest(".marca-corpo"); if(!g || !foto) return;
-    const d = {ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
-    if(!d) return;
-    e.preventDefault();
-    const passo = (e.shiftKey ? 0.04 : 0.01) * Math.max(foto.w, foto.h);
-    const alvo = g.dataset.marca === "ombro" ? ombro : pe;
-    alvo.x = Math.max(0, Math.min(foto.w, alvo.x + d[0]*passo));
-    alvo.y = Math.max(0, Math.min(foto.h, alvo.y + d[1]*passo));
-    if(ombro.y > pe.y - 20){
-      if(g.dataset.marca === "ombro") ombro.y = pe.y - 20; else pe.y = ombro.y + 20;
-    }
-    posicionar();
-    const foco = g.dataset.marca;
-    clearTimeout(g._t);
-    g._t = setTimeout(() => { atualizar(); const v = $('[data-marca="'+foco+'"]'); if(v) v.focus(); }, 260);
+  window.addEventListener("pagehide", () => {
+    rostos = {}; avatar = null; avatarVestido = null; foto = null;
   });
 
   /* ── medidas ── */
@@ -3465,17 +3395,15 @@ escrever();
 
   if($("#ia-provar")) $("#ia-provar").addEventListener("click", provarComIA);
 
-  $("#largura").addEventListener("input", e => {
-    larguraFoto = (+e.target.value || 100)/100;
-    e.target.setAttribute("aria-valuetext",
-      larguraFoto === 1 ? "normal" : Math.round(larguraFoto*100)+" por cento");
-    if(foto) posicionar();
-  });
-
   /* ── trocar de modo ── */
   function trocarModo(novo){
+    /* Sem IA não existe modo avatar. A versão anterior desenhava as peças
+       por cima da foto, e é exatamente isso que a loja recusou: fica com
+       cara de adesivo. Melhor não oferecer do que oferecer ruim. */
+    if(novo === "foto" && !iaLigada()) novo = "boneca";
     modo = novo;
     const naFoto = modo === "foto";
+    $("#modo-foto").hidden = !iaLigada();
     secao.classList.toggle("prova--foto", naFoto);
     $("#modo-boneca").setAttribute("aria-checked", String(!naFoto));
     $("#modo-foto").setAttribute("aria-checked", String(naFoto));
@@ -3485,7 +3413,6 @@ escrever();
        dela e a altura sai das marcas */
     $("#campo-pele").hidden = naFoto;
     $("#campo-altura").hidden = naFoto;
-    $("#campo-larg").hidden = !naFoto;
     $("#campo-foto").hidden = !naFoto;
     $("#nota-boneca").hidden = naFoto;
     $("#nota-foto").hidden = !naFoto;
@@ -3520,6 +3447,7 @@ escrever();
   });
 
   montarControles();
+  montarRostos();
   contarMedidas();
   trocarModo("boneca");   /* deixa os textos coerentes com a IA ligada ou não */
   atualizar();

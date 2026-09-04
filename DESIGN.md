@@ -700,3 +700,70 @@ Enquanto caçava isso, dois testes mentiram e precisaram ser consertados:
    a prateleira que rola, a capa com zoom, a gaveta fechada. O ruído escondia
    os vazamentos de verdade. Agora o teste sobe a árvore e ignora quem está
    dentro de algo que rola ou esconde.
+
+## O avatar a partir do rosto — o que a referência realmente pedia
+
+A loja mandou o print do Minimal Club duas vezes, e na segunda ficou claro o
+que eu não tinha entendido: **o problema não era a fidelidade do desenho, era
+o desenho existir.** Peça vetorial sobre foto lê como adesivo, por melhor que
+seja o contorno, a luz e a textura. A frase foi direta — "não fica legal ali
+nas peças".
+
+E o fluxo certo era o oposto do que eu tinha construído: **a cliente não manda
+foto de corpo inteiro, manda fotos do rosto**, e o sistema monta o corpo.
+
+### Como ficou
+
+Duas etapas, duas gerações pagas:
+
+1. **`face-to-model`** — de uma a quatro fotos do rosto viram uma pessoa de
+   corpo inteiro, com a identidade preservada. Uma vez por cliente.
+2. **`tryon-v1.6`** — a peça é vestida nesse corpo. Uma por peça provada.
+
+O avatar é criado **uma vez e reaproveitado**. Refazer o corpo a cada peça
+dobraria a conta sem melhorar nada, e cada passada de IA degrada a imagem —
+por isso a peça é sempre vestida no avatar limpo, nunca no resultado anterior.
+Empilhar três provas deixaria o rosto irreconhecível.
+
+Escolher uma peça já dispara a prova: com o avatar montado, pedir mais um
+toque é atrito sem motivo.
+
+### O que foi removido, e por quê
+
+Todo o modo "peças desenhadas sobre a sua foto" saiu do arquivo: as duas
+marcas arrastáveis, a escala derivada delas, a camada de luz em `multiply`, o
+controle de largura e o suporte a peça recortada sobre foto. Cerca de 200
+linhas.
+
+Não foi só limpeza. **Enquanto a IA estiver desligada, o modo avatar não
+aparece** — o botão fica escondido e clicar nele devolve para a boneca. É uma
+decisão de produto: melhor não oferecer do que oferecer a versão que a dona já
+recusou. E foto de rosto é dado biométrico; pedir isso sem ter o que entregar
+não se justifica.
+
+### Privacidade: a régua subiu
+
+Antes eram fotos de corpo, agora são fotos de **rosto**. O consentimento mudou
+de texto e abre com a frase que importa: *"Foto de rosto é dado do seu corpo.
+Pense antes, como você pensaria antes de mandar para um desconhecido."*
+
+O que continua garantido e testado: escolher a foto não envia nada; recusar o
+consentimento não envia nada; as fotos não vão para `localStorage` nem
+`sessionStorage`; "Trocar as fotos" apaga o avatar e as miniaturas do DOM, não
+só esconde; e sai apenas a foto e a peça — nada do pedido, do nome ou do
+telefone.
+
+### As janelas do rosto, e um erro de arquitetura que elas revelaram
+
+Quatro janelas circulares, com o rótulo **fora** do círculo (dentro, "Olhando
+para cima" saía cortado). Só a de frente é obrigatória: exigir as quatro faria
+muita gente desistir na terceira, e uma já produz avatar.
+
+A primeira versão remontava o HTML inteiro a cada foto escolhida. Isso recriava
+os `<input>`, e com eles: o foco se perdia no meio do preenchimento, e um campo
+já preenchido deixava de existir enquanto a pessoa ainda mexia nele. Agora as
+janelas são montadas uma vez e só repintadas — `montarRostos()` monta,
+`pintarJanelas()` atualiza.
+
+Trocar qualquer foto derruba o avatar antigo. Mostrar o avatar anterior ao lado
+de fotos novas seria dizer que ele veio delas.

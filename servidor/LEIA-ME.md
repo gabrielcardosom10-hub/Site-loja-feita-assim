@@ -27,8 +27,14 @@ não há comando para rodar, nem segunda conta para criar.
 | `FASHN_KEY` | a sua chave | **obrigatória** — sem ela o provador responde que não foi configurado |
 | `ORIGENS` | `https://site-loja-feita-assim.vercel.app` | de onde o site pode chamar |
 | `HOSTS_PECA` | `d8j0ntlcm91z4.cloudfront.net,site-loja-feita-assim.vercel.app` | de onde as fotos das peças podem vir |
-| `TETO_HORA` | `20` | provas por hora, no site todo |
-| `TETO_IP` | `6` | provas por hora, por pessoa |
+| `TETO_HORA` | `20` | gerações por hora, no site todo |
+| `TETO_IP` | `6` | gerações por hora, por pessoa |
+| `MODELO_AVATAR` | `face-to-model` | opcional — o modelo que vira o rosto em corpo |
+| `MODELO_TRYON` | `tryon-v1.6` | opcional — o modelo que veste a peça |
+
+Os dois últimos existem porque a API do fornecedor muda de versão sem avisar.
+Se um dia o provador parar com erro `502` citando o nome do modelo, troque o
+nome na variável e faça o redeploy — sem mexer em código.
 
 3. **Redeploy** (a Vercel só aplica variáveis novas num deploy novo).
 4. No `index.html`, em `CONFIG.provador.ia`, troque `endpoint: ""` por
@@ -63,10 +69,23 @@ teto que não falha.
 (abaixo). Sem Upstash ele vale dentro de cada instância quente da função — a
 Vercel cria várias — então ele **ajuda contra rajada e não substitui o saldo**.
 
-Custo de referência: **US$ 0,075 por imagem**, cerca de **R$ 0,42**. Confira a
-cotação e o preço atual antes de decidir.
+### Quanto custa cada cliente
 
-| provas/hora | pico teórico por dia | custo |
+São **duas gerações pagas**, e elas não têm a mesma frequência:
+
+| quando | o que acontece | quantas vezes |
+|---|---|---|
+| ao montar o avatar | as fotos do rosto viram um corpo | **uma vez** por cliente |
+| ao escolher uma peça | a peça é vestida no avatar | **uma por peça provada** |
+
+O avatar é criado uma vez e reaproveitado em todas as provas — foi decisão de
+projeto, e é o que impede a conta de dobrar a cada peça.
+
+Custo de referência: **US$ 0,075 por geração**, cerca de **R$ 0,42**. Uma
+cliente que monta o avatar e prova três peças gasta 4 gerações ≈ **R$ 1,68**.
+Confira a cotação e o preço atual antes de decidir.
+
+| gerações/hora | pico teórico por dia | custo |
 |---|---|---|
 | 20 | 480 | ~US$ 36 |
 | 6 | 144 | ~US$ 11 |
@@ -93,8 +112,13 @@ se o Upstash cair — o provador não para por causa disso.
 Enquanto o provador era só desenho, a foto **não saía do aparelho**, e a CSP
 com `connect-src 'self'` garantia isso por construção.
 
-**Com a IA ligada, a foto é enviada para a FASHN**, que fica fora do Brasil.
-Não há como fazer diferente: o modelo roda em servidor.
+**Com a IA ligada, as fotos do ROSTO da cliente são enviadas para a FASHN**,
+que fica fora do Brasil. Não há como fazer diferente: o modelo roda em
+servidor.
+
+Foto de rosto é dado biométrico, e isso pesa mais do que uma foto qualquer.
+Por isso o modo avatar **só existe quando a IA está ligada**: sem ela o botão
+nem aparece, e ninguém entrega o rosto para nada.
 
 Por isso o site pede **consentimento explícito** antes do primeiro envio e diz
 para onde a foto vai. Isso é obrigação da LGPD, e **a loja é a controladora
