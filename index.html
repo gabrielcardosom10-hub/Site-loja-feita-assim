@@ -2283,6 +2283,17 @@ escrever();
   /* Cada peça leva um contorno de si mesma, escurecido. Sem isso, tricô
      creme sobre pele clara — ou bolsa preta sobre jaqueta preta — viram uma
      mancha só, e o desenho deixa de informar exatamente onde mais importa. */
+  /* Cor vinda do CONFIG entra em atributo de SVG montado por texto. Uma
+     aspa dentro do valor sairia do atributo — é dado do dono, mas a regra
+     desta página é que NADA entra em atributo sem passar por uma função de
+     segurança, e cor era a última exceção. Só passa #RGB, #RRGGBB ou
+     #RRGGBBAA; o resto vira um neutro que não quebra o desenho. */
+  function corSegura(v, reserva){
+    const t = String(v == null ? "" : v).trim();
+    return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?([0-9a-fA-F]{2})?$/.test(t)
+      ? t : (reserva || "#6B5878");
+  }
+
   function escurecer(hex, k){
     const h = String(hex||"").replace("#","");
     if(h.length !== 6) return "#00000040";
@@ -2305,7 +2316,9 @@ escrever();
 
   /* ── o corpo ── */
   function corpo(m){
-    const t = (cfg.peles && cfg.peles[pele]) || {pele:"#C99368", cabelo:"#3A2A20"};
+    const bruto = (cfg.peles && cfg.peles[pele]) || {};
+    const t = {pele: corSegura(bruto.pele, "#C99368"),
+               cabelo: corSegura(bruto.cabelo, "#3A2A20")};
     const {cx,OY,CY,QY,Ox,Cx,Qx,JY,TY,W} = m;
     const bracoW = n(9.5*W), pernaW = n(15*W);
     return (
@@ -2551,7 +2564,7 @@ escrever();
         /* sem proporção ainda: segue no desenho até a imagem chegar */
       }
       const f = MOLDES[p.molde];
-      if(f) svg += f(m, p.cor || "#6B5878");
+      if(f) svg += f(m, corSegura(p.cor));
     });
     return svg;
   }
@@ -2850,7 +2863,7 @@ escrever();
     $("#tons").innerHTML = (cfg.peles || []).map((t,i) =>
       '<button class="tom" type="button" role="radio" aria-checked="'+(i===pele)+'" '+
         'tabindex="'+(i===pele?0:-1)+'" aria-label="'+escapar(t.nome)+'">'+
-        '<span style="background:'+escapar(t.pele)+'"></span></button>').join("");
+        '<span style="background:'+corSegura(t.pele,"#C99368")+'"></span></button>').join("");
 
     $("#alturas").innerHTML = (cfg.alturas || []).map((a,i) =>
       botao("opcao","",i===altura,"radio").replace("></button>",
@@ -2866,7 +2879,7 @@ escrever();
         daVaga(v).map(p =>
           '<button class="peca-op" type="button" aria-pressed="false" '+
             'data-ref="'+escapar(p.ref)+'">'+
-            '<i style="background:'+escapar(p.cor || "#6B5878")+'"></i>'+
+            '<i style="background:'+corSegura(p.cor)+'"></i>'+
             escapar(p.nome)+'</button>').join("")+
       '</div></div>').join("");
   }

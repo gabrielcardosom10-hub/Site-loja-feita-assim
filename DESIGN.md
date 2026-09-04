@@ -594,3 +594,32 @@ quando alguém decide, por escrito, que vai ceder.
 
 Quando isso acontece, a mensagem na tela diz exatamente o que consertar. Foi
 o primeiro caso que o teste pegou, e ficou como teste permanente.
+
+## A passada adversarial
+
+Depois de tudo pronto, o site inteiro passou por um ataque deliberado — cada
+entrada recebeu payload, e o sucesso era **nada acontecer**. Servido por HTTP,
+com a CSP valendo de verdade.
+
+O que foi atacado e resistiu: a busca, os três campos de medida, o nome do
+arquivo da foto, o hash da URL, o `localStorage` do carrinho (payload no nome
+da peça, preço de R$ 0,01), script externo injetado à força, `fetch` de
+exfiltração, e o `CONFIG` envenenado — cor de peça com `"><img onerror=...>`
+e tom de pele com `url(javascript:1)`.
+
+O último item derrubou a última exceção da página: **cor entrava crua em
+atributo de SVG**. Era dado do dono da loja, mas a regra é que nada entra em
+atributo sem passar por uma função de segurança — agora existe `corSegura()`,
+que só deixa passar `#RGB`, `#RRGGBB` ou `#RRGGBBAA` e devolve um neutro para
+o resto. Uma aspa numa cor não sai mais do atributo.
+
+No worker, dois aparafusos: `X-Content-Type-Options: nosniff` em toda
+resposta, e o `Content-Length` conferido **antes** do parse do corpo — sem
+isso, um corpo de dezenas de megabytes seria lido inteiro só para ser
+recusado depois, CPU gasta a mando de quem ataca.
+
+O teste também registra, de propósito, o limite que fica: script inline
+pós-carga roda, porque `script-src 'unsafe-inline'` é a troca declarada para
+a dona editar o `CONFIG` sem build. O que a CSP garante mesmo assim: código
+de fora não carrega, e dado não sai — os dois testes que transformariam uma
+injeção em roubo falham para o atacante.

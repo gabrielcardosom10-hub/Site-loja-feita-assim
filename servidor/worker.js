@@ -37,7 +37,12 @@ function cors(env, origem){
 }
 const json = (dados, status, cab) => new Response(JSON.stringify(dados), {
   status: status || 200,
-  headers: {"Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...cab}
+  headers: {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff",
+    ...cab
+  }
 });
 
 /* ── contadores ──────────────────────────────────────────────── */
@@ -140,6 +145,12 @@ export default {
         "Você já provou " + tetoIp + " vezes hoje. Volte amanhã, ou fale com a loja no WhatsApp."}, 429, cab);
 
     /* ── entrada ── */
+    /* O tamanho é conferido ANTES do parse: sem isto, um corpo de dezenas de
+       megabytes seria lido e interpretado inteiro só para ser recusado
+       depois — CPU do worker gasta de graça, a mando de quem ataca. */
+    const tamanho = parseInt(pedido.headers.get("Content-Length") || "0", 10) || 0;
+    if(tamanho > MAX_FOTO + 64*1024)
+      return json({erro: "pedido muito grande"}, 413, cab);
     let corpo;
     try{ corpo = await pedido.json(); }
     catch(e){ return json({erro: "corpo inválido"}, 400, cab); }
