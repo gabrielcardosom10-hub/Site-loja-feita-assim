@@ -902,6 +902,21 @@ a.marca{min-height:44px;}
 .opcao:hover{border-color:var(--tinta);}
 .opcao[aria-checked="true"]{background:var(--tinta);border-color:var(--tinta);color:var(--papel);}
 
+/* "sugerir pela foto": mesma linguagem visual do link de medidas, porque é
+   a mesma categoria de ação — opcional, sem compromisso, texto sublinhado
+   em vez de botão cheio */
+.prova__sugerir{
+  position:relative;display:inline-flex;align-items:center;
+  min-height:44px;padding:0 2px;cursor:pointer;
+  color:var(--rosa-forte);font-family:var(--corpo);font-size:13px;
+  text-decoration:underline;text-underline-offset:4px;
+}
+.prova__sugerir:hover{color:var(--tinta);}
+.prova__sugerir:focus-within{outline:2px solid var(--rosa-claro);outline-offset:3px;border-radius:2px;}
+.prova__sugerir input{
+  position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;
+}
+
 /* tom de pele: a bolinha é o desenho, o alvo de toque é maior que ela */
 .tom{
   width:44px;height:44px;display:grid;place-items:center;
@@ -1365,9 +1380,24 @@ a.marca{min-height:44px;}
               <b id="voce-resumo"></b>
             </summary>
           <div class="prova__voce" role="group" aria-label="Como você é">
+            <div class="prova__campo" id="campo-sugerir">
+              <label class="prova__sugerir" id="sugerir-rotulo">
+                <input type="file" id="sugerir-arquivo" accept="image/jpeg,image/png,image/webp">
+                <span>Sugerir cores pela minha foto</span>
+              </label>
+              <p class="prova__dica" id="sugerir-status" role="status"></p>
+            </div>
             <div class="prova__campo" id="campo-pele">
               <span class="prova__rot" id="rot-pele">Tom de pele</span>
               <div class="prova__tons" id="tons" role="radiogroup" aria-labelledby="rot-pele"></div>
+            </div>
+            <div class="prova__campo" id="campo-cabelo">
+              <span class="prova__rot" id="rot-cabelo">Cor do cabelo</span>
+              <div class="prova__tons" id="cabelos" role="radiogroup" aria-labelledby="rot-cabelo"></div>
+            </div>
+            <div class="prova__campo" id="campo-penteado">
+              <span class="prova__rot" id="rot-penteado">Penteado</span>
+              <div class="prova__opcoes" id="penteados" role="radiogroup" aria-labelledby="rot-penteado"></div>
             </div>
             <div class="prova__campo" id="campo-altura">
               <span class="prova__rot" id="rot-altura">Altura</span>
@@ -1757,6 +1787,23 @@ const CONFIG = {
       {nome:"Negra",   pele:"#71462C", cabelo:"#1E1614"},
       {nome:"Retinta", pele:"#4E2E1D", cabelo:"#150F0E"}
     ],
+    /* Cor do cabelo, separada do tom de pele. Antes cada tom de pele vinha
+       com UM cabelo fixo — clara sempre com o mesmo castanho, por exemplo
+       — e isso não é verdade para ninguém: a mesma pele veste cabelo preto,
+       loiro, grisalho. "cabelo: -1" (o padrão) mantém o par antigo, para
+       quem nunca mexeu aqui continuar vendo a mesma boneca de sempre. */
+    cabelos: [
+      {nome:"Preto",          cor:"#1E1614"},
+      {nome:"Castanho escuro",cor:"#3A2A20"},
+      {nome:"Castanho claro", cor:"#6B4A2E"},
+      {nome:"Loiro escuro",   cor:"#8C6239"},
+      {nome:"Loiro claro",    cor:"#C9A063"},
+      {nome:"Ruivo",          cor:"#8A4227"},
+      {nome:"Grisalho",       cor:"#9C9490"}
+    ],
+    /* penteados: mudam a silhueta do cabelo, não a cor. Os moldes ficam em
+       MOLDES_CABELO, na parte de baixo do arquivo. */
+    penteados: ["Solta", "Curta", "Presa"],
     /* altura muda o comprimento da perna, não o resto */
     alturas: [
       {nome:"Até 1,60", escala:0.94},
@@ -2507,6 +2554,9 @@ escrever();
 
   /* estado */
   let pele = 0, altura = 1, manequim = 1, look = {};
+  /* -1 = usa o cabelo que vem junto do tom de pele (o par de sempre).
+     0 em diante = a cor escolhida em cfg.cabelos, independente da pele. */
+  let cabeloIdx = -1, penteado = 0;
   /* ── AVATAR DESLIGADO ────────────────────────────────────────
      A loja pediu para tirar a função do avatar da tela. O código inteiro
      continua aqui — o recorte de cabeça, a análise de pele e cabelo, a
@@ -2663,8 +2713,56 @@ function corSegura(v, reserva){
       return {pele: corSegura(avatarLocal.pele, "#C99368"),
               cabelo: corSegura(avatarLocal.cabelo, "#3A2A20")};
     const bruto = (cfg.peles && cfg.peles[pele]) || {};
+    const escolhido = cabeloIdx >= 0 && cfg.cabelos && cfg.cabelos[cabeloIdx];
     return {pele: corSegura(bruto.pele, "#C99368"),
-            cabelo: corSegura(bruto.cabelo, "#3A2A20")};
+            cabelo: corSegura(escolhido ? escolhido.cor : bruto.cabelo, "#3A2A20")};
+  }
+
+  /* ── PENTEADOS ────────────────────────────────────────────────
+     Três silhuetas, sempre no mesmo forro (a franja/topo é igual nos três
+     — muda o que desce dela para baixo), porque é essa parte de cima que
+     encosta na testa e não pode abrir buraco entre o cabelo e a pele. */
+  const MOLDES_CABELO = [
+    /* 0 — Solta e lisa: mechas até o ombro, a de sempre */
+    cx => '<path d="M '+(cx-20.5)+',60 C '+(cx-21.5)+',24 '+(cx+21.5)+',24 '+(cx+20.5)+',60 '+
+            'C '+(cx+20)+',50 '+(cx+14)+',47 '+cx+',47 '+
+            'C '+(cx-14)+',47 '+(cx-20)+',50 '+(cx-20.5)+',60 Z"/>'+
+          '<path d="M '+(cx-19)+',50 C '+(cx-26)+',74 '+(cx-25)+',90 '+(cx-22)+',104 '+
+            'L '+(cx-14)+',101 C '+(cx-17)+',86 '+(cx-17)+',66 '+(cx-14)+',54 Z"/>'+
+          '<path d="M '+(cx+19)+',50 C '+(cx+26)+',74 '+(cx+25)+',90 '+(cx+22)+',104 '+
+            'L '+(cx+14)+',101 C '+(cx+17)+',86 '+(cx+17)+',66 '+(cx+14)+',54 Z"/>',
+    /* 1 — Curta: o mesmo topo, mechas param na altura do queixo */
+    cx => '<path d="M '+(cx-20.5)+',60 C '+(cx-21.5)+',24 '+(cx+21.5)+',24 '+(cx+20.5)+',60 '+
+            'C '+(cx+20)+',50 '+(cx+14)+',47 '+cx+',47 '+
+            'C '+(cx-14)+',47 '+(cx-20)+',50 '+(cx-20.5)+',60 Z"/>'+
+          '<path d="M '+(cx-19)+',50 C '+(cx-24)+',64 '+(cx-23)+',72 '+(cx-20)+',80 '+
+            'L '+(cx-12)+',77 C '+(cx-15)+',68 '+(cx-16)+',60 '+(cx-14)+',54 Z"/>'+
+          '<path d="M '+(cx+19)+',50 C '+(cx+24)+',64 '+(cx+23)+',72 '+(cx+20)+',80 '+
+            'L '+(cx+12)+',77 C '+(cx+15)+',68 '+(cx+16)+',60 '+(cx+14)+',54 Z"/>',
+    /* 2 — Presa: sem mecha solta nenhuma — o topo cobre o alto da cabeça
+       rente, e um coque pequeno fecha atrás, um pouco acima da elipse */
+    cx => '<path d="M '+(cx-20.5)+',58 C '+(cx-21.5)+',22 '+(cx+21.5)+',22 '+(cx+20.5)+',58 '+
+            'C '+(cx+18)+',46 '+(cx+11)+',42 '+cx+',42 '+
+            'C '+(cx-11)+',42 '+(cx-18)+',46 '+(cx-20.5)+',58 Z"/>'+
+          '<ellipse cx="'+cx+'" cy="27" rx="9" ry="7.5"/>',
+  ];
+
+  /* ── O ROSTO DESENHADO ───────────────────────────────────────
+     A boneca nunca teve olho nem boca — só a elipse da cabeça, do jeito
+     que ilustração de moda costuma reduzir o rosto para não competir com
+     a roupa. "Mais opções de rosto" pediu o oposto: uma cara ali, mesmo
+     que pequena. O traço fica no mínimo possível — dois olhos, uma boca —
+     porque exagerar aqui é o jeito mais rápido de a boneca parecer
+     brinquedo em vez de ilustração. */
+  function rostoDesenhado(cx, corPele){
+    const olho = "#2E2118";                    /* fixo: pele muda, o olho não */
+    const boca = escurecer(corPele, .74);       /* lábio como sombra da pele */
+    return '<g>'+
+        '<ellipse cx="'+(cx-6)+'" cy="53" rx="1.6" ry="2" fill="'+olho+'"/>'+
+        '<ellipse cx="'+(cx+6)+'" cy="53" rx="1.6" ry="2" fill="'+olho+'"/>'+
+        '<path d="M '+(cx-4)+',63 Q '+cx+',66 '+(cx+4)+',63" stroke="'+boca+'" '+
+          'stroke-width="1.4" stroke-linecap="round" fill="none"/>'+
+      '</g>';
   }
 
   function corpo(m){
@@ -2675,8 +2773,10 @@ function corSegura(v, reserva){
     /* Com a cabeça recortada da foto, o cabelo desenhado não é ajuda: as
        mechas dele apareceriam ao lado do cabelo dela, e duas cabeleiras na
        mesma cabeça é pior do que nenhuma. A cabeça em elipse continua,
-       porque ela é o forro atrás das bordas macias do recorte. */
+       porque ela é o forro atrás das bordas macias do recorte. O rosto
+       desenhado sai pelo mesmo motivo: por cima da foto ele vira máscara. */
     const semRecorte = !(modo === "foto" && avatarLocal && avatarLocal.recorte);
+    const molde = MOLDES_CABELO[penteado] || MOLDES_CABELO[0];
     return (
       /* pernas e braços são traços de ponta redonda: leem bem em 180px */
       '<g stroke="'+t.pele+'" fill="none" stroke-linecap="round" stroke-linejoin="round">'+
@@ -2697,18 +2797,9 @@ function corSegura(v, reserva){
            deixavam um anel de pele em volta do cabelo */
         (semRecorte ? '<ellipse cx="'+cx+'" cy="56" rx="19" ry="23.5"/>' : '')+
       '</g>'+
-      /* cabelo: mechas laterais descem até o ombro */
-      (semRecorte
-        ? '<g fill="'+t.cabelo+'">'+
-            '<path d="M '+(cx-20.5)+',60 C '+(cx-21.5)+',24 '+(cx+21.5)+',24 '+(cx+20.5)+',60 '+
-              'C '+(cx+20)+',50 '+(cx+14)+',47 '+cx+',47 '+
-              'C '+(cx-14)+',47 '+(cx-20)+',50 '+(cx-20.5)+',60 Z"/>'+
-            '<path d="M '+(cx-19)+',50 C '+(cx-26)+',74 '+(cx-25)+',90 '+(cx-22)+',104 '+
-              'L '+(cx-14)+',101 C '+(cx-17)+',86 '+(cx-17)+',66 '+(cx-14)+',54 Z"/>'+
-            '<path d="M '+(cx+19)+',50 C '+(cx+26)+',74 '+(cx+25)+',90 '+(cx+22)+',104 '+
-              'L '+(cx+14)+',101 C '+(cx+17)+',86 '+(cx+17)+',66 '+(cx+14)+',54 Z"/>'+
-          '</g>'
-        : '')
+      (semRecorte ? rostoDesenhado(cx, bruto.pele) : '')+
+      /* cabelo: o penteado escolhido, na cor escolhida */
+      (semRecorte ? '<g fill="'+t.cabelo+'">'+molde(cx)+'</g>' : '')
     );
   }
 
@@ -3266,6 +3357,25 @@ function corSegura(v, reserva){
         'tabindex="'+(i===pele?0:-1)+'" aria-label="'+escapar(t.nome)+'">'+
         '<span style="background:'+corSegura(t.pele,"#C99368")+'"></span></button>').join("");
 
+    /* -1 (o par de sempre, ligado ao tom de pele) entra como a primeira
+       opção, sem bolinha de cor própria — ela muda de cara conforme o tom
+       de pele escolhido, e mostrar duas bolinhas idênticas ao lado uma da
+       outra (a "automática" e a igual dela) confundiria mais que ajudaria */
+    const corDoPar = ((cfg.peles || [])[pele] || {}).cabelo;
+    $("#cabelos").innerHTML =
+      '<button class="tom" type="button" role="radio" aria-checked="'+(cabeloIdx===-1)+'" '+
+        'tabindex="'+(cabeloIdx===-1?0:-1)+'" aria-label="Cabelo do tom de pele escolhido">'+
+        '<span style="background:'+corSegura(corDoPar,"#3A2A20")+';'+
+          'box-shadow:inset 0 0 0 2px var(--papel)"></span></button>'+
+      (cfg.cabelos || []).map((c,i) =>
+        '<button class="tom" type="button" role="radio" aria-checked="'+(cabeloIdx===i)+'" '+
+          'tabindex="'+(cabeloIdx===i?0:-1)+'" aria-label="'+escapar(c.nome)+'">'+
+          '<span style="background:'+corSegura(c.cor,"#3A2A20")+'"></span></button>').join("");
+
+    $("#penteados").innerHTML = (cfg.penteados || []).map((p,i) =>
+      botao("opcao","",i===penteado,"radio").replace("></button>",
+        ' aria-label="Penteado '+escapar(p)+'">'+escapar(p)+'</button>')).join("");
+
     $("#alturas").innerHTML = (cfg.alturas || []).map((a,i) =>
       botao("opcao","",i===altura,"radio").replace("></button>",
         ' aria-label="Altura '+escapar(a.nome)+'">'+escapar(a.nome)+'</button>')).join("");
@@ -3330,6 +3440,17 @@ function corSegura(v, reserva){
   function pintarControles(){
     [...$("#tons").children].forEach((b,i) => {
       b.setAttribute("aria-checked", String(i===pele)); b.tabIndex = i===pele ? 0 : -1; });
+    /* a bolinha do "par de sempre" muda de cor com o tom de pele mesmo
+       depois de montada — repintar aqui evita remontar a lista inteira só
+       porque a pele mudou */
+    const parBotao = $("#cabelos").firstElementChild;
+    if(parBotao) parBotao.querySelector("span").style.background =
+      corSegura(((cfg.peles || [])[pele] || {}).cabelo, "#3A2A20");
+    [...$("#cabelos").children].forEach((b,i) => {
+      const marcado = i===0 ? cabeloIdx===-1 : cabeloIdx===i-1;
+      b.setAttribute("aria-checked", String(marcado)); b.tabIndex = marcado ? 0 : -1; });
+    [...$("#penteados").children].forEach((b,i) => {
+      b.setAttribute("aria-checked", String(i===penteado)); b.tabIndex = i===penteado ? 0 : -1; });
     [...$("#alturas").children].forEach((b,i) => {
       b.setAttribute("aria-checked", String(i===altura)); b.tabIndex = i===altura ? 0 : -1; });
     [...$("#manequins").children].forEach((b,i) => {
@@ -3354,6 +3475,13 @@ function corSegura(v, reserva){
     }else{
       const pl = (cfg.peles || [])[pele];
       if(pl && pl.nome) partes.push(pl.nome.toLowerCase());
+      /* só nomeia o cabelo quando ele foi escolhido À PARTE — o par de
+         sempre já está implícito no tom de pele, dizer os dois juntos
+         seria repetir a mesma informação com palavras diferentes */
+      if(cabeloIdx >= 0){
+        const cb = (cfg.cabelos || [])[cabeloIdx];
+        if(cb && cb.nome) partes.push(cb.nome.toLowerCase());
+      }
       const al = (cfg.alturas || [])[altura];
       if(al && al.nome) partes.push(al.nome);
     }
@@ -3470,6 +3598,76 @@ function corSegura(v, reserva){
     pele = [...$("#tons").children].indexOf(b); atualizar();
   });
   setas($("#tons"), () => pele, v => pele = v);
+
+  /* #cabelos tem um botão a mais que cfg.cabelos: o primeiro é "o par de
+     sempre" (cabeloIdx = -1). O resto anda um índice à frente do array. */
+  $("#cabelos").addEventListener("click", e => {
+    const b = e.target.closest(".tom"); if(!b) return;
+    const i = [...$("#cabelos").children].indexOf(b);
+    cabeloIdx = i === 0 ? -1 : i - 1;
+    atualizar();
+  });
+  setas($("#cabelos"), () => cabeloIdx + 1, v => cabeloIdx = v === 0 ? -1 : v - 1);
+
+  $("#penteados").addEventListener("click", e => {
+    const b = e.target.closest(".opcao"); if(!b) return;
+    penteado = [...$("#penteados").children].indexOf(b); atualizar();
+  });
+  setas($("#penteados"), () => penteado, v => penteado = v);
+
+  /* ── SUGERIR PELA FOTO ────────────────────────────────────────
+     Isto não é o avatar. A foto NUNCA aparece em lugar nenhum, a boneca
+     continua sendo 100% desenho — o que sai da foto são só duas cores, a
+     pele e o cabelo mais PARECIDOS entre os que já existem na loja, nunca
+     inventados. Quem acha essas cores é analisarRosto(), a mesma função
+     do avatar — ela ficou dormente atrás de AVATAR_DESLIGADO, não
+     apagada, e por isso continua de pé para ser reaproveitada aqui.
+
+     A foto é lida, analisada e esquecida dentro do mesmo clique: a
+     variável nem chega a existir fora desta função, e nada é guardado. */
+  function corMaisPerto(hexAlvo, lista){
+    const rgb = h => { const t = String(h||"").replace("#",""); return [0,2,4].map(i => parseInt(t.slice(i,i+2),16) || 0); };
+    const alvo = rgb(hexAlvo);
+    let melhorI = -1, melhorD = Infinity;
+    lista.forEach((hex,i) => {
+      const v = rgb(hex);
+      const d = (v[0]-alvo[0])**2 + (v[1]-alvo[1])**2 + (v[2]-alvo[2])**2;
+      if(d < melhorD){ melhorD = d; melhorI = i; }
+    });
+    return melhorI;
+  }
+  const sugerirStatus = txt => { const e = $("#sugerir-status"); if(e) e.textContent = txt || ""; };
+
+  $("#sugerir-arquivo").addEventListener("change", async e => {
+    const arq = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if(!arq) return;
+    sugerirStatus("Lendo sua foto…");
+    const url = await lerArquivo(arq);
+    if(!url){
+      /* lerArquivo já escreveu o motivo em #prova-erro — só que #prova-erro
+         mora dentro de #campo-foto, escondido na boneca. O recado se muda
+         para cá, e o original é apagado para não ficar aceso à toa. */
+      sugerirStatus(($("#prova-erro")||{}).textContent || "Não consegui ler essa foto.");
+      erro("");
+      return;
+    }
+    sugerirStatus("Procurando o tom mais parecido…");
+    const cores = await analisarRosto(url);
+    if(!cores){
+      sugerirStatus("Não achei um rosto nessa foto. Tente uma de frente, com boa luz.");
+      return;
+    }
+    const idxPele = corMaisPerto(cores.pele, (cfg.peles||[]).map(t => t.pele));
+    const idxCabelo = corMaisPerto(cores.cabelo, (cfg.cabelos||[]).map(t => t.cor));
+    if(idxPele >= 0) pele = idxPele;
+    if(idxCabelo >= 0) cabeloIdx = idxCabelo;
+    const nomePele = ((cfg.peles||[])[idxPele]||{}).nome || "um tom";
+    const nomeCabelo = ((cfg.cabelos||[])[idxCabelo]||{}).nome || "uma cor";
+    sugerirStatus("Sugestão pronta: "+nomePele.toLowerCase()+", cabelo "+
+      nomeCabelo.toLowerCase()+". Ajuste como quiser nas opções abaixo.");
+    atualizar();
+  });
 
   $("#alturas").addEventListener("click", e => {
     const b = e.target.closest(".opcao"); if(!b) return;
@@ -4504,6 +4702,11 @@ function corSegura(v, reserva){
        porque lá o corpo é desenhado; com a IA, não, porque lá o corpo vem
        pronto na imagem. */
     $("#campo-pele").hidden = naFoto;
+    /* cor do cabelo, penteado e a sugestão pela foto só fazem sentido
+       para a cabeça DESENHADA — a mesma regra do tom de pele */
+    $("#campo-cabelo").hidden = naFoto;
+    $("#campo-penteado").hidden = naFoto;
+    $("#campo-sugerir").hidden = naFoto;
     $("#campo-altura").hidden = naFoto && iaLigada();
     $("#campo-foto").hidden = !naFoto;
     $("#nota-boneca").hidden = naFoto;
@@ -4538,6 +4741,8 @@ function corSegura(v, reserva){
   montarControles();
   montarRostos();
   contarMedidas();
+  sugerirStatus("A foto é lida só neste aparelho, para sugerir a cor mais "+
+    "parecida — e não fica guardada em lugar nenhum.");
   trocarModo("boneca");   /* deixa os textos coerentes com a IA ligada ou não */
   atualizar();
 })();

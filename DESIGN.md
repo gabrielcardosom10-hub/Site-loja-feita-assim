@@ -1143,3 +1143,73 @@ E entrou `desligado.mjs`: um teste pequeno, específico, que existe só para
 travar a garantia oposta — que o seletor não aparece, que clicar direto no
 botão escondido não muda nada, que a boneca continua funcionando sozinha.
 "Tirar a função" também precisa de prova de que ela saiu.
+
+---
+
+## Rosto, cabelo, e a foto que só sugere uma cor
+
+> "Coloque mais opções de rosto e cabelo na boneca, ou se conseguir, a
+> pessoa tira uma foto e cria uma aparência parecida da boneca."
+
+A boneca nunca teve rosto — só a elipse da cabeça, do jeito que ilustração
+de moda costuma reduzir a cara para não competir com a roupa. E o cabelo
+sempre veio em PAR fixo com o tom de pele: escolher "Clara" também escolhia
+um castanho específico, e não tinha como separar os dois.
+
+### O rosto: o mínimo que ainda é rosto
+
+Dois olhos (elipses de 1,6×2) e uma boca (uma curva fina). Nada de
+sobrancelha, nada de nariz — testado na tela antes de entrar no código,
+porque "isto parece bom" não é coisa que se decida por especificação, é
+coisa que se decide olhando. Qualquer traço a mais nesta escala vira
+brinquedo, não ilustração.
+
+A cor dos olhos é fixa (um marrom escuro neutro, a mesma em qualquer tom de
+pele); a da boca sai de `escurecer(pele, .74)` — um pouco mais escura que a
+própria pele da cliente, como lábio é na vida real, então nunca destoa em
+nenhum dos cinco tons.
+
+### Cabelo: cor solta da pele, três penteados
+
+`cfg.cabelos` é uma paleta de sete cores, independente de `cfg.peles`.
+`cabeloIdx = -1` é o estado padrão — "o par de sempre", o mesmo castanho
+que cada tom de pele sempre trouxe, para quem nunca mexeu aqui não ver a
+boneca mudar sozinha. Escolher uma cor à parte é `cabeloIdx = 0..6`, e ela
+sobrevive a trocar de tom de pele (só o `-1` acompanha a pele; uma escolha
+explícita fica).
+
+Três penteados (`MOLDES_CABELO`) compartilham o mesmo topo — a franja que
+encosta na testa não pode abrir buraco — e diferem no que desce dele: solto
+até o ombro (o de sempre), curto até o queixo, ou preso com um coque acima
+da cabeça. Um índice (`penteado`) escolhe qual molde desenhar; a cor vem de
+onde sempre veio.
+
+### "Sugerir pela minha foto" — e por que ele não é o avatar
+
+A segunda metade do pedido — "a pessoa tira uma foto e cria uma aparência
+parecida" — parecia, à primeira vista, pedir de volta o que acabou de ser
+desligado. Não é: o avatar mostrava o ROSTO da foto sobre o corpo; isto
+aqui olha para a foto, acha duas cores, e esquece a foto. A boneca continua
+100% desenho, sempre.
+
+Reaproveita `analisarRosto()` inteira, sem duplicar uma linha da
+segmentação — ela ficou dormente atrás de `AVATAR_DESLIGADO`, não apagada,
+e por isso continuava de pé para isto. O que muda é o que se faz com o
+retorno: em vez de recortar a cabeça e desenhá-la, `corMaisPerto()` acha a
+cor mais PARECIDA entre as que a loja já oferece — nunca inventa um tom
+novo — e marca esse tom de pele e essa cor de cabelo, como se a cliente
+tivesse clicado nas bolinhas ela mesma.
+
+A foto nunca é atribuída a nenhuma variável que sobreviva ao clique, nunca
+aparece em `<img>` nenhuma, nunca sai do dispositivo — zero pedido de rede,
+testado. O único traço que ela deixa são dois índices de array.
+
+### Um bug que só apareceu por causa do lugar do aviso de erro
+
+`lerArquivo()` já escreve o motivo de uma foto recusada em `#prova-erro` —
+só que esse elemento mora dentro de `#campo-foto`, escondido sempre que a
+boneca é o modo (e agora ela é o único modo). Sem tratar isso, escolher um
+arquivo inválido no "sugerir pela foto" ficaria mudo: o erro existiria,
+mas em elemento invisível. A correção lê o texto que `lerArquivo()` acabou
+de escrever, mostra em `#sugerir-status` — que É visível — e apaga o
+original para não deixar um alerta escondido aceso à toa.
