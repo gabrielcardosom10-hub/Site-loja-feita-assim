@@ -1285,3 +1285,102 @@ então a preferência é lida na mão e quem pediu menos movimento recebe um
 salto seco. E o **foco vai junto**, para o título do provador — sem isso,
 quem navega por teclado ou leitor de tela continuaria lá em cima na
 vitrine, com a tela mostrando outra coisa.
+
+---
+
+## Um segundo motor: a OpenRouter, chamando o Gemini
+
+> "claude, como eu uso a API do gemini para criar as fotos?" → "eu tenho o
+> openroute qual eu uso?"
+
+Duas perguntas curtas, e a resposta certa não cabia numa frase. O Google tem
+duas APIs de imagem bem diferentes — a simples (uma chave, modelo geral) e a
+de try-on dedicado (dentro do Google Cloud, mais setup) —, e eu não sabia
+qual a loja já tinha nem qual preferia até perguntar. A segunda pergunta
+resolveu isso sozinha: a loja já tem conta na OpenRouter, que dá acesso ao
+modelo de imagem do Gemini com a mesma chave que já usa em outros projetos.
+
+### A arquitetura que a FASHN tinha não servia sem ajuste
+
+A FASHN é dois modelos especializados, cada prova é um pedido assíncrono —
+o servidor manda o pedido, recebe um `id`, e o cliente pergunta de novo a
+cada 2,5s até a imagem ficar pronta (`esperarIA()`). A OpenRouter para
+modelos de imagem funciona diferente: uma chamada de `chat/completions`,
+com as fotos como partes da mensagem, e a imagem já vem pronta na mesma
+resposta. Não tem fila para consultar depois.
+
+Isso simplificou uma coisa e obrigou outra:
+
+- **Simplificou**: nenhuma rota de consulta por `id` para esse motor — o
+  código nem tenta, devolve erro claro se alguém chamar `GET ?id=` com a
+  OpenRouter ligada.
+- **Obrigou**: o cliente (`index.html`) esperava sempre `{id, etapa}` na
+  resposta do POST e ia direto consultar. Agora existe `resultadoIA(d,
+  etapa)`, que olha a resposta primeiro — se já veio `{estado:"completed",
+  imagem}`, usa na hora; senão, cai no `esperarIA()` de sempre. A FASHN
+  nunca manda `estado` na resposta do POST, então para ela nada mudou;
+  testado que o comportamento antigo continua idêntico.
+
+### Qual motor liga sozinho, sem variável de configuração
+
+Não tem um `MOTOR=openrouter` para escrever. `motorLigado()` olha qual
+chave existe (`OPENROUTER_KEY` ou `FASHN_KEY`) e decide — se as duas
+existirem, a OpenRouter ganha, por ser a que a loja está usando agora. Uma
+chave a menos para configurar errado.
+
+### Um bug que só apareceu com o motor novo: a peneira certa para cada formato
+
+`mostrarAvatar()` sempre usou `urlSegura()` para o `href` da imagem — e
+funcionava, porque a FASHN sempre devolve uma URL `https://` hospedada por
+ela. A OpenRouter devolve os **bytes da imagem direto na resposta**, como
+`data:image/png;base64,...`. `urlSegura()` recusa `data:` de propósito — é
+o esquema por onde entraria SVG com script vindo de fora —, então o avatar
+da OpenRouter virava um `href="#"` mudo, sem erro nenhum na tela. Achado só
+testando de ponta a ponta com um servidor fingido: a montagem por partes
+(servidor sozinho, depois cliente sozinho) não pegava, porque cada metade
+"confiava" que a outra mandava o formato certo.
+
+A correção é `imagemGerada()`: tenta a peneira de foto (`fotoSegura()`,
+que aceita `data:image/(jpeg|png|webp);base64,...`) primeiro, e só cai para
+`urlSegura()` se não for isso. Nenhuma das duas afrouxa — cada uma continua
+recusando o que sempre recusou.
+
+### Os prompts, e uma honestidade que não dava para pular
+
+A FASHN foi treinada para uma coisa: vestir roupa em gente, preservando
+pose e identidade. A OpenRouter aqui chama um modelo GERAL de imagem — ele
+segue a instrução em texto, mas não foi feito só para isso. Isso pesa
+diferente nas duas etapas:
+
+- **Vestir a peça** é o tipo de edição de imagem que esses modelos gerais
+  mais treinam — tende a sair bem.
+- **Montar o corpo inteiro a partir só do rosto** é um pedido mais difícil
+  para um modelo geral, e o resultado varia mais de foto para foto.
+
+Isso está escrito no comentário do topo de `provar.js` e no `LEIA-ME`, sem
+suavizar — porque prometer o mesmo nível de consistência da FASHN seria
+mentira, e a loja tem o direito de saber antes de escolher.
+
+Os textos de pedido (`PROMPT_AVATAR`, `promptTryon`) foram escritos em
+inglês de propósito: é a língua em que estes modelos seguem instrução de
+edição de imagem com mais precisão. O nome da peça entra no pedido — mas
+só o que vem do catálogo da loja (`CONFIG.pecas`), nunca texto que a
+cliente digitou.
+
+### O modelo que passa a data de validade
+
+`gemini-2.5-flash-image` — a versão mais citada quando comecei a procurar
+— para de funcionar em outubro de 2026. O padrão aqui já é
+`gemini-3.1-flash-image`, a versão seguinte, configurável por
+`OPENROUTER_MODELO` pela mesma razão que `MODELO_AVATAR`/`MODELO_TRYON` já
+eram configuráveis: a API de um fornecedor de IA muda de nome sem avisar, e
+trocar isso não pode pedir mexer em código.
+
+### Uma coisa que fiz e o dono do site precisa decidir
+
+Nada disto aparece na tela ainda. `AVATAR_DESLIGADO = true` continua ligado
+— foi um pedido explícito de duas conversas atrás ("tire a função do
+avatar"), e eu não desfaço uma decisão de propósito da loja sem perguntar
+primeiro, mesmo que a pergunta de hoje pareça andar na direção contrária.
+O servidor está pronto e testado; falta uma linha, e ela é escolha da loja,
+não minha.

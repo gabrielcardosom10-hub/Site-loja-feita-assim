@@ -28,30 +28,62 @@ os dois antes de ligar a IA lá.
 O arquivo é `api/provar.js`, na raiz do projeto. Ele **sobe junto com o site**:
 não há comando para rodar, nem segunda conta para criar.
 
-### Ligar
+### Dois fornecedores possíveis — a chave que existir decide
 
-1. Crie uma conta na **fashn.ai** e compre créditos. A chave fica em
-   Settings → API.
-   **Não me mande essa chave, nem cole em conversa nenhuma.**
+Não tem variável de "qual motor usar". Você põe **uma** das duas chaves, e o
+código escolhe sozinho pela que encontrar (se as duas existirem, a
+OpenRouter ganha):
+
+|  | OpenRouter (Gemini) | FASHN |
+|---|---|---|
+| o que é | modelo de imagem GERAL, entende a instrução em texto | modelo feito SÓ para vestir roupa em pessoa |
+| preço por imagem | ≈ US$ 0,04–0,07 (confira, muda sem aviso) | ≈ US$ 0,075 |
+| qualidade | boa em vestir a peça; menos previsível em montar o corpo inteiro só a partir do rosto | mais consistente nas duas etapas, porque só faz isso |
+| conta | aistudio ou openrouter.ai — uma chave só, do jeito que você já usa em outros projetos | conta própria na fashn.ai |
+
+Se você já tem conta na OpenRouter, é o caminho mais direto. Se notar que o
+avatar (a etapa de "montar o corpo a partir do rosto") sai estranho com
+frequência, vale tentar a FASHN — ou ajustar o texto do pedido em
+`PROMPT_AVATAR`, no topo de `api/provar.js`.
+
+### Ligar — caminho OpenRouter
+
+1. Em **openrouter.ai** → Keys, crie uma chave e coloque **créditos
+   limitados** na conta (é o único teto que não depende de nenhuma linha de
+   código estar certa). **Não me mande essa chave, nem cole em conversa
+   nenhuma.**
 2. No painel da Vercel, abra o projeto → **Settings** → **Environment
    Variables** e crie:
 
 | nome | valor | para quê |
 |---|---|---|
-| `FASHN_KEY` | a sua chave | **obrigatória** — sem ela o provador responde que não foi configurado |
+| `OPENROUTER_KEY` | a sua chave | **obrigatória** — sem ela (e sem `FASHN_KEY`) o provador responde que não foi configurado |
 | `ORIGENS` | `https://site-loja-feita-assim.vercel.app` | de onde o site pode chamar |
 | `HOSTS_PECA` | `d8j0ntlcm91z4.cloudfront.net,site-loja-feita-assim.vercel.app` | de onde as fotos das peças podem vir |
-| `TETO_MES` | `200` | **o teto do bolso** — imagens no mês inteiro. Ver abaixo |
+| `TETO_MES` | `250` | **o teto do bolso** — imagens no mês inteiro. Ver abaixo |
 | `TETO_HORA` | `20` | gerações por hora, no site todo (contra rajada) |
 | `TETO_IP` | `6` | gerações por hora, por pessoa (contra abuso) |
+| `OPENROUTER_MODELO` | `google/gemini-3.1-flash-image` | opcional — troque se o Google aposentar este modelo (acontece sem aviso) |
+
+### Ligar — caminho FASHN
+
+1. Crie uma conta na **fashn.ai** e compre créditos. A chave fica em
+   Settings → API.
+   **Não me mande essa chave, nem cole em conversa nenhuma.**
+2. As mesmas variáveis acima, trocando `OPENROUTER_KEY` por:
+
+| nome | valor | para quê |
+|---|---|---|
+| `FASHN_KEY` | a sua chave | **obrigatória** |
 | `MODELO_AVATAR` | `face-to-model` | opcional — o modelo que vira o rosto em corpo |
 | `MODELO_TRYON` | `tryon-v1.6` | opcional — o modelo que veste a peça |
 
-Os dois últimos existem porque a API do fornecedor muda de versão sem avisar.
-Se um dia o provador parar com erro `502` citando o nome do modelo, troque o
-nome na variável e faça o redeploy — sem mexer em código.
-
 3. **Redeploy** (a Vercel só aplica variáveis novas num deploy novo).
+
+Os nomes de modelo (dos dois fornecedores, incluindo `OPENROUTER_MODELO`
+acima) existem como variável porque a API deles muda de versão sem avisar.
+Se um dia o provador parar com erro `502` citando o nome do modelo, troque o
+nome na variável e faça outro redeploy — sem mexer em código.
 
 Só isso. No `index.html` o `endpoint` **já está em `"/api/provar"`** — não
 precisa mexer.
@@ -62,16 +94,22 @@ está de pé**. Se a chave ainda não estiver lá, ele nem oferece o caminho da
 IA — mostra o provador de graça e pronto. Ninguém consente em mandar o rosto
 para fora para depois receber um erro.
 
-Pronto. Com a chave no lugar, o botão "Provar de verdade com IA" aparece no
-provador, no modo **"No meu avatar"**. Sem a chave, o mesmo modo mostra o
-provador que roda no aparelho da cliente.
+Pronto. Com a chave no lugar, quem escuta o resultado é o próprio provador —
+mas **confira antes se o modo de foto está ligado**: ele pode estar escondido
+da tela por `AVATAR_DESLIGADO` no `index.html` (busque por essa palavra). Se
+estiver `true`, a chave funciona no servidor mas ninguém vê o botão — vire
+para `false` para o modo aparecer.
 
 ### Conferir
 
 Abra `https://site-loja-feita-assim.vercel.app/api/provar` no navegador. Com a
-chave configurada ele responde `{"erro":"identificador inválido"}` — o que é o
-esperado, porque faltou o `?id=`. Se responder `{"erro":"sem chave"}`, a
-variável não chegou: confira o nome e refaça o deploy.
+chave configurada ele responde `{"erro":"identificador inválido"}` **se o
+motor for a FASHN** — o que é o esperado, porque faltou o `?id=`. **Com a
+OpenRouter** não existe consulta por identificador (a resposta já vem pronta
+no POST), então essa rota responde `{"erro":"este motor não usa consulta por
+identificador"}` — também esperado, e também sinal de que a chave chegou.
+Se qualquer um dos dois responder `{"erro":"sem chave"}`, a variável não
+chegou: confira o nome e refaça o deploy.
 
 ---
 
@@ -90,15 +128,16 @@ saber o câmbio mente. A conta é sua:
 quanto você aceita gastar  ÷  preço da imagem  =  TETO_MES
 ```
 
-Com US$ 0,075 por imagem:
+Com US$ 0,06 por imagem (faixa da OpenRouter; a FASHN fica perto de US$ 0,075):
 
 | você aceita gastar | `TETO_MES` |
 |---|---|
-| US$ 10 no mês | `133` |
-| US$ 15 no mês | `200` ← é o padrão, se você não puser nada |
-| US$ 30 no mês | `400` |
+| US$ 10 no mês | `166` |
+| US$ 15 no mês | `250` ← é o padrão, se você não puser nada |
+| US$ 30 no mês | `500` |
 
-**Confira o preço no site da FASHN antes de fechar o número.**
+**Confira o preço no site do fornecedor que você escolheu antes de fechar o
+número** — muda sem aviso, e os dois fornecedores não cobram o mesmo.
 
 Batido o teto, o provador com IA para até o mês virar. E aqui está a parte
 que importa: **o site não mostra erro.** Ele cai sozinho no provador de graça
@@ -109,8 +148,8 @@ Vale também para: chave faltando, fornecedor fora do ar, e a cliente recusando
 mandar o rosto. Nos quatro casos o site cai no de graça, calado.
 
 Uma coisa que o código faz de propósito: **pedido inválido não queima o teto do
-mês.** Só conta o que virou geração de verdade na FASHN. Quem segura tentativa
-inválida e ataque são os dois tetos de baixo, que somam sempre.
+mês.** Só conta o que virou geração de verdade no fornecedor. Quem segura
+tentativa inválida e ataque são os dois tetos de baixo, que somam sempre.
 
 ### 2 e 3. `TETO_HORA` e `TETO_IP` — os de rajada
 
@@ -119,8 +158,9 @@ bolso no mês** — 20 por hora dá 14.400 por mês.
 
 ### E o que nunca falha
 
-**O saldo pré-pago na FASHN.** Ele não depende de nenhuma linha deste código
-estar certa. Compre crédito limitado; é o único teto que não depende de nada.
+**O saldo pré-pago no fornecedor** — na OpenRouter ou na FASHN, qualquer uma
+das duas. Ele não depende de nenhuma linha deste código estar certa. Compre
+crédito limitado; é o único teto que não depende de nada.
 
 Os três daqui só são rígidos com o **Upstash** configurado (abaixo, e o plano
 de graça dá conta com folga). Sem Upstash cada instância quente da função tem
@@ -139,9 +179,10 @@ São **duas gerações pagas**, e elas não têm a mesma frequência:
 O avatar é criado uma vez e reaproveitado em todas as provas — foi decisão de
 projeto, e é o que impede a conta de dobrar a cada peça.
 
-Custo de referência: **US$ 0,075 por geração**, cerca de **R$ 0,42**. Uma
-cliente que monta o avatar e prova três peças gasta 4 gerações ≈ **R$ 1,68**.
-Confira a cotação e o preço atual antes de decidir.
+Custo de referência: **US$ 0,04 a 0,075 por geração** conforme o fornecedor
+(uns **R$ 0,22 a R$ 0,42**). Uma cliente que monta o avatar e prova três
+peças gasta 4 gerações ≈ **R$ 0,90 a R$ 1,68**. Confira a cotação e o preço
+atual antes de decidir — dos dois lados, câmbio e fornecedor mudam sem aviso.
 
 | gerações/hora | pico teórico por dia | custo |
 |---|---|---|
@@ -170,9 +211,10 @@ se o Upstash cair — o provador não para por causa disso.
 Enquanto o provador era só desenho, a foto **não saía do aparelho**, e a CSP
 com `connect-src 'self'` garantia isso por construção.
 
-**Com a IA ligada, as fotos do ROSTO da cliente são enviadas para a FASHN**,
-que fica fora do Brasil. Não há como fazer diferente: o modelo roda em
-servidor.
+**Com a IA ligada, as fotos do ROSTO da cliente são enviadas para o
+fornecedor configurado** (OpenRouter ou FASHN, conforme a chave que estiver
+na Vercel), que fica fora do Brasil. Não há como fazer diferente: o modelo
+roda em servidor.
 
 Foto de rosto é dado biométrico, e isso pesa mais do que uma foto qualquer.
 Por isso o modo avatar **só existe quando a IA está ligada**: sem ela o botão
@@ -182,7 +224,8 @@ Por isso o site pede **consentimento explícito** antes do primeiro envio e diz
 para onde a foto vai. Isso é obrigação da LGPD, e **a loja é a controladora
 desses dados**. Antes de publicar:
 
-- confira na política da FASHN por quanto tempo a imagem fica guardada;
+- confira na política do fornecedor escolhido (OpenRouter ou FASHN) por
+  quanto tempo a imagem fica guardada;
 - escreva isso em `CONFIG.provador.ia.guarda`, no `index.html` — esse texto
   aparece na caixa de consentimento.
 
@@ -193,7 +236,10 @@ outro lugar.
 
 ## Caminho 2 — Cloudflare Workers (alternativa)
 
-Só se o site sair da Vercel. O arquivo é `worker.js`, nesta pasta.
+Só se o site sair da Vercel. O arquivo é `worker.js`, nesta pasta — e **ele
+só sabe falar com a FASHN**. O caminho da OpenRouter descrito acima existe só
+na versão Vercel (`api/provar.js`); portar para o worker é trabalho que ainda
+não foi feito.
 
 ```bash
 npx wrangler login
@@ -210,9 +256,11 @@ navegador bloqueia a chamada, de propósito.
 
 | sintoma | causa provável |
 |---|---|
-| "o provador não foi configurado" | falta `FASHN_KEY`, ou faltou o redeploy |
+| o modo de foto nem aparece na tela | `AVATAR_DESLIGADO` está `true` no `index.html` — a chave pode estar certa e mesmo assim ninguém vê o botão |
+| "o provador não foi configurado" | falta `OPENROUTER_KEY` **e** `FASHN_KEY`, ou faltou o redeploy |
 | "não consegui falar com o provador" | o caminho em `CONFIG` não bate com o da função |
 | `403 origem não autorizada` | `ORIGENS` não bate com o endereço do site |
 | `400 a peça não é de um endereço autorizado` | falta o host das fotos em `HOSTS_PECA` |
 | `429 teto da hora` | o limite acabou; ele volta na hora seguinte |
-| `502` com mensagem da API | chave inválida ou sem crédito na FASHN |
+| `502` com mensagem da API | chave inválida, sem crédito, ou (na OpenRouter) o modelo recusou o pedido por segurança — tente fotos diferentes |
+| `502 a IA não devolveu uma imagem` (só na OpenRouter) | o modelo respondeu só com texto, sem gerar imagem — normalmente é recusa de segurança; tente de novo com outra foto |

@@ -1840,6 +1840,18 @@ const CONFIG = {
        vestida por um modelo de inteligência artificial, e o resultado
        parece uma fotografia.
 
+       DOIS FORNECEDORES POSSÍVEIS, escolhidos sozinhos pela chave que
+       existir na Vercel — não tem nada para escolher aqui no CONFIG:
+         • OPENROUTER_KEY → chama um modelo de imagem do Google (Gemini)
+           através da OpenRouter. É o que a loja está usando agora.
+         • FASHN_KEY → o caminho original, um modelo feito especificamente
+           para vestir roupa em gente.
+       Se as duas chaves existirem, a OpenRouter ganha. O comentário no
+       topo de `api/provar.js` explica a diferença de qualidade entre os
+       dois — resumo: a FASHN tende a acertar mais na primeira tentativa
+       porque só faz isso; a OpenRouter é mais barata e serve para o mesmo
+       fim, com resultado que varia um pouco mais.
+
        O preço é literal: cada imagem gerada é cobrada pelo fornecedor.
 
        O TETO DO MÊS é o que transforma isso num número que você escolhe.
@@ -1848,11 +1860,14 @@ const CONFIG = {
 
            quanto você aceita gastar  ÷  preço da imagem  =  TETO_MES
 
-       Com o preço que eu vi quando montei isto, US$ 0,075 por imagem:
-           US$ 10/mês  → TETO_MES = 133
-           US$ 15/mês  → TETO_MES = 200   (é o padrão, se você não puser nada)
-           US$ 30/mês  → TETO_MES = 400
-       Confira o preço no site da FASHN antes de fechar o número.
+       Preços que eu vi quando montei isto (CONFIRA no site do fornecedor
+       antes de fechar o número — isso muda sem aviso):
+           OpenRouter (Gemini, modelo de imagem)  ≈ US$ 0,04 a US$ 0,07 por imagem
+           FASHN (modelo específico de try-on)    ≈ US$ 0,075 por imagem
+       Com US$ 0,06 por imagem, por exemplo:
+           US$ 10/mês  → TETO_MES = 166
+           US$ 15/mês  → TETO_MES = 250   (é o padrão, se você não puser nada)
+           US$ 30/mês  → TETO_MES = 500
 
        Batido o teto, o provador com IA para até o mês virar — e o de graça
        assume, sem erro na tela. Ninguém fica sem provador.
@@ -1860,21 +1875,23 @@ const CONFIG = {
        E o teto só é RÍGIDO de verdade com o Upstash configurado (o plano de
        graça dá conta). Sem ele, cada instância da função tem o seu contador
        e o teto vira estimativa. A trava que nunca falha continua sendo uma:
-       compre crédito PRÉ-PAGO limitado na FASHN.
+       compre crédito PRÉ-PAGO limitado — na OpenRouter ou na FASHN,
+       qualquer uma das duas.
 
-       E repare que os dois caminhos NÃO CONVIVEM na mesma tela: ligar este
-       aqui TROCA o provador do rosto encaixado pelo da IA. O que era uma
-       foto vira quatro, o encaixe local sai de cena e passa a valer o
-       consentimento antes de cada envio. Desligar devolve tudo como está
-       hoje, sem perder nada.
+       E repare que os dois caminhos (IA e o desenho de graça) NÃO CONVIVEM
+       na mesma tela: ligar este aqui TROCA o provador do rosto encaixado
+       pelo da IA. O que era uma foto vira quatro, o encaixe local sai de
+       cena e passa a valer o consentimento antes de cada envio. Desligar
+       devolve tudo como está hoje, sem perder nada.
 
        Desligado enquanto `endpoint` estiver vazio, e o botão nem aparece.
 
        O intermediário é `api/provar.js`, e ele sobe junto com o site na
        Vercel. Não há comando para rodar nem segunda conta para criar: falta
-       só pôr a chave da FASHN nas variáveis de ambiente do projeto, em
-       Settings → Environment Variables → FASHN_KEY. O LEIA-ME da pasta
-       `servidor/` tem o passo a passo e as variáveis opcionais.
+       só pôr UMA das duas chaves nas variáveis de ambiente do projeto, em
+       Settings → Environment Variables → OPENROUTER_KEY ou FASHN_KEY. O
+       LEIA-ME da pasta `servidor/` tem o passo a passo e as variáveis
+       opcionais.
 
        ATENÇÃO, E ISTO É O MAIS IMPORTANTE DESTE BLOCO: com a IA ligada, a
        foto da cliente PASSA A SAIR DO APARELHO. Ela vai para a empresa que
@@ -1904,7 +1921,9 @@ const CONFIG = {
 
          Para desligar, ponha "" de volta. Nada mais muda. */
       endpoint: "/api/provar",
-      fornecedor: "FASHN",
+      /* só documentação — nada no site lê este campo. Ele muda sozinho
+         conforme a chave que estiver na Vercel: ver o topo de provar.js */
+      fornecedor: "OpenRouter (Gemini) ou FASHN — decide a chave na Vercel",
       guarda: "Confirme com o fornecedor por quanto tempo a imagem fica guardada."
     },
 
@@ -4024,7 +4043,7 @@ function corSegura(v, reserva){
         erro(d.mensagem || d.erro || "Não deu para montar o avatar agora.");
         return;
       }
-      const pronto = await esperarIA(d.id, "avatar");
+      const pronto = await resultadoIA(d, "avatar");
       if(!pronto) return;
       avatar = pronto; avatarVestido = null;
       iaEstado("Avatar pronto. Escolha as peças abaixo.");
@@ -4033,7 +4052,7 @@ function corSegura(v, reserva){
       if(!cairParaLocal("O provador com inteligência artificial não respondeu. "+
         "Este aqui roda no seu aparelho: o seu rosto, no corpo desenhado."))
         erro("Não consegui falar com o provador. Se você é da loja: confira se a "+
-             "FASHN_KEY está nas variáveis de ambiente da Vercel.");
+             "OPENROUTER_KEY ou a FASHN_KEY está nas variáveis de ambiente da Vercel.");
     }finally{
       criandoAvatar = false; pintarRostos();
     }
@@ -4051,7 +4070,8 @@ function corSegura(v, reserva){
         /* veste sempre no avatar limpo, nunca no resultado anterior: cada
            passada de IA degrada um pouco a imagem, e empilhar três provas
            deixaria o rosto irreconhecível */
-        body: JSON.stringify({foto: avatar, peca: alvo.p.foto, categoria: alvo.categoria})
+        body: JSON.stringify({foto: avatar, peca: alvo.p.foto, categoria: alvo.categoria,
+          nomePeca: alvo.p.nome})
       });
       const d = await r.json().catch(() => ({}));
       if(!r.ok){
@@ -4061,7 +4081,7 @@ function corSegura(v, reserva){
         return;
       }
 
-      const pronto = await esperarIA(d.id, "provar");
+      const pronto = await resultadoIA(d, "provar");
       if(!pronto) return;
       avatarVestido = pronto;
       mostrarAvatar(alvo.p.nome);
@@ -4069,11 +4089,16 @@ function corSegura(v, reserva){
       /* fetch bloqueado pela CSP cai aqui, e é o engano mais provável de quem
          ligou a IA sem trocar connect-src */
       iaEstado("Não consegui falar com o provador. Se você é da loja: confira "+
-               "se a FASHN_KEY está nas variáveis de ambiente da Vercel, e se "+
-               "o endereço no CONFIG bate com o caminho da função.");
+               "se a OPENROUTER_KEY ou a FASHN_KEY está nas variáveis de ambiente "+
+               "da Vercel, e se o endereço no CONFIG bate com o caminho da função.");
     }finally{
       iaOcupado = false; pintarIA();
     }
+  }
+
+  async function resultadoIA(d, etapa){
+    if(d.estado === "completed" && d.imagem) return d.imagem;
+    return esperarIA(d.id, etapa);
   }
 
   async function esperarIA(id, etapa){
@@ -4103,6 +4128,14 @@ function corSegura(v, reserva){
   /* Sem peça escolhida mostra o avatar; com peça, o avatar vestido. Nunca
      desenho por cima de foto — foi justamente isso que ficou parecendo
      adesivo, e a loja recusou com razão. */
+  /* O resultado da IA vem de dois jeitos, conforme o motor do servidor: a
+     FASHN devolve uma URL hospedada (https://...), a OpenRouter devolve os
+     bytes na própria resposta (data:image/...;base64,...). urlSegura()
+     recusa data: de propósito — é o esquema por onde entraria SVG com
+     script vindo de fora —, então uma imagem gerada precisa da peneira
+     certa para cada formato, tentando a de foto primeiro. */
+  const imagemGerada = v => fotoSegura(v) || urlSegura(v);
+
   function mostrarAvatar(nome){
     const boneca = $("#boneca");
     const url = avatarVestido || avatar;
@@ -4112,7 +4145,7 @@ function corSegura(v, reserva){
       '<title id="boneca-desc">'+escapar(nome
         ? "Seu avatar vestindo "+nome+"."
         : "Seu avatar, sem nenhuma peça escolhida ainda.")+'</title>'+
-      '<image href="'+urlSegura(url)+'" x="0" y="0" width="900" height="1200" '+
+      '<image href="'+imagemGerada(url)+'" x="0" y="0" width="900" height="1200" '+
         'preserveAspectRatio="xMidYMid meet"/>';
     if(nome) iaEstado("Pronto. Escolha outra peça para trocar.");
   }
