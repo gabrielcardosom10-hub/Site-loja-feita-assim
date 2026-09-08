@@ -1782,7 +1782,11 @@ const CONFIG = {
          Quando for ligar, ponha exatamente: "/api/provar"
          Caminho do próprio site — nenhum domínio de fora, e por isso a CSP
          continua em connect-src 'self'. */
-      endpoint: "/api/provar",
+      /* Voltou para vazio de propósito, e não por engano: com ele
+         preenchido o provador que aparece é o pago, e o do rosto
+         encaixado — que não custa nada — some da tela. Para ligar a IA
+         de novo é esta linha, e só ela: "/api/provar". */
+      endpoint: "",
       fornecedor: "FASHN",
       guarda: "Confirme com o fornecedor por quanto tempo a imagem fica guardada."
     },
