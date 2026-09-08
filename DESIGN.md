@@ -767,3 +767,115 @@ janelas são montadas uma vez e só repintadas — `montarRostos()` monta,
 
 Trocar qualquer foto derruba o avatar antigo. Mostrar o avatar anterior ao lado
 de fotos novas seria dizer que ele veio delas.
+
+---
+
+## O avatar de graça: o rosto dela sobre o corpo desenhado
+
+> "Tente colocar um avatar realista sem precisar pagar uma API para isso.
+> Coloque uma foto do rosto da pessoa e simule como as peças iriam ficar.
+> Consegue fazer? Pois se cada imagem gastar o custo vai ficar muito alto e não
+> precisa ser algo 100% realista."
+
+O provador com IA funciona, mas cobra por imagem. Numa loja que está começando
+isso é conta de luz todo mês, e a conta cresce justamente quando o site dá
+certo. Então o padrão passou a ser outro caminho, que **custa zero e roda no
+aparelho da própria cliente**: uma foto do rosto dela, encaixada no corpo que a
+página já desenhava, com a pele e o cabelo tirados dessa mesma foto.
+
+Não é fotografia, e a tela não diz que é. É o que a dúvida dela pede: como a
+cor e o modelo da peça conversam com ela — não com uma modelo qualquer que a
+loja não tem.
+
+### O que rodar sem servidor obriga a resolver
+
+Não há modelo treinado, não há biblioteca, não há rede. Sobrou aritmética sobre
+os pixels, num `<canvas>` de 176px de lado. Três passos:
+
+1. **Achar a pele.** Cada pixel passa por um teste em YCbCr, que separa a cor
+   do brilho e por isso vale do tom mais claro ao mais escuro. Sozinho ele não
+   basta: parede bege, papel e concreto passam folgado — a primeira versão lia
+   a parede inteira como rosto. Entrou junto um teste sobre o R, G e B crus
+   (`r-g ≥ 10`, `r-b ≥ 14`, `g > b`), porque cinza quente tem R e G quase
+   iguais e pele nunca tem.
+
+2. **Escolher a mancha certa.** As regiões conectadas competem por tamanho,
+   proximidade do meio e — o que mais importa — **quantas bordas do quadro
+   elas encostam**. Fundo encosta nas quatro; rosto, em nenhuma. Mancha acima
+   de 55% do quadro é descartada de saída.
+
+3. **Medir o rosto dentro da mancha.** Pescoço, colo e ombros são pele também e
+   caem na mesma mancha. O perfil de **contagem de pixels por linha** resolve:
+   engorda até as bochechas, afina no pescoço, dispara nos ombros. A linha das
+   bochechas dá a largura do rosto, e dela sai o resto — altura de cabeça é
+   proporção conhecida, não chute.
+
+### Três erros que os testes pegaram
+
+**Medir pela distância entre extremos, não pela contagem.** Na altura do queixo
+os ombros já aparecem nos cantos da linha, e a distância entre o pixel mais à
+esquerda e o mais à direita continua larga depois que o rosto acabou. O rosto
+saía pequeno no meio da oval, com halo de parede em volta.
+
+**Continuar medindo depois do pescoço.** O ombro passava a bochecha por um por
+cento — o bastante para a caixa inteira se mudar para o tronco. Agora, passado
+o vale do pescoço, o laço para de medir rosto.
+
+**Cabelo castanho tem exatamente cor de pele.** Nenhuma regra de pixel separa
+os dois, e nem deveria: são a mesma matéria. Então a mancha às vezes é só o
+rosto (cabelo escuro, que o teste de cor descarta) e às vezes é a cabeça
+inteira. Dá para saber qual pelo quanto ela sobe acima da linha das bochechas —
+rosto sozinho começa logo ali, cabeça inteira começa meia largura acima.
+
+### Por que não fica com cara de adesivo
+
+Foi a recusa anterior da loja, e vale repetir o motivo: peça desenhada por cima
+de foto não encaixa em ninguém. Aqui é o contrário — o desenho é o corpo, e a
+foto entra só onde ela manda:
+
+- a oval tem a **borda se desmanchando** (máscara com degradê radial), nunca
+  corte duro;
+- por baixo continua a **cabeça desenhada, já no tom da foto**: onde a foto não
+  alcança não fica buraco, fica pele;
+- pescoço, braços e pernas usam a pele dela, e o cabelo desenhado usa o cabelo
+  dela — a figura fecha como uma coisa só;
+- uma **sombra de queixo** no pescoço, que é meio pixel de código e resolve o
+  efeito de cabeça flutuando.
+
+Sobraram dois ajustes — tamanho e altura do encaixe — porque o achador erra às
+vezes (foto de longe, contraluz, duas pessoas no quadro). Eles mexem em seis
+atributos do SVG, não no SVG inteiro: refazê-lo a cada quadro do arrasto
+reserializaria a foto em base64 junto, umas cem mil letras sessenta vezes por
+segundo.
+
+### A promessa forte voltou
+
+Sem IA, **a foto não sai do aparelho** — e agora isso é o padrão, não a
+alternativa. Ela é lida num canvas, vira uns tons e um recorte, e acaba aí.
+Não vai para `localStorage`, não vai para a rede, some quando a página fecha. O
+teste de privacidade não confia na CSP para isso: ele conta os pedidos de rede
+que a página faz depois de escolher a foto, e exige zero.
+
+De quebra, o `data:` URL da foto entra num atributo do SVG, e `urlSegura()`
+recusa `data:` de propósito — é o esquema por onde entraria SVG com script
+vindo de fora. Foi preciso uma quinta função de segurança, `fotoSegura()`, com
+uma peneira estreita: só o alfabeto que o canvas escreve. Uma aspa não cabe
+nele.
+
+### Os dois caminhos não convivem na mesma tela
+
+Ligar a IA **troca** o provador, não empilha. O que era uma foto vira quatro, o
+encaixe local sai de cena e volta o consentimento antes de cada envio. O motivo
+é de tela: as janelas das fotos ficam por cima do palco, e mostrar a figura ali
+esconderia os campos das outras três — a pessoa escolheria a primeira foto e
+perderia o caminho para as outras. Desligar devolve tudo como está hoje.
+
+### Duas coisas que a tela revelou de novo
+
+`display` numa classe vence o atributo `hidden`. Terceira vez neste arquivo:
+depois de "Tom de pele" e da barra do celular, foi o botão da IA continuando na
+tela no caminho onde ele não existe. Entrou `.prova__arquivo[hidden]`.
+
+E `id="palco"` existia **duas vezes** — na capa e no provador. O JS lia sempre
+o primeiro, então nada quebrava, mas HTML com id repetido é inválido e confunde
+leitor de tela. O do provador virou `prova-palco`.
