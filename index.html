@@ -577,6 +577,27 @@ a.marca{min-height:44px;}
   width:auto;height:auto;max-width:100%;
   max-height:clamp(380px,54vh,520px);border-radius:2px;
 }
+/* a foto de verdade, sobreposta ao desenho — trocar não redesenha nada,
+   só troca o que está por cima */
+.prova__original{
+  position:absolute;inset:clamp(16px,2.5vw,26px);
+  width:calc(100% - clamp(32px,5vw,52px));height:calc(100% - clamp(32px,5vw,52px));
+  object-fit:contain;border-radius:2px;background:var(--ameixa);
+}
+.prova__original[hidden]{display:none;}
+.prova__comparar{
+  position:absolute;top:8px;right:8px;z-index:1;
+  min-height:44px;padding:0 16px;border-radius:99px;
+  background:#00000059;color:var(--papel);
+  font-family:var(--corpo);font-size:12.5px;font-weight:600;
+  border:1px solid #FBF7F93d;backdrop-filter:blur(3px);
+}
+.prova__comparar:hover{background:#00000080;}
+.prova__comparar:focus-visible{outline:2px solid var(--rosa-claro);outline-offset:2px;}
+.prova__comparar[hidden]{display:none;}
+@media(max-width:420px){
+  .prova__comparar{font-size:11.5px;padding:0 13px;}
+}
 .prova__palco{
   grid-area:palco;
   position:relative;display:grid;justify-items:center;
@@ -1295,6 +1316,11 @@ a.marca{min-height:44px;}
         <div class="prova__palco" id="prova-palco">
           <svg class="boneca" id="boneca" viewBox="44 12 132 446"
                role="img" aria-labelledby="boneca-desc"></svg>
+
+          <!-- a foto de verdade, para comparar com o resultado -->
+          <img class="prova__original" id="foto-original" alt="Sua foto original, sem nenhuma edição." hidden>
+          <button class="prova__comparar" id="comparar-foto" type="button" hidden
+                  aria-pressed="false">Ver minha foto</button>
 
           <!-- as fotos do rosto, antes de existir avatar -->
           <div class="prova__soltar" id="soltar" hidden>
@@ -2491,6 +2517,11 @@ escrever();
   let rostos = {}, avatar = null, avatarVestido = null;
   /* O avatar de graça: o rosto dela, lido aqui mesmo, com dois ajustes. */
   let avatarLocal = null, rostoZoom = 1, rostoY = 0;
+  /* Comparar não é um terceiro provador: é a MESMA foto que ela mandou,
+     mostrada sem edição nenhuma, por cima do resultado. A pergunta que
+     isso responde é "o que mudou de verdade?" — e só faz sentido existir
+     enquanto houver as duas coisas para comparar. */
+  let comparando = false;
   const VIEWBOX_BONECA = "44 12 132 446";
 
   /* ── geometria ──────────────────────────────────────────────
@@ -3367,6 +3398,18 @@ function corSegura(v, reserva){
     $("#prova-limpar").hidden = !postas.length;
   }
 
+  function pintarComparar(){
+    const bt = $("#comparar-foto"), img = $("#foto-original");
+    if(!bt || !img) return;
+    const disponivel = modo === "foto" && !!rostos.frente && (!!avatar || !!avatarLocal);
+    if(!disponivel) comparando = false;
+    bt.hidden = !disponivel;
+    bt.setAttribute("aria-pressed", String(comparando));
+    bt.textContent = comparando ? "Ver o look" : "Ver minha foto";
+    img.hidden = !comparando;
+    if(comparando) img.src = fotoSegura(rostos.frente);
+  }
+
   function atualizar(){
     /* qualquer mexida nos controles descarta o resultado da IA: manter a
        imagem antiga na tela enquanto a escolha mudou seria mentir */
@@ -3388,6 +3431,7 @@ function corSegura(v, reserva){
        o consentimento por engano, ou para quando o fornecedor tropeçou. */
     const vb = $("#voltar-ia");
     if(vb) vb.hidden = !(modo === "foto" && caiuParaLocal && iaLigada());
+    pintarComparar();
   }
 
   /* ── eventos ── */
@@ -4319,7 +4363,7 @@ function corSegura(v, reserva){
     rostos[angulo] = url;
     /* trocar uma foto invalida o avatar: mostrar o antigo com fotos novas
        na tela seria dizer que ele veio delas */
-    avatar = null; avatarVestido = null;
+    avatar = null; avatarVestido = null; comparando = false;
     /* A de frente é a que vira rosto na figura, e ela vale na hora — a
        leitura é local e leva uns poucos milissegundos. As outras três só
        existem para o provador com IA, quando a loja liga. */
@@ -4336,10 +4380,14 @@ function corSegura(v, reserva){
     }
     atualizar();
   });
+  $("#comparar-foto").addEventListener("click", () => {
+    comparando = !comparando;
+    pintarComparar();
+  });
   $("#criar-avatar").addEventListener("click", criarAvatar);
   $("#tirar-foto").addEventListener("click", () => {
     rostos = {}; avatar = null; avatarVestido = null;
-    avatarLocal = null; rostoZoom = 1; rostoY = 0;
+    avatarLocal = null; rostoZoom = 1; rostoY = 0; comparando = false;
     /* trocar a foto começa de novo, inclusive tentando a IA outra vez */
     caiuParaLocal = false;
     remontarRostos();
@@ -4348,7 +4396,7 @@ function corSegura(v, reserva){
   });
   /* e ao sair da página, nada fica para trás */
   window.addEventListener("pagehide", () => {
-    rostos = {}; avatar = null; avatarVestido = null; avatarLocal = null;
+    rostos = {}; avatar = null; avatarVestido = null; avatarLocal = null; comparando = false;
   });
 
   /* ── medidas ── */
@@ -4424,6 +4472,7 @@ function corSegura(v, reserva){
        O rosto real sobre o corpo desenhado não tem esse problema, porque
        peça e corpo estão no mesmo desenho, no mesmo lugar. */
     modo = novo;
+    if(modo !== "foto") comparando = false;
     const naFoto = modo === "foto";
     $("#modo-foto").hidden = false;
     secao.classList.toggle("prova--foto", naFoto);

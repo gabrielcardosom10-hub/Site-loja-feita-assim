@@ -1045,3 +1045,48 @@ verdade na hora de traçar o contorno.
 
 E entrou a sombra no chão. Sem ela a figura flutua, e figura que flutua lê
 como adesivo por mais bem desenhada que esteja.
+
+---
+
+## A resposta a uma especificação de try-on "de verdade"
+
+> Uma especificação formal pedindo virtual try-on fotorrealista — WebGPU,
+> WebAssembly, ONNX Runtime, modelo open-source rodando local, e como
+> alternativa um "backend próprio com GPU". Explícito: "Não substituir a
+> geração de IA por uma simples sobreposição 2D."
+
+A resposta não podia ser só código. Try-on fotorrealista de verdade —
+preservando identidade, pose, luz, sombra e caimento de tecido ao mesmo
+tempo — é uma cadeia de modelos pesados (pose, segmentação, deformação da
+peça, difusão) que passa de 2-3 GB e roda em GPU. Isso é física, não
+preferência de arquitetura:
+
+- **No navegador**: não existe hoje implementação que faça essa cadeia
+  inteira com qualidade de foto em segundos, nem no celular mais forte.
+  Prometer isso seria exatamente a "solução falsa" que a própria
+  especificação pede para não fazer.
+- **Backend próprio com GPU**: existe e funciona, mas GPU não é grátis em
+  lugar nenhum. É uma conta recorrente, e maior que a da FASHN — que já está
+  construída, testada, e parada no repositório esperando só a chave.
+
+Then esperei a decisão dela em vez de escolher por conta própria: o que a
+FASHN já entrega bate item por item com a lista da especificação (rosto,
+cabelo, pele, pose, luz, sombra, caimento), e ligar ou não é decisão de
+bolso, não de engenharia. Ela escolheu continuar 100% grátis.
+
+### O que entrou de fato: comparar "Foto original" × "Experimentando"
+
+Item explícito da especificação, e o único que fazia sentido construir
+dentro da escolha de ficar grátis — não depende de motor de IA nenhum,
+porque a "foto original" já está na memória da página (é `rostos.frente`,
+a mesma imagem que preenche a janelinha circular do upload) e o "resultado"
+já existe (a figura desenhada com o rosto dela).
+
+A implementação não redesenha nada ao trocar: a foto é uma `<img>` absoluta
+sobreposta ao SVG, alternada por `hidden`. Trocar de vista custa uma
+troca de atributo, não uma reserialização.
+
+O estado `comparando` reseta em todo ponto que já invalidava o avatar —
+trocar a foto, trocar de ângulo, sair do modo foto, `pagehide` — para nunca
+deixar a tela presa mostrando "a foto de antes" depois que o que havia por
+baixo mudou.
