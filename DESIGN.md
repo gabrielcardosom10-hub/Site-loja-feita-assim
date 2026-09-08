@@ -1213,3 +1213,75 @@ arquivo inválido no "sugerir pela foto" ficaria mudo: o erro existiria,
 mas em elemento invisível. A correção lê o texto que `lerArquivo()` acabou
 de escrever, mostra em `#sugerir-status` — que É visível — e apaga o
 original para não deixar um alerta escondido aceso à toa.
+
+---
+
+## A boneca vira gente, e a peça leva até ela
+
+> "O boneco/avatar não está realista. Deixe semelhante de uma pessoa.
+> Coloque também uma opção para o usuário clicar na peça e ir direto para
+> o avatar."
+
+### O que fazia a figura não parecer gente
+
+Não era acabamento, era **silhueta e proporção** — e nenhuma sombra
+conserta nenhuma das duas.
+
+**Membro era cano.** Braço e perna eram traço de largura única, de cima a
+baixo (`stroke-width` fixo). Corpo humano não tem largura única em lugar
+nenhum: a coxa é cheia no quadril, aperta no joelho, volta na barriga da
+perna e afina no tornozelo. Agora cada membro é um contorno fechado que
+desce por um lado, arredonda a ponta e volta pelo outro, com a meia-largura
+declarada em cada altura. As alças das curvas ficam na vertical de
+propósito — membro é quase vertical, e alça vertical mantém a transição
+macia sem inventar barriga onde o corpo não tem.
+
+**Faltava mão.** O braço acabava numa ponta redonda. Braço sem mão é,
+sozinho, o detalhe que mais grita "manequim".
+
+**A perna era longa demais.** A figura tinha 8,6 cabeças de altura —
+proporção de croqui de moda, que é literalmente a convenção usada para
+NÃO parecer gente. O que estava esticado era só a perna: ombro-a-quadril
+já media 2,2 cabeças, que é o certo. Encurtando a perna de 216 para 186 a
+figura fecha em 8 cabeças: mulher alta de verdade, não desenho de ateliê.
+
+Mexer num lugar só bastou porque calça, saia e sobretudo saem todos de
+`TY` e `QY` — encurtaram juntos, sozinhos.
+
+**Pé era elipse solta.** Virou um pé com calcanhar, planta e dedo apontando
+para fora, ancorado no tornozelo.
+
+### Um degrau que só apareceu depois
+
+Fechado em linha reta no alto, o braço ganhava um **degrau no ombro** — um
+corte horizontal visível de longe, onde antes havia a calota redonda do
+traço. As duas pontas do membro passaram a fechar em arco: redondo em cima,
+ele lê como deltoide e desaparece por baixo do tronco.
+
+E a gola do tricô encolheu junto (19 → 17,2 de largura): dimensionada para
+o pescoço antigo, sobrava dos dois lados no novo e lia como colarinho de
+gesso.
+
+### Clicar na peça e cair no look
+
+O cartão da vitrine ganhou uma ação secundária, **"Ver no look"** — menor e
+cinza, porque um cartão só pode ter um botão principal e o principal aqui é
+comprar.
+
+O recado atravessa por **evento** (`feita:provar`), não por função global: o
+provador vive dentro do próprio fecho e é bom que continue assim. Se ele
+estiver desligado no CONFIG, ninguém escuta — e aí o botão nem chega a ser
+desenhado, porque `vestivel()` faz exatamente o mesmo teste que o provador
+faz para montar as prateleiras. Se divergissem, o botão prometeria uma peça
+que o provador não sabe desenhar.
+
+Vestir passou a ser uma função só (`vestir()`), usada pelos dois caminhos —
+a prateleira de lá e o botão da vitrine —, senão um dia discordariam sobre
+o que fazer quando a peça é vestido (que ocupa cima e baixo ao mesmo tempo).
+
+Duas coisas que a rolagem precisou respeitar, e que são fáceis de esquecer:
+`scrollIntoView({behavior:"smooth"})` **ignora** `prefers-reduced-motion`,
+então a preferência é lida na mão e quem pediu menos movimento recebe um
+salto seco. E o **foco vai junto**, para o título do provador — sem isso,
+quem navega por teclado ou leitor de tela continuaria lá em cima na
+vitrine, com a tela mostrando outra coisa.

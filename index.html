@@ -423,6 +423,21 @@ a.marca{min-height:44px;}
 .marcar:hover{color:var(--tinta);}
 .marcar svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;flex:none;}
 
+/* Ação secundária do cartão: leva a peça para o provador. Um cartão só
+   pode ter UM botão principal, e aqui o principal é comprar — então esta
+   fica menor, cinza, sem o traço de cima que separa o de comprar.
+   O margin:auto muda de dono: quem empurra tudo para o fim do cartão passa
+   a ser ela, e o "adicionar" cola embaixo. */
+.peca__provar{
+  margin:auto 0 0;min-height:44px;width:100%;
+  display:flex;align-items:center;gap:8px;
+  font-size:12.5px;color:var(--cinza);text-align:left;
+  transition:color var(--t);
+}
+.peca__provar + .marcar{margin-top:0;}
+.peca__provar:hover{color:var(--tinta);}
+.peca__provar svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;flex:none;}
+
 .vazio-busca{
   grid-column:1/-1;padding:34px 0;font-size:15px;color:var(--cinza);max-width:46ch;
 }
@@ -1248,6 +1263,7 @@ a.marca{min-height:44px;}
   <symbol id="lupa" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></symbol>
   <symbol id="sacola" viewBox="0 0 24 24"><path d="M4.5 7.5h15l-1.2 13.5H5.7z"/><path d="M8.8 7.5V6a3.2 3.2 0 016.4 0v1.5"/></symbol>
   <symbol id="seta" viewBox="0 0 24 24"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13,6 19,12 13,18"/></symbol>
+  <symbol id="manequim" viewBox="0 0 24 24"><circle cx="12" cy="6.6" r="3.3"/><path d="M6.2 21v-2.4a5.8 5.8 0 0111.6 0V21"/></symbol>
   <symbol id="xis" viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></symbol>
 </svg>
 
@@ -1314,7 +1330,7 @@ a.marca{min-height:44px;}
 
     <section class="prova dentro" id="prova" aria-labelledby="tit-prova" hidden>
       <div class="pecas__cab">
-        <h2 id="tit-prova">Monte o look</h2>
+        <h2 id="tit-prova" tabindex="-1">Monte o look</h2>
         <span class="etiqueta" id="prova-selo">Desenho, não foto</span>
       </div>
 
@@ -1331,7 +1347,7 @@ a.marca{min-height:44px;}
 
       <div class="prova__grade">
         <div class="prova__palco" id="prova-palco">
-          <svg class="boneca" id="boneca" viewBox="44 12 132 446"
+          <svg class="boneca" id="boneca" viewBox="44 12 132 412"
                role="img" aria-labelledby="boneca-desc"></svg>
 
           <!-- a foto de verdade, para comparar com o resultado -->
@@ -2226,8 +2242,22 @@ function desenharPeca(p){
         '<button class="tamanho" type="button" aria-pressed="'+(j===0)+'" data-tam="'+escapar(t)+'">'+escapar(t)+'</button>'
       ).join("")+
     '</div>'+
+    (vestivel(p)
+      ? '<button class="peca__provar" type="button" '+
+          'aria-label="Ver '+escapar(p.nome)+' no look">'+
+          '<svg aria-hidden="true"><use href="#manequim"/></svg>Ver no look</button>'
+      : "")+
     '<button class="marcar" type="button">Adicionar ao carrinho <svg aria-hidden="true"><use href="#seta"/></svg></button>'+
   '</article>';
+}
+
+/* Peça que sabe se vestir. É o MESMO teste que o provador faz para montar
+   as prateleiras — se divergissem, o botão prometeria uma peça que o
+   provador não sabe desenhar, e a pessoa chegaria lá numa boneca sem
+   nada. Provador desligado no CONFIG: botão nenhum. */
+function vestivel(p){
+  const cfg = CONFIG.provador || {};
+  return !!(cfg.ligado && p && p.molde);
 }
 
 let filtro = "Tudo", termo = "";
@@ -2285,6 +2315,13 @@ function mostrarPecas(){
     el.querySelector(".marcar").addEventListener("click", () => {
       const tam = el.querySelector('.tamanho[aria-pressed="true"]').dataset.tam;
       por(p, tam);
+    });
+    /* O provador vive dentro do próprio fecho, e é bom que continue assim.
+       O recado vai por evento: se ele estiver desligado ninguém escuta —
+       e aí o botão nem chegou a ser desenhado. */
+    const irProvar = el.querySelector(".peca__provar");
+    if(irProvar) irProvar.addEventListener("click", () => {
+      document.dispatchEvent(new CustomEvent("feita:provar", {detail:{ref: p.ref}}));
     });
   });
 }
@@ -2586,12 +2623,20 @@ escrever();
      isso responde é "o que mudou de verdade?" — e só faz sentido existir
      enquanto houver as duas coisas para comparar. */
   let comparando = false;
-  const VIEWBOX_BONECA = "44 12 132 446";
+  const VIEWBOX_BONECA = "44 12 132 412";
 
   /* ── geometria ──────────────────────────────────────────────
      Um corpo só, com dois parâmetros: L estica a perna (altura) e W
      alarga o corpo (manequim). Todo molde lê estas medidas, então peça
      nova entra sem recalcular nada. */
+  /* A perna encurtou. A figura tinha 8,6 cabeças de altura — proporção de
+     ILUSTRAÇÃO DE MODA, que é justamente onde ela deixava de parecer gente:
+     ombro-a-quadril já estava certo (2,2 cabeças), o que esticava era só a
+     perna. Com 186 em vez de 216 a figura fecha em 8 cabeças, que é uma
+     mulher alta de verdade em vez de um croqui.
+
+     Mexer aqui basta: as calças, a saia e o sobretudo saem todos de TY e
+     de QY, então encurtam junto sozinhos. */
   function medidas(){
     const L = (cfg.alturas && cfg.alturas[altura] ? cfg.alturas[altura].escala : 1);
     const W = [0.92,1,1.08,1.16][manequim] || 1;
@@ -2599,8 +2644,8 @@ escrever();
     return {
       L, W, OY, CY, QY,
       Ox: 27*W, Cx: 18.5*W, Qx: 26*W,
-      JY: QY + 108*L,
-      TY: QY + 216*L,
+      JY: QY + 92*L,      /* joelho a meio caminho do quadril ao chão */
+      TY: QY + 186*L,
       cx: 110
     };
   }
@@ -2718,6 +2763,89 @@ function corSegura(v, reserva){
             cabelo: corSegura(escolhido ? escolhido.cor : bruto.cabelo, "#3A2A20")};
   }
 
+  /* ── UM MEMBRO COM CINTURA ────────────────────────────────────
+     Braço e perna eram traço de largura única, de cima a baixo: cano, não
+     gente. O olho lê isso antes de ler qualquer outra coisa, e sombra
+     nenhuma conserta — o que denuncia é a SILHUETA, e é ela que muda aqui.
+
+     Cada membro virou um contorno fechado: desce por um lado, arredonda a
+     ponta, volta pelo outro. Os nós carregam a meia-largura em cada
+     altura, e é dela que sai a forma — coxa cheia no quadril, joelho
+     estreito, barriga da perna, tornozelo fino.
+
+     As alças das curvas ficam na vertical de propósito: membro é quase
+     vertical, e alça vertical mantém a transição macia sem inventar
+     barriga onde o corpo não tem. */
+  function suave(pts){
+    let d = "M "+n(pts[0][0])+","+n(pts[0][1]);
+    for(let i = 1; i < pts.length; i++){
+      const a = pts[i-1], b = pts[i], dy = (b[1]-a[1])/3;
+      d += " C "+n(a[0])+","+n(a[1]+dy)+" "+n(b[0])+","+n(b[1]-dy)+" "+n(b[0])+","+n(b[1]);
+    }
+    return d;
+  }
+
+  /* nós = [{x,y,w}] do alto para a ponta; AS DUAS pontas fecham em arco.
+     O alto também: fechado em linha reta, o braço ganhava um degrau no
+     ombro — a primeira versão tinha isso e o corte aparecia de longe.
+     Redondo em cima, ele lê como deltoide e some por baixo do tronco. */
+  function membro(nos){
+    const p = nos[0], f = nos[nos.length-1];
+    const volta = suave(nos.map(q => [q.x + q.w, q.y]).reverse()).replace(/^M[^C]*/, "");
+    return '<path d="'+suave(nos.map(q => [q.x - q.w, q.y]))+
+      " A "+n(f.w)+","+n(f.w)+" 0 0 0 "+n(f.x + f.w)+","+n(f.y)+
+      volta+
+      " A "+n(p.w)+","+n(p.w)+" 0 0 0 "+n(p.x - p.w)+","+n(p.y)+
+      ' Z"/>';
+  }
+
+  /* s = -1 esquerda, +1 direita. Larguras em meia-medida, já no manequim. */
+  function pernaDe(m, s){
+    const {cx,QY,JY,TY,W} = m;
+    return membro([
+      {x: cx + s*10,   y: QY - 6,                   w: 8.5*W},
+      {x: cx + s*11.6, y: QY + (JY-QY)*0.45,        w: 7.7*W},
+      {x: cx + s*13,   y: JY,                       w: 6.0*W},
+      {x: cx + s*13.6, y: JY + (TY-JY)*0.30,        w: 7.1*W},
+      {x: cx + s*14,   y: TY,                       w: 4.4*W}
+    ]);
+  }
+
+  function bracoDe(m, s, ate){
+    const {cx,OY,CY,Ox,Cx,Qx,QY,W} = m;
+    const fim = ate || (QY + 10);
+    const yO = OY + 7, yC = CY - 4;
+    return membro([
+      {x: cx + s*(Ox-2),  y: yO - 3,                w: 5.5*W},
+      {x: cx + s*(Ox-2.4),y: yO + (yC-yO)*0.5,      w: 4.6*W},
+      {x: cx + s*(Cx+7),  y: yC,                    w: 3.8*W},
+      {x: cx + s*(Cx+8.6),y: yC + (fim-yC)*0.45,    w: 4.0*W},
+      {x: cx + s*(Qx+2),  y: fim,                   w: 2.9*W}
+    ]);
+  }
+
+  /* A mão faltava inteira: o braço acabava numa ponta redonda, e braço sem
+     mão é o detalhe que mais grita "manequim". */
+  function maoDe(m, s, ate){
+    const {cx,Qx,QY,W} = m;
+    const y = (ate || (QY + 10)) - 1, x = cx + s*(Qx+2);
+    return membro([
+      {x, y,          w: 3.0*W},
+      {x: x + s*0.7, y: y + 4.4, w: 3.7*W},
+      {x, y: y + 9.4, w: 2.5*W}
+    ]);
+  }
+
+  function peDe(m, s){
+    const {cx,TY,W} = m;
+    const x = cx + s*14, y = TY, a = 4.4*W;
+    return '<path d="M '+n(x + s*a)+','+n(y-4)+
+      ' C '+n(x + s*7.2)+','+n(y+3.4)+' '+n(x + s*10)+','+n(y+6)+' '+n(x + s*10.2)+','+n(y+9.2)+
+      ' C '+n(x + s*10.2)+','+n(y+11.6)+' '+n(x + s*4.4)+','+n(y+12.3)+' '+n(x)+','+n(y+12.1)+
+      ' C '+n(x - s*2.9)+','+n(y+11.9)+' '+n(x - s*3.9)+','+n(y+8.6)+' '+n(x - s*a)+','+n(y+5)+
+      ' L '+n(x - s*a)+','+n(y-4)+' Z"/>';
+  }
+
   /* ── PENTEADOS ────────────────────────────────────────────────
      Três silhuetas, sempre no mesmo forro (a franja/topo é igual nos três
      — muda o que desce dela para baixo), porque é essa parte de cima que
@@ -2769,7 +2897,6 @@ function corSegura(v, reserva){
     const bruto = tons();
     const {cx,OY,CY,QY,Ox,Cx,Qx,JY,TY,W} = m;
     const t = {pele: pintar(bruto.pele, cx), cabelo: pintar(bruto.cabelo, cx)};
-    const bracoW = n(9.5*W), pernaW = n(15*W);
     /* Com a cabeça recortada da foto, o cabelo desenhado não é ajuda: as
        mechas dele apareceriam ao lado do cabelo dela, e duas cabeleiras na
        mesma cabeça é pior do que nenhuma. A cabeça em elipse continua,
@@ -2778,25 +2905,24 @@ function corSegura(v, reserva){
     const semRecorte = !(modo === "foto" && avatarLocal && avatarLocal.recorte);
     const molde = MOLDES_CABELO[penteado] || MOLDES_CABELO[0];
     return (
-      /* pernas e braços são traços de ponta redonda: leem bem em 180px */
-      '<g stroke="'+t.pele+'" fill="none" stroke-linecap="round" stroke-linejoin="round">'+
-        '<polyline stroke-width="'+pernaW+'" points="'+
-          n(cx-10)+','+n(QY)+' '+n(cx-13)+','+n(JY)+' '+n(cx-14)+','+n(TY)+'"/>'+
-        '<polyline stroke-width="'+pernaW+'" points="'+
-          n(cx+10)+','+n(QY)+' '+n(cx+13)+','+n(JY)+' '+n(cx+14)+','+n(TY)+'"/>'+
-        '<polyline stroke-width="'+bracoW+'" points="'+bracoEsq(m)+'"/>'+
-        '<polyline stroke-width="'+bracoW+'" points="'+bracoDir(m)+'"/>'+
-      '</g>'+
-      /* pés */
+      /* Membros e pés primeiro, tronco e cabeça por cima: assim o ombro
+         cobre o alto do braço e o quadril cobre o alto da coxa, que é
+         como as partes se encaixam de verdade. */
       '<g fill="'+t.pele+'">'+
-        '<ellipse cx="'+n(cx-15)+'" cy="'+n(TY+7)+'" rx="7.5" ry="5"/>'+
-        '<ellipse cx="'+n(cx+15)+'" cy="'+n(TY+7)+'" rx="7.5" ry="5"/>'+
-        '<rect x="'+n(cx-6)+'" y="72" width="12" height="26" rx="5"/>'+
+        peDe(m,-1) + peDe(m,1) +
+        pernaDe(m,-1) + pernaDe(m,1) +
+        bracoDe(m,-1) + bracoDe(m,1) +
+        maoDe(m,-1) + maoDe(m,1) +
+        /* pescoço: mais estreito em cima, alargando para os ombros */
+        '<path d="M '+n(cx-5.4)+',70 C '+n(cx-5.6)+',82 '+n(cx-6.6)+',90 '+n(cx-7.6)+',99'+
+          ' L '+n(cx+7.6)+',99 C '+n(cx+6.6)+',90 '+n(cx+5.6)+',82 '+n(cx+5.4)+',70 Z"/>'+
         '<path d="'+tronco(m,0)+'"/>'+
         /* a cabeça da boneca sai de cena quando a dela chega: as duas juntas
            deixavam um anel de pele em volta do cabelo */
         (semRecorte ? '<ellipse cx="'+cx+'" cy="56" rx="19" ry="23.5"/>' : '')+
       '</g>'+
+      /* sombra do queixo no pescoço: sem ela a cabeça fica colada, chapada */
+      (semRecorte ? '<ellipse cx="'+cx+'" cy="79" rx="6.4" ry="3.2" fill="#0000001a"/>' : '')+
       (semRecorte ? rostoDesenhado(cx, bruto.pele) : '')+
       /* cabelo: o penteado escolhido, na cor escolhida */
       (semRecorte ? '<g fill="'+t.cabelo+'">'+molde(cx)+'</g>' : '')
@@ -2833,8 +2959,10 @@ function corSegura(v, reserva){
   const MOLDES = {
     trico: (m,c) => manga(m,c,n(12*m.W)) +
       '<path d="'+tronco(m,2.5,m.QY+4)+'" fill="'+c+'" stroke="'+escurecer(c,.8)+'" '+CONTORNO+'/>'+
-      '<rect x="'+n(m.cx-9.5)+'" y="76" width="19" height="22" rx="6" fill="'+c+'" stroke="'+escurecer(c,.8)+'" '+CONTORNO+'/>'+
-      '<rect x="'+n(m.cx-9.5)+'" y="76" width="19" height="5" rx="2.5" fill="#0000001c"/>',
+      /* a gola encolheu junto com o pescoço novo: 19 de largura sobrava
+         dos dois lados e lia como colarinho de gesso */
+      '<rect x="'+n(m.cx-8.6)+'" y="77" width="17.2" height="21" rx="7" fill="'+c+'" stroke="'+escurecer(c,.8)+'" '+CONTORNO+'/>'+
+      '<rect x="'+n(m.cx-8.6)+'" y="77" width="17.2" height="5" rx="2.5" fill="#0000001c"/>',
 
     camisa: (m,c) => manga(m,c,n(12*m.W)) +
       '<path d="'+tronco(m,2.5,m.QY+4)+'" fill="'+c+'" stroke="'+escurecer(c,.8)+'" '+CONTORNO+'/>'+
@@ -3688,16 +3816,44 @@ function corSegura(v, reserva){
     if(!p) return;
     /* clicar na peça que já está vestida tira ela: um toque põe, o mesmo tira */
     if(look[vaga] && look[vaga].ref === p.ref) delete look[vaga];
-    else {
-      look[vaga] = p;
-      /* vestido ocupa cima e baixo ao mesmo tempo */
-      if(p.molde === "vestido") delete look.baixo;
-      else if(vaga === "baixo" && look.cima && look.cima.molde === "vestido") delete look.cima;
-    }
+    else vestir(p, vaga);
     atualizar();
     /* com avatar montado, escolher a peça já veste: pedir mais um toque
        depois de a pessoa ter montado o avatar é atrito sem motivo */
     if(modo === "foto" && avatar && !iaOcupado && pecaParaIA()) provarComIA();
+  });
+
+  /* Vestir uma peça, com a regra do vestido junto. Os dois caminhos que
+     vestem — a prateleira daqui e o botão lá da vitrine — passam por
+     aqui, senão um dia discordariam sobre o que fazer com o vestido. */
+  function vestir(p, vaga){
+    look[vaga] = p;
+    /* vestido ocupa cima e baixo ao mesmo tempo */
+    if(p.molde === "vestido") delete look.baixo;
+    else if(vaga === "baixo" && look.cima && look.cima.molde === "vestido") delete look.cima;
+  }
+
+  /* ── VIR DA VITRINE DIRETO PARA O LOOK ────────────────────────
+     O botão "Ver no look" no cartão da peça manda um evento; aqui ele
+     vira a peça vestida e a rolagem até o provador.
+
+     A rolagem lê prefers-reduced-motion na mão porque
+     scrollIntoView({behavior:"smooth"}) ignora a preferência — quem pediu
+     menos movimento recebe um salto seco. E o FOCO vai junto: sem isso,
+     quem navega por teclado ou leitor de tela continuaria lá em cima na
+     vitrine, com a tela mostrando outra coisa. */
+  document.addEventListener("feita:provar", e => {
+    const ref = e.detail && e.detail.ref;
+    const p = vestiveis.find(x => x.ref === ref);
+    if(!p) return;
+    const vaga = (VAGAS.find(v => v.moldes.indexOf(p.molde) >= 0) || {}).id;
+    if(!vaga) return;
+    vestir(p, vaga);
+    atualizar();
+    const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    secao.scrollIntoView({behavior: quieto ? "auto" : "smooth", block: "start"});
+    const tit = $("#tit-prova");
+    if(tit) tit.focus({preventScroll:true});
   });
 
   $("#prova-limpar").addEventListener("click", () => {
