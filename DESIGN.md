@@ -1090,3 +1090,56 @@ O estado `comparando` reseta em todo ponto que já invalidava o avatar —
 trocar a foto, trocar de ângulo, sair do modo foto, `pagehide` — para nunca
 deixar a tela presa mostrando "a foto de antes" depois que o que havia por
 baixo mudou.
+
+---
+
+## "Tire a função do avatar"
+
+Pedido curto, decisão que merecia uma pergunta antes do código: apagar o
+quê, exatamente? O modo de foto sozinho, o provador inteiro, ou só tirar da
+tela sem apagar nada? Cada leitura é um tamanho de trabalho diferente, e
+desfazer apagamento custa mais do que confirmar antes. A resposta foi a
+terceira: esconder, sem apagar.
+
+### Uma trava, não uma demolição
+
+```js
+const AVATAR_DESLIGADO = true;
+```
+
+Uma linha, comentada, perto de onde `modo` é declarado. `trocarModo()`
+força `novo = "boneca"` sempre que a trava está ligada, e o próprio seletor
+de modo — não só o botão do avatar — some da tela, porque escolher entre
+duas opções quando uma não existe não é escolha nenhuma. O HTML já nasce
+com o seletor escondido (`hidden` direto na tag), para não piscar antes do
+JavaScript rodar.
+
+Tudo o que vinha depois — recorte de cabeça, análise de pele e cabelo,
+integração com a FASHN, `api/provar.js`, o teto de gasto mensal — continua
+exatamente onde estava. Religar é essa mesma linha virando `false`. Nada
+mais precisa mudar.
+
+### O preço de não apagar: a bateria de testes teve que aprender a mentira
+
+Um código que existe mas está inalcançável quebra qualquer teste que
+dependa de clicar nele — e quebra do jeito bom: `page.click()` do Playwright
+recusa clicar em elemento escondido e trava em timeout, não falha
+silenciosamente. Isso obrigou a separar as páginas de teste em três
+verdades:
+
+- `teste.html` — o que a cliente vê hoje: avatar escondido.
+- `teste-avatar.html` — a trava virada de volta, sem IA: prova que o
+  código "apagado-mas-não-apagado" continua correto.
+- `teste-ia.html` — a mesma trava virada, mais a IA mockada — agora
+  construída a partir de `teste-avatar.html`, porque sem a primeira chave a
+  segunda não alcança lugar nenhum.
+
+Cinco arquivos de teste que clicavam em `#modo-foto` sobre `teste.html`
+tiveram que apontar para a fixture certa. O `FIXTURES.md` ganhou uma tabela
+dizendo qual arquivo usa qual página, para o próximo teste escrito não
+cair na mesma armadilha.
+
+E entrou `desligado.mjs`: um teste pequeno, específico, que existe só para
+travar a garantia oposta — que o seletor não aparece, que clicar direto no
+botão escondido não muda nada, que a boneca continua funcionando sozinha.
+"Tirar a função" também precisa de prova de que ela saiu.

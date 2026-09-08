@@ -1303,7 +1303,9 @@ a.marca{min-height:44px;}
         <span class="etiqueta" id="prova-selo">Desenho, não foto</span>
       </div>
 
-      <div class="prova__modos" role="radiogroup" aria-label="Como você quer ver o look">
+      <!-- AVATAR_DESLIGADO no script: o seletor fica escondido de partida,
+           antes mesmo do JS rodar, para não piscar na tela. -->
+      <div class="prova__modos" role="radiogroup" aria-label="Como você quer ver o look" hidden>
         <button class="modo" id="modo-boneca" type="button" role="radio" aria-checked="true">
           Numa boneca
         </button>
@@ -2505,6 +2507,18 @@ escrever();
 
   /* estado */
   let pele = 0, altura = 1, manequim = 1, look = {};
+  /* ── AVATAR DESLIGADO ────────────────────────────────────────
+     A loja pediu para tirar a função do avatar da tela. O código inteiro
+     continua aqui — o recorte de cabeça, a análise de pele e cabelo, a
+     integração com a FASHN, tudo — só que inalcançável: nenhum caminho do
+     site chega mais em modo "foto". Trocar isto de volta é mudar UMA
+     linha, esta aqui, para false. Nada mais precisa mexer.
+
+     Apagar o código teria sido mais rápido de escrever, mas mais caro de
+     desfazer — e "tire a função" não é a mesma coisa que "apague o
+     trabalho". Se um dia a loja quiser de volta, ele está pronto. */
+  const AVATAR_DESLIGADO = true;
+
   /* modo foto */
   let modo = "boneca";
   /* as fotos do rosto e o avatar gerado a partir delas */
@@ -4471,10 +4485,15 @@ function corSegura(v, reserva){
        — que é o que a loja recusou, com razão: ficava com cara de adesivo.
        O rosto real sobre o corpo desenhado não tem esse problema, porque
        peça e corpo estão no mesmo desenho, no mesmo lugar. */
+    if(AVATAR_DESLIGADO) novo = "boneca";
     modo = novo;
     if(modo !== "foto") comparando = false;
     const naFoto = modo === "foto";
-    $("#modo-foto").hidden = false;
+    /* sem o modo foto, escolher entre duas opções não é escolha nenhuma —
+       o seletor inteiro some, não só o botão do avatar */
+    const seletor = $(".prova__modos");
+    if(seletor) seletor.hidden = AVATAR_DESLIGADO;
+    $("#modo-foto").hidden = AVATAR_DESLIGADO;
     secao.classList.toggle("prova--foto", naFoto);
     $("#modo-boneca").setAttribute("aria-checked", String(!naFoto));
     $("#modo-foto").setAttribute("aria-checked", String(naFoto));
