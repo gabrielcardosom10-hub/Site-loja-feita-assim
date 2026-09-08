@@ -9,13 +9,25 @@
  * basta pôr FASHN_KEY nas variáveis de ambiente do projeto na Vercel.
  *
  * SOBRE O TETO DE GASTO — leia antes de ligar.
- * O endereço é público, e tem de ser. Existem dois tetos aqui:
- *   • O de verdade é o SALDO PRÉ-PAGO na FASHN. Ele não depende de nada
- *     deste código estar certo, e é o único que não falha.
- *   • O daqui é por hora e por IP. Com Upstash configurado ele é rígido e
- *     compartilhado; sem Upstash ele vale só dentro de cada instância quente
- *     da função — ajuda contra rajada, não substitui o saldo.
- * Não confie no segundo para proteger o bolso. Compre crédito limitado.
+ * O endereço é público, e tem de ser. Existem três tetos aqui, e eles não
+ * fazem o mesmo trabalho:
+ *   • TETO_MES é o do BOLSO. Ele conta as imagens geradas no mês e para
+ *     quando chega no número que a loja escolheu. É o único que responde à
+ *     pergunta "quanto isso pode me custar até o dia 30".
+ *   • TETO_HORA e TETO_IP são contra RAJADA, não contra conta alta: seguram
+ *     um pico e um abusador, e zeram a cada hora.
+ *   • O de verdade, que não depende de nada deste código estar certo, é o
+ *     SALDO PRÉ-PAGO na FASHN. Compre crédito limitado. Sempre.
+ *
+ * Com Upstash configurado os três são rígidos e compartilhados entre as
+ * instâncias. SEM Upstash cada instância quente tem o seu contador, e aí
+ * TETO_MES vira estimativa, não trava — para um teto de bolso que valha o
+ * nome, configure o Upstash (o plano de graça dá conta com folga).
+ *
+ * QUANDO QUALQUER TETO ESTOURA, a resposta vem com "cair": true. O site lê
+ * esse sinal e cai sozinho no provador de graça — o rosto da cliente sobre
+ * o corpo desenhado. Ninguém vê erro; o provador só fica menos bonito até
+ * o mês virar.
  */
 
 const MAX_FOTO = 6 * 1024 * 1024;
@@ -65,6 +77,27 @@ async function somar(chave, ttlSegundos){
   return {n: reg.n, rigido: false};
 }
 
+/* Lê um contador SEM somar. A saúde precisa disto: perguntar "o mês já
+   estourou?" não pode gastar uma unidade do próprio teto. */
+async function ler(chave){
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const tok = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if(url && tok){
+    try{
+      const r = await fetch(url + "/get/" + encodeURIComponent(chave), {
+        headers: {Authorization: "Bearer " + tok}
+      });
+      const d = await r.json();
+      return {n: Number(d.result) || 0, rigido: true};
+    }catch(e){ /* cai na memória */ }
+  }
+  const reg = memoria.get(chave);
+  return {n: reg && reg.ate > Date.now() ? reg.n : 0, rigido: false};
+}
+
+const mesAgora = () => new Date().toISOString().slice(0, 7);   /* AAAA-MM */
+const MES_EM_SEGUNDOS = 32 * 24 * 3600;
+
 /* ── a API de try-on ────────────────────────────────────────── */
 async function chamar(caminho, opcoes){
   const r = await fetch("https://api.fashn.ai/v1" + caminho, {
@@ -92,11 +125,37 @@ export default async function handler(req, res){
   res.setHeader("X-Content-Type-Options", "nosniff");
 
   if(req.method === "OPTIONS") return res.status(204).end();
-  if(!process.env.FASHN_KEY)
-    return res.status(503).json({erro: "sem chave", mensagem:
-      "O provador com IA ainda não foi configurado. Falta FASHN_KEY nas variáveis de ambiente."});
   if(origem && permitidas.length && !liberada)
     return res.status(403).json({erro: "origem não autorizada"});
+
+  const tetoMes  = Number(process.env.TETO_MES  || 200);
+  const tetoHora = Number(process.env.TETO_HORA || 20);
+  const tetoIp   = Number(process.env.TETO_IP   || 6);
+
+  /* ── saúde: GET sem identificador ───────────────────────────
+     O site pergunta isto UMA vez, quando a cliente abre o provador, e só
+     mostra o caminho da IA se a resposta disser que ele está de pé. É o
+     que evita o pior desenho possível: pedir para ela consentir em mandar
+     o rosto para fora, e depois responder com erro porque faltava a chave
+     ou porque o mês já tinha estourado. Consentimento gasto à toa é pior
+     do que botão nenhum.
+
+     Não sai daqui número de uso, nem nada da chave: o endereço é público,
+     e "quanto a loja já gastou" não é assunto de quem passa na rua. */
+  if(req.method === "GET" && !(req.query && req.query.id)){
+    const ligado = !!process.env.FASHN_KEY;
+    const mes = ligado ? await ler("prova:m:" + mesAgora()) : {n: 0, rigido: false};
+    return res.status(200).json({
+      saude: true,
+      ligado,
+      pausado: ligado && mes.n >= tetoMes,
+      tetoRigido: mes.rigido
+    });
+  }
+
+  if(!process.env.FASHN_KEY)
+    return res.status(503).json({erro: "sem chave", cair: true, mensagem:
+      "O provador com IA ainda não foi configurado. Falta FASHN_KEY nas variáveis de ambiente."});
 
   /* ── consultar um pedido em andamento ── */
   if(req.method === "GET"){
@@ -120,17 +179,24 @@ export default async function handler(req, res){
   /* ── limites, antes de qualquer trabalho ── */
   const ip = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "sem-ip";
   const hora = new Date().toISOString().slice(0, 13);   /* AAAA-MM-DDThh */
-  const tetoHora = Number(process.env.TETO_HORA || 20);
-  const tetoIp   = Number(process.env.TETO_IP   || 6);
+
+  /* O teto do mês é lido, não somado, aqui: quem soma é o despacho, lá
+     embaixo, depois de a geração ter sido de fato pedida. Somar antes faria
+     pedido inválido e ataque queimarem o teto do BOLSO da loja — e é para
+     isso que existem os dois tetos de rajada, que somam sempre. */
+  const mes = await ler("prova:m:" + mesAgora());
+  if(mes.n >= tetoMes)
+    return res.status(429).json({erro: "teto do mês", cair: true, mensagem:
+      "O provador com inteligência artificial já bateu o limite deste mês."});
 
   const geral = await somar("prova:h:" + hora, 3900);
   if(geral.n > tetoHora)
-    return res.status(429).json({erro: "teto da hora", mensagem:
+    return res.status(429).json({erro: "teto da hora", cair: true, mensagem:
       "O provador com IA está muito procurado agora. Tente daqui a pouco."});
 
   const pessoal = await somar("prova:ip:" + hora + ":" + ip, 3900);
   if(pessoal.n > tetoIp)
-    return res.status(429).json({erro: "teto por pessoa", mensagem:
+    return res.status(429).json({erro: "teto por pessoa", cair: true, mensagem:
       "Você já provou " + tetoIp + " vezes nesta hora. Descanse um pouco, ou fale com a loja no WhatsApp."});
 
   /* ── entrada ── */
@@ -166,7 +232,10 @@ export default async function handler(req, res){
       modelo: MODELO_AVATAR
     });
     if(!r.corpo.id) return res.status(502).json({erro: "a API não devolveu um identificador"});
-    return res.status(202).json({id: r.corpo.id, etapa: "avatar", tetoRigido: geral.rigido});
+    /* só aqui virou dinheiro: a geração foi aceita pelo fornecedor */
+    const gasto = await somar("prova:m:" + mesAgora(), MES_EM_SEGUNDOS);
+    return res.status(202).json({id: r.corpo.id, etapa: "avatar",
+      tetoRigido: geral.rigido && gasto.rigido, doMes: gasto.n, tetoMes});
   }
 
   /* ── etapa 2: vestir a peça no corpo ── */
@@ -209,7 +278,9 @@ export default async function handler(req, res){
   });
   if(!r.ok) return res.status(502).json({erro: r.corpo.error || r.corpo.message || ("a API respondeu " + r.status)});
   if(!r.corpo.id) return res.status(502).json({erro: "a API não devolveu um identificador"});
-  return res.status(202).json({id: r.corpo.id, etapa: "provar", tetoRigido: geral.rigido});
+  const gasto = await somar("prova:m:" + mesAgora(), MES_EM_SEGUNDOS);
+  return res.status(202).json({id: r.corpo.id, etapa: "provar",
+    tetoRigido: geral.rigido && gasto.rigido, doMes: gasto.n, tetoMes});
 }
 
 /* O corpo chega em JSON e pode ser grande: a foto vem como data URI. */

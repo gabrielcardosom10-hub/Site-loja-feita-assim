@@ -1401,6 +1401,10 @@ a.marca{min-height:44px;}
                 <p class="prova__dica" id="ia-estado" role="status"></p>
               </div>
 
+              <button class="prova__abrir-medidas" id="voltar-ia" type="button" hidden>
+                Tentar com inteligência artificial
+              </button>
+
               <button class="prova__limpar" id="tirar-foto" type="button" hidden>Trocar as fotos</button>
             </div>
           </div>
@@ -1745,9 +1749,27 @@ const CONFIG = {
        vestida por um modelo de inteligência artificial, e o resultado
        parece uma fotografia.
 
-       O preço é literal: cada imagem gerada é cobrada pelo fornecedor. Numa
-       vitrine com movimento isso vira uma conta mensal que não existe
-       enquanto este campo estiver vazio. Ligue só se a conta fechar.
+       O preço é literal: cada imagem gerada é cobrada pelo fornecedor.
+
+       O TETO DO MÊS é o que transforma isso num número que você escolhe.
+       Ele mora na Vercel, em TETO_MES, e conta IMAGENS — não reais, porque
+       preço muda e código que finge saber o câmbio mente. A conta é sua:
+
+           quanto você aceita gastar  ÷  preço da imagem  =  TETO_MES
+
+       Com o preço que eu vi quando montei isto, US$ 0,075 por imagem:
+           US$ 10/mês  → TETO_MES = 133
+           US$ 15/mês  → TETO_MES = 200   (é o padrão, se você não puser nada)
+           US$ 30/mês  → TETO_MES = 400
+       Confira o preço no site da FASHN antes de fechar o número.
+
+       Batido o teto, o provador com IA para até o mês virar — e o de graça
+       assume, sem erro na tela. Ninguém fica sem provador.
+
+       E o teto só é RÍGIDO de verdade com o Upstash configurado (o plano de
+       graça dá conta). Sem ele, cada instância da função tem o seu contador
+       e o teto vira estimativa. A trava que nunca falha continua sendo uma:
+       compre crédito PRÉ-PAGO limitado na FASHN.
 
        E repare que os dois caminhos NÃO CONVIVEM na mesma tela: ligar este
        aqui TROCA o provador do rosto encaixado pelo da IA. O que era uma
@@ -1782,11 +1804,15 @@ const CONFIG = {
          Quando for ligar, ponha exatamente: "/api/provar"
          Caminho do próprio site — nenhum domínio de fora, e por isso a CSP
          continua em connect-src 'self'. */
-      /* Voltou para vazio de propósito, e não por engano: com ele
-         preenchido o provador que aparece é o pago, e o do rosto
-         encaixado — que não custa nada — some da tela. Para ligar a IA
-         de novo é esta linha, e só ela: "/api/provar". */
-      endpoint: "",
+      /* LIGADO. Agora ligar é seguro, coisa que antes não era: se faltar a
+         chave, se o teto do mês estourar ou se o fornecedor cair, o site
+         não mostra erro — ele cai sozinho no provador de graça, o rosto
+         dela sobre o corpo desenhado. E ele pergunta se a IA está de pé
+         ANTES de pedir consentimento, então ninguém autoriza mandar o
+         rosto para fora à toa.
+
+         Para desligar, ponha "" de volta. Nada mais muda. */
+      endpoint: "/api/provar",
       fornecedor: "FASHN",
       guarda: "Confirme com o fornecedor por quanto tempo a imagem fica guardada."
     },
@@ -2872,19 +2898,21 @@ function corSegura(v, reserva){
     const boneca = $("#boneca");
     if(modo === "foto"){
       /* com a IA ligada E o avatar pronto, quem manda é a imagem da IA */
-      if(avatar){
+      if(avatar && !caiuParaLocal){
         boneca.hidden = false; $("#soltar").hidden = true;
         const alvo = pecaParaIA();
         mostrarAvatar(avatarVestido && alvo ? alvo.p.nome : null);
         return;
       }
-      /* O caminho de graça, que é o padrão. Ele não aparece com a IA
-         ligada, e o motivo é de tela, não de gosto: as janelas das quatro
-         fotos ficam POR CIMA do palco, e mostrar a figura ali esconderia
-         justamente os campos das outras três — a pessoa escolheria a
-         primeira foto e perderia o caminho para as outras. Com a IA
-         ligada, quem manda é o fluxo dela: quatro fotos, um botão. */
-      if(!iaLigada() && avatarLocal){
+      /* O caminho de graça. Ele é o padrão quando a IA está desligada, e é
+         a rede de proteção quando ela cai — teto do mês estourado, chave
+         faltando, erro do fornecedor, ou ela recusando mandar o rosto.
+
+         Com a IA de pé ele não aparece, e o motivo é de tela: as janelas
+         das quatro fotos ficam POR CIMA do palco, e mostrar a figura ali
+         esconderia os campos das outras três — a pessoa escolheria a
+         primeira foto e perderia o caminho para as outras. */
+      if(avatarLocal && (!iaLigada() || caiuParaLocal)){
         boneca.hidden = false; $("#soltar").hidden = true;
         boneca.setAttribute("viewBox", VIEWBOX_BONECA);
         const m = medidas();
@@ -2911,7 +2939,7 @@ function corSegura(v, reserva){
     const postas = ["cima","baixo","sobre","bolsa","oculos"]
       .map(v => look[v] && look[v].nome).filter(Boolean);
     if(modo === "foto"){
-      if(avatar){
+      if(avatar && !caiuParaLocal){
         const posta = pecaParaIA();
         return posta && avatarVestido
           ? "Seu avatar vestindo "+posta.p.nome+"."
@@ -3132,7 +3160,7 @@ function corSegura(v, reserva){
     if(modo === "foto"){
       partes.push("sua foto");
       /* no avatar de graça o corpo é desenhado, então a altura volta a valer */
-      const alt = !iaLigada() && (cfg.alturas || [])[altura];
+      const alt = noDesenho() && (cfg.alturas || [])[altura];
       if(alt && alt.nome) partes.push(alt.nome);
     }else{
       const pl = (cfg.peles || [])[pele];
@@ -3202,11 +3230,20 @@ function corSegura(v, reserva){
     desenhar(); pintarControles(); pintarTamanhos(); pintarLegenda();
     pintarResumo(); contar(); pintarIA(); pintarRostos();
     const bt = $("#tirar-foto");
-    if(bt) bt.hidden = !(modo === "foto" && (avatar || (avatarLocal && !iaLigada())));
+    if(bt) bt.hidden = !(modo === "foto" && (avatar || (avatarLocal && noDesenho())));
     const aj = $("#ajuste-rosto");
     /* os ajustes só valem sobre a figura desenhada: no resultado da IA o
        rosto já está dentro da imagem, e mexer ali não moveria nada */
-    if(aj) aj.hidden = !(modo === "foto" && avatarLocal && !avatar && !iaLigada());
+    if(aj) aj.hidden = !(modo === "foto" && avatarLocal && noDesenho());
+    /* a altura só faz sentido enquanto o corpo for desenhado */
+    const alt = $("#campo-altura");
+    if(alt) alt.hidden = !noDesenho();
+    /* Caminho de volta, e só quando existe volta: iaLigada() já é falso com
+       o teto do mês batido ou sem chave, então este botão não aparece para
+       prometer o que a loja não pode entregar. Ele existe para quem recusou
+       o consentimento por engano, ou para quando o fornecedor tropeçou. */
+    const vb = $("#voltar-ia");
+    if(vb) vb.hidden = !(modo === "foto" && caiuParaLocal && iaLigada());
   }
 
   /* ── eventos ── */
@@ -3290,8 +3327,51 @@ function corSegura(v, reserva){
   const IA = (cfg.ia || {});
   let consentiu = false, iaOcupado = false, iaVerUrl = null;
 
-  /* aceita caminho do próprio site (/api/provar) ou endereço https completo */
-  const iaLigada = () => !!(IA.endpoint && /^(https:\/\/|\/)/.test(IA.endpoint));
+  /* ── OS DOIS PROVADORES, E QUEM MANDA EM QUAL ───────────────
+     O de graça — o rosto dela sobre o corpo desenhado — funciona sempre e
+     não depende de nada. O da IA é melhor e custa dinheiro por imagem.
+
+     A regra: a IA manda quando está de pé E dentro do teto do mês. Fora
+     disso o site CAI para o de graça, sem erro na tela. É por isso que a
+     análise do rosto roda mesmo com a IA ligada: a rede de proteção tem de
+     estar pronta antes de precisar dela.
+
+     E a saúde é perguntada ANTES de qualquer consentimento. Pedir para ela
+     autorizar mandar o rosto para fora e depois responder "faltou a chave"
+     seria gastar o consentimento à toa — que é pior do que não ter botão. */
+  let iaSaude = null;          /* null = ainda não perguntei */
+  let caiuParaLocal = false;   /* a IA saiu de cena nesta sessão */
+
+  const iaConfigurada = () => !!(IA.endpoint && /^(https:\/\/|\/)/.test(IA.endpoint));
+  const iaLigada = () => iaConfigurada() &&
+    (iaSaude === null || (iaSaude.ligado && !iaSaude.pausado));
+
+  /* O corpo vai ser desenhado? É isso que dá sentido à altura. Repare que
+     a pergunta não é "já tem foto": se dependesse disso, a Altura sumiria
+     do painel e voltaria no instante em que a foto entrasse, empurrando o
+     resto para baixo. Controle que pisca é pior do que controle inútil. */
+  const noDesenho = () => modo === "boneca" || !iaLigada() || caiuParaLocal;
+
+  async function verificarIA(){
+    if(!iaConfigurada() || iaSaude !== null) return;
+    const antes = iaLigada();
+    try{
+      const r = await fetch(iaUrl());
+      const d = await r.json();
+      iaSaude = {ligado: d.ligado !== false, pausado: !!d.pausado};
+    }catch(e){
+      /* servidor fora do ar, CSP, rede caída: o de graça assume */
+      iaSaude = {ligado: false, pausado: false};
+    }
+    if(iaLigada() !== antes){
+      /* mudou de caminho: as janelas do rosto são quatro num e uma no
+         outro. Remontar só é seguro enquanto nenhuma foi preenchida — e
+         nesse ponto nenhuma foi, porque a pergunta sai antes da primeira. */
+      remontarRostos();
+      trocarModo(modo);
+    }
+    atualizar();
+  }
   const iaUrl = id => {
     const base = IA.endpoint.replace(/\/$/, "");
     return id ? base + "?id=" + encodeURIComponent(id) : base;
@@ -3310,11 +3390,23 @@ function corSegura(v, reserva){
 
   function iaEstado(txt){ const e = $("#ia-estado"); if(e) e.textContent = txt || ""; }
 
+  /* Sai da IA e mostra o desenho com o rosto dela, sem cara de erro. Só
+     funciona se a análise da foto tiver dado certo; se não deu, o erro
+     antigo continua valendo, porque aí não há para onde cair. */
+  function cairParaLocal(recado){
+    if(!avatarLocal) return false;
+    caiuParaLocal = true;
+    erro("");
+    iaEstado(recado || "");
+    atualizar();
+    return true;
+  }
+
   function pintarIA(){
     const cx = $("#ia");
     if(!cx) return;
     const alvo = pecaParaIA();
-    cx.hidden = !(iaLigada() && modo === "foto" && avatar);
+    cx.hidden = !(iaLigada() && !caiuParaLocal && modo === "foto" && avatar);
     const bt = $("#ia-provar");
     bt.disabled = iaOcupado || !alvo;
     $("#ia-txt").textContent = iaOcupado ? "Vestindo…"
@@ -3352,7 +3444,14 @@ function corSegura(v, reserva){
 
   async function criarAvatar(){
     if(!rostos.frente || criandoAvatar) return;
-    if(!(await pedirConsentimento())){ iaEstado("Tudo bem — nada foi enviado."); return; }
+    if(!(await pedirConsentimento())){
+      /* Recusar não pode custar o provador. Ela fica sem a foto de verdade
+         e ganha o desenho com o rosto dela, que não sai do aparelho. */
+      if(!cairParaLocal("Tudo bem — nada foi enviado. Aqui está o provador que "+
+        "roda no seu aparelho: o seu rosto, no corpo desenhado."))
+        iaEstado("Tudo bem — nada foi enviado.");
+      return;
+    }
     criandoAvatar = true; pintarRostos(); erro(""); iaEstado("Montando o seu avatar…");
     try{
       const lista = ANGULOS.map(a => rostos[a.id]).filter(Boolean);
@@ -3361,15 +3460,24 @@ function corSegura(v, reserva){
         body: JSON.stringify({acao: "avatar", rostos: lista})
       });
       const d = await r.json().catch(() => ({}));
-      if(!r.ok){ erro(d.mensagem || d.erro || "Não deu para montar o avatar agora."); return; }
+      if(!r.ok){
+        /* "cair" é o servidor dizendo: teto batido ou não configurado —
+           não insista, mostre o outro provador */
+        if(d.cair && cairParaLocal((d.mensagem || "")+" Enquanto isso, aqui está "+
+          "o provador do seu aparelho: o seu rosto, no corpo desenhado.")) return;
+        erro(d.mensagem || d.erro || "Não deu para montar o avatar agora.");
+        return;
+      }
       const pronto = await esperarIA(d.id, "avatar");
       if(!pronto) return;
       avatar = pronto; avatarVestido = null;
       iaEstado("Avatar pronto. Escolha as peças abaixo.");
       atualizar();
     }catch(e){
-      erro("Não consegui falar com o provador. Se você é da loja: confira se a "+
-           "FASHN_KEY está nas variáveis de ambiente da Vercel.");
+      if(!cairParaLocal("O provador com inteligência artificial não respondeu. "+
+        "Este aqui roda no seu aparelho: o seu rosto, no corpo desenhado."))
+        erro("Não consegui falar com o provador. Se você é da loja: confira se a "+
+             "FASHN_KEY está nas variáveis de ambiente da Vercel.");
     }finally{
       criandoAvatar = false; pintarRostos();
     }
@@ -3390,7 +3498,12 @@ function corSegura(v, reserva){
         body: JSON.stringify({foto: avatar, peca: alvo.p.foto, categoria: alvo.categoria})
       });
       const d = await r.json().catch(() => ({}));
-      if(!r.ok){ iaEstado(d.mensagem || d.erro || "Não deu para provar agora."); return; }
+      if(!r.ok){
+        if(d.cair && cairParaLocal((d.mensagem || "")+" Enquanto isso, a peça "+
+          "aparece no provador do seu aparelho.")) return;
+        iaEstado(d.mensagem || d.erro || "Não deu para provar agora.");
+        return;
+      }
 
       const pronto = await esperarIA(d.id, "provar");
       if(!pronto) return;
@@ -3480,6 +3593,17 @@ function corSegura(v, reserva){
      pedir quatro seria pedir foto que ninguém vai ler. Com a IA ligada as
      outras três voltam, porque aí elas entram de verdade no modelo. */
   const angulosPedidos = () => iaLigada() ? ANGULOS : [ANGULOS[0]];
+
+  /* A resposta da saúde pode trocar o caminho (quatro janelas viram uma, ou
+     o contrário). Remontar é seguro só enquanto nenhuma foto foi escolhida:
+     com foto na mão, recriar os <input> apagaria o que ela já preencheu. */
+  function remontarRostos(){
+    const cx = $("#rostos");
+    if(!cx || Object.keys(rostos).length) return;
+    delete cx.dataset.pronto;
+    montarRostos();
+    pintarRostos();
+  }
 
   function montarRostos(){
     const cx = $("#rostos"); if(!cx || cx.dataset.pronto) return;
@@ -3861,7 +3985,9 @@ function corSegura(v, reserva){
     /* A de frente é a que vira rosto na figura, e ela vale na hora — a
        leitura é local e leva uns poucos milissegundos. As outras três só
        existem para o provador com IA, quando a loja liga. */
-    if(angulo === "frente" && !iaLigada()){
+    /* A de frente vale nos dois caminhos: no de graça ela É o provador, e
+       no da IA ela é a rede de proteção para quando a IA sair de cena. */
+    if(angulo === "frente"){
       rostoZoom = 1; rostoY = 0;
       const zoom = $("#rosto-zoom"), sobe = $("#rosto-y");
       if(zoom){ zoom.value = 100; zoom.setAttribute("aria-valuetext", "tamanho normal"); }
@@ -3876,6 +4002,9 @@ function corSegura(v, reserva){
   $("#tirar-foto").addEventListener("click", () => {
     rostos = {}; avatar = null; avatarVestido = null;
     avatarLocal = null; rostoZoom = 1; rostoY = 0;
+    /* trocar a foto começa de novo, inclusive tentando a IA outra vez */
+    caiuParaLocal = false;
+    remontarRostos();
     erro(""); iaEstado(""); atualizar();
     const um = $("#rostos input"); if(um) um.focus();
   });
@@ -3941,6 +4070,12 @@ function corSegura(v, reserva){
     moverRosto();
   });
 
+  if($("#voltar-ia")) $("#voltar-ia").addEventListener("click", () => {
+    caiuParaLocal = false;
+    erro(""); iaEstado(""); atualizar();
+    criarAvatar();
+  });
+
   if($("#ia-provar")) $("#ia-provar").addEventListener("click", provarComIA);
 
   /* ── trocar de modo ── */
@@ -3977,6 +4112,10 @@ function corSegura(v, reserva){
     const voce = $("#voce"); if(voce) voce.open = naFoto;
     const notaIa = $("#nota-ia"); if(notaIa) notaIa.hidden = !iaLigada();
     const notaLivre = $("#nota-livre"); if(notaLivre) notaLivre.hidden = iaLigada();
+    /* a primeira entrada no modo do avatar é o momento certo de perguntar
+       se a IA está de pé: antes disso ninguém precisa da resposta, e
+       depois disso já seria tarde */
+    if(naFoto) verificarIA();
     erro("");
     atualizar();
   }

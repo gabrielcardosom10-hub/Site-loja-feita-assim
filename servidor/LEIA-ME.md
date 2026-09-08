@@ -7,15 +7,19 @@
 > celular. Este arquivo é só para quem decidir pagar pela versão em que a peça
 > é vestida por inteligência artificial e o resultado parece uma fotografia.
 >
-> E repare: ligar a IA **troca** o provador, não soma. Detalhes no `CONFIG`,
-> no bloco `provador.ia`.
+> Os dois convivem: a IA manda quando está de pé e dentro do teto do mês, e o
+> de graça é a rede embaixo dela. Detalhes no `CONFIG`, no bloco
+> `provador.ia`.
 
 O site é estático. Uma chave de API dentro dele seria pública, e qualquer
 pessoa gastaria a conta da loja. O intermediário fica no meio: ele guarda a
 chave, e o navegador nunca a vê.
 
 **O site está na Vercel, então o caminho é o de cima.** O worker do Cloudflare
-continua aqui como alternativa, para o caso de a hospedagem mudar de novo.
+continua aqui como alternativa, para o caso de a hospedagem mudar de novo —
+mas atenção: **o `TETO_MES` e a resposta de saúde só existem na versão da
+Vercel.** Se um dia a loja mudar para o Cloudflare, o worker precisa receber
+os dois antes de ligar a IA lá.
 
 ---
 
@@ -37,8 +41,9 @@ não há comando para rodar, nem segunda conta para criar.
 | `FASHN_KEY` | a sua chave | **obrigatória** — sem ela o provador responde que não foi configurado |
 | `ORIGENS` | `https://site-loja-feita-assim.vercel.app` | de onde o site pode chamar |
 | `HOSTS_PECA` | `d8j0ntlcm91z4.cloudfront.net,site-loja-feita-assim.vercel.app` | de onde as fotos das peças podem vir |
-| `TETO_HORA` | `20` | gerações por hora, no site todo |
-| `TETO_IP` | `6` | gerações por hora, por pessoa |
+| `TETO_MES` | `200` | **o teto do bolso** — imagens no mês inteiro. Ver abaixo |
+| `TETO_HORA` | `20` | gerações por hora, no site todo (contra rajada) |
+| `TETO_IP` | `6` | gerações por hora, por pessoa (contra abuso) |
 | `MODELO_AVATAR` | `face-to-model` | opcional — o modelo que vira o rosto em corpo |
 | `MODELO_TRYON` | `tryon-v1.6` | opcional — o modelo que veste a peça |
 
@@ -47,15 +52,19 @@ Se um dia o provador parar com erro `502` citando o nome do modelo, troque o
 nome na variável e faça o redeploy — sem mexer em código.
 
 3. **Redeploy** (a Vercel só aplica variáveis novas num deploy novo).
-4. No `index.html`, em `CONFIG.provador.ia`, troque `endpoint: ""` por
-   `endpoint: "/api/provar"` e publique.
 
-O passo 4 é de propósito o último. Com o botão no ar e a função sem chave, a
-cliente consentiria em mandar a foto dela para fora e receberia um erro —
-consentimento gasto à toa é pior do que botão nenhum.
+Só isso. No `index.html` o `endpoint` **já está em `"/api/provar"`** — não
+precisa mexer.
 
-Pronto. O botão "Provar de verdade com IA" aparece no provador, no modo
-"Na minha foto".
+A ordem deixou de importar, e essa é a mudança que tornou seguro deixar
+ligado: antes de mostrar qualquer botão, o site **pergunta à função se ela
+está de pé**. Se a chave ainda não estiver lá, ele nem oferece o caminho da
+IA — mostra o provador de graça e pronto. Ninguém consente em mandar o rosto
+para fora para depois receber um erro.
+
+Pronto. Com a chave no lugar, o botão "Provar de verdade com IA" aparece no
+provador, no modo **"No meu avatar"**. Sem a chave, o mesmo modo mostra o
+provador que roda no aparelho da cliente.
 
 ### Conferir
 
@@ -68,16 +77,55 @@ variável não chegou: confira o nome e refaça o deploy.
 
 ## O teto de gasto — leia antes de ligar
 
-O endereço é público, e tem de ser. Existem **dois** tetos, e eles não têm o
-mesmo peso:
+O endereço é público, e tem de ser. Existem **três** tetos, e eles fazem
+trabalhos diferentes.
 
-**O que segura de verdade é o saldo pré-pago na FASHN.** Ele não depende de
-nenhuma linha deste código estar certa. Compre crédito limitado; é o único
-teto que não falha.
+### 1. `TETO_MES` — o do bolso
 
-**O daqui é por hora e por IP.** Ele é rígido só se você configurar o Upstash
-(abaixo). Sem Upstash ele vale dentro de cada instância quente da função — a
-Vercel cria várias — então ele **ajuda contra rajada e não substitui o saldo**.
+É o que responde "quanto isso pode me custar até o dia 30". Ele conta
+**imagens**, não reais — porque preço muda, câmbio muda, e código que finge
+saber o câmbio mente. A conta é sua:
+
+```
+quanto você aceita gastar  ÷  preço da imagem  =  TETO_MES
+```
+
+Com US$ 0,075 por imagem:
+
+| você aceita gastar | `TETO_MES` |
+|---|---|
+| US$ 10 no mês | `133` |
+| US$ 15 no mês | `200` ← é o padrão, se você não puser nada |
+| US$ 30 no mês | `400` |
+
+**Confira o preço no site da FASHN antes de fechar o número.**
+
+Batido o teto, o provador com IA para até o mês virar. E aqui está a parte
+que importa: **o site não mostra erro.** Ele cai sozinho no provador de graça
+— o rosto da cliente sobre o corpo desenhado, que roda no aparelho dela e não
+custa nada. Ninguém fica sem provador; ele só fica menos bonito até o dia 1º.
+
+Vale também para: chave faltando, fornecedor fora do ar, e a cliente recusando
+mandar o rosto. Nos quatro casos o site cai no de graça, calado.
+
+Uma coisa que o código faz de propósito: **pedido inválido não queima o teto do
+mês.** Só conta o que virou geração de verdade na FASHN. Quem segura tentativa
+inválida e ataque são os dois tetos de baixo, que somam sempre.
+
+### 2 e 3. `TETO_HORA` e `TETO_IP` — os de rajada
+
+Seguram um pico de acesso e um abusador. Zeram a cada hora. **Não protegem o
+bolso no mês** — 20 por hora dá 14.400 por mês.
+
+### E o que nunca falha
+
+**O saldo pré-pago na FASHN.** Ele não depende de nenhuma linha deste código
+estar certa. Compre crédito limitado; é o único teto que não depende de nada.
+
+Os três daqui só são rígidos com o **Upstash** configurado (abaixo, e o plano
+de graça dá conta com folga). Sem Upstash cada instância quente da função tem
+o seu contador — a Vercel cria várias — e o `TETO_MES` vira estimativa, não
+trava. **Se o teto do mês importa para você, configure o Upstash.**
 
 ### Quanto custa cada cliente
 

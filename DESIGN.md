@@ -879,3 +879,85 @@ tela no caminho onde ele não existe. Entrou `.prova__arquivo[hidden]`.
 E `id="palco"` existia **duas vezes** — na capa e no provador. O JS lia sempre
 o primeiro, então nada quebrava, mas HTML com id repetido é inválido e confunde
 leitor de tela. O do provador virou `prova-palco`.
+
+---
+
+## Teto de mês, e os dois provadores no mesmo site
+
+> "Tem como ser uma foto real da pessoa?"
+
+Tem, e só de um jeito que entrega mesmo: o modelo de IA, que cobra por
+imagem. A pergunta real não era técnica, era de bolso — e o buraco estava
+no servidor: ele tinha teto **por hora** (20) e **por pessoa** (6), e nenhum
+dos dois responde "quanto isso pode me custar até o dia 30". Vinte por hora
+dá 14.400 por mês.
+
+### `TETO_MES`, e por que ele conta imagens
+
+Entrou um teto mensal que **conta imagens, não reais**. Código que finge
+saber o câmbio e o preço do fornecedor mente na primeira vez que um dos dois
+muda. A conta fica no LEIA-ME, onde uma pessoa a refaz em dez segundos:
+quanto aceita gastar ÷ preço da imagem = `TETO_MES`.
+
+Duas decisões dentro dele:
+
+- **Ele é lido, não somado, na porta.** Quem soma é o despacho, depois de a
+  geração ter sido aceita pelo fornecedor. Assim pedido inválido e tentativa
+  de abuso **não queimam o teto do bolso** — para isso servem os dois tetos
+  de rajada, que somam sempre. O teste cobra exatamente isso.
+- **Ele é honesto sobre quando não é teto.** Sem Upstash, cada instância
+  quente da função tem o seu contador e o número vira estimativa. Está
+  escrito no cabeçalho do arquivo e no LEIA-ME, junto com a única trava que
+  não depende de código nenhum: crédito pré-pago limitado.
+
+### A queda: o de graça vira a rede embaixo do pago
+
+Antes eu tinha feito os dois se excluírem — ligar a IA apagava o provador de
+graça. Isso deixava o site com um único ponto de falha justamente onde ele
+custa dinheiro. Agora a IA manda **enquanto está de pé e dentro do teto**, e
+em quatro situações o site **cai sozinho** no rosto-sobre-o-desenho, sem
+erro na tela:
+
+1. o teto do mês estourou;
+2. falta a `FASHN_KEY`;
+3. o fornecedor não respondeu;
+4. **ela recusou mandar o rosto.**
+
+A quarta é a que mais importa. Recusar não pode custar o provador — ela fica
+sem a foto de verdade e ganha o desenho com o rosto dela, que não sai do
+aparelho. Antes, recusar dava "Tudo bem — nada foi enviado." e uma tela
+vazia.
+
+Para isso a análise do rosto passou a rodar **também** com a IA ligada: a
+rede de proteção tem de estar pronta antes de precisar dela.
+
+### A pergunta de saúde, e o consentimento que não se gasta à toa
+
+Era isto que travava ligar o `endpoint` antes de a chave estar na Vercel: a
+cliente consentiria em mandar o rosto para fora e receberia um erro. E
+consentimento gasto à toa é pior do que botão nenhum.
+
+Entrou um `GET` sem identificador que responde `{ligado, pausado}` — e nada
+mais: o endereço é público, e quanto a loja já gastou não é assunto de quem
+passa na rua. O site pergunta **uma vez**, quando a cliente abre o provador,
+e só mostra o caminho da IA se a resposta disser que ele está de pé. Se não
+estiver, ele remonta as janelas de quatro para uma e segue no de graça, sem
+avisar ninguém de nada.
+
+Com isso o `endpoint` pôde vir ligado no arquivo. Ligar deixou de ser um
+passo que exige ordem certa.
+
+### Duas coisas que os testes cobraram e eu tinha errado
+
+**A Altura sumia até a foto chegar.** Eu tinha amarrado a visibilidade dela a
+"já existe rosto analisado". Resultado: o controle desaparecia do painel e
+voltava no instante em que a foto entrava, empurrando o resto para baixo.
+Controle que pisca é pior do que controle inútil — a pergunta certa é "o
+corpo vai ser desenhado?", não "já tem foto".
+
+**Recusar o consentimento era uma porta sem maçaneta.** Ela recusava, ganhava
+o provador do aparelho — e as janelas do rosto saíam da tela junto, sem
+caminho de volta a não ser jogar fora as fotos. Entrou um "Tentar com
+inteligência artificial" no painel, e ele só aparece quando existe volta: com
+o teto do mês batido ou sem chave, `iaLigada()` já é falso e o botão não
+promete o que a loja não pode entregar.
