@@ -961,3 +961,87 @@ caminho de volta a não ser jogar fora as fotos. Entrou um "Tentar com
 inteligência artificial" no painel, e ele só aparece quando existe volta: com
 o teto do mês batido ou sem chave, `iaLigada()` já é falso e o botão não
 promete o que a loja não pode entregar.
+
+---
+
+## Mais realista, ainda sem pagar nada
+
+> "Tente mais uma vez deixar a foto do meu avatar mais realista. Sem
+> precisar pagar outro site."
+
+O que estava atrapalhando não era o acabamento — eram duas coisas
+estruturais, e as duas tinham conserto de graça.
+
+### 1. A oval jogava fora o cabelo dela
+
+A primeira versão recortava um **oval no rosto** e desenhava um penteado
+genérico em volta. O resultado é o rosto dela dentro de um cabelo que não é
+dela — e nenhuma quantidade de sombreado conserta isso, porque o problema é
+de conteúdo, não de acabamento.
+
+Agora a **cabeça inteira é recortada do fundo**: cabelo de verdade, formato
+de cabeça, orelha, brinco. O fundo de uma selfie costuma ser liso, e liso é
+justamente o que um crescimento de região sabe achar — começa nas bordas do
+quadro e vai comendo vizinho parecido até esbarrar na pessoa. O que sobra é
+ela. Sai como PNG com transparência, porque máscara de SVG não sabe desenhar
+um contorno de cabelo.
+
+**O erro que quase enterrou isso:** as sementes do fundo saíam das quatro
+bordas do quadro. Só que numa foto de rosto a borda de baixo é o **ombro da
+pessoa**, não parede. Colher ali ensinava ao algoritmo que pele é cor de
+fundo, e o crescimento comia a cara dela inteira — 98% da foto virava
+"fundo", sobravam os olhos e a boca. Agora as sementes vêm do topo e dos
+lados, só na metade de cima, e nenhum representante do fundo pode ter a cor
+da pele dela.
+
+**O segundo erro:** comparar só vizinho com vizinho deixa a cadeia derivar.
+Passo a passo de vinte em vinte, o crescimento atravessa o contorno da
+pessoa e come tudo. Agora são duas condições ao mesmo tempo: a **local**,
+que deixa o fundo seguir uma parede com sombra ou degradê, e a **global**,
+que exige que a cor ainda pareça com alguma cor de borda. A deriva morre na
+segunda.
+
+Fundo bagunçado não tem conserto, e aí três testes de sanidade reprovam o
+recorte e a oval assume sem ninguém perceber. Recorte roto é pior do que
+oval boa — tem um retrato de fundo impossível na bateria só para provar que
+essa queda acontece calada.
+
+### 2. Cabeça de gente não tem o tamanho da cabeça de boneca
+
+A cabeça da boneca é grande de propósito: é assim que desenho de moda
+funciona. Encaixar a cabeça fotografada naquela proporção devolvia uma
+cabeçorra, com o desenho aparecendo como auréola de pele em volta do
+cabelo.
+
+A primeira tentativa foi o extremo oposto — encolher para proporção de
+gente de verdade. Ficou pior: **cabeça pequena num corpo de nove cabeças lê
+como erro, não como realismo.** O que dá realismo é a fotografia dentro do
+contorno, não a métrica.
+
+Ficou no meio, e do jeito certo: a cabeça dela é encaixada na *caixa da
+cabeça da boneca* — 37 de largura, queixo em 82, que é o espaço que o resto
+do desenho foi construído esperando. E a medida vem do recorte, não de
+palpite: supor a proporção entre janela e cabeça erra com franja, coque e
+cabelo curto, e o erro aparece como auréola.
+
+Efeito colateral que os testes pegaram: **os óculos flutuavam acima dos
+olhos.** Eles moravam numa altura fixa, boa para a cabeça desenhada e só
+para ela. Agora sai a linha dos olhos de fato, da caixa do rosto, e os
+acessórios de cabeça se penduram nela.
+
+### 3. Vetor chapado ao lado de foto lê como papel recortado
+
+A foto tem luz e o vetor não tinha nenhuma, e o olho lê essa diferença antes
+de ler a roupa. Agora toda superfície é pintada com a **mesma rampa
+lateral**, ancorada no corpo e não em cada forma (`userSpaceOnUse`). Sendo
+uma rampa só para a figura inteira, braço, tronco e casaco recebem a luz do
+mesmo lado — a figura fecha como um volume em vez de um mosaico de retalhos
+cada um com a sua luz.
+
+Os onze moldes não mudaram uma linha. Eles continuam recebendo "a cor" e
+escrevendo `fill="..."` como sempre; o que mudou é que a cor virou uma
+referência de degradê, e `escurecer()` aprendeu a voltar dela para o tom de
+verdade na hora de traçar o contorno.
+
+E entrou a sombra no chão. Sem ela a figura flutua, e figura que flutua lê
+como adesivo por mais bem desenhada que esteja.

@@ -2537,11 +2537,62 @@ function corSegura(v, reserva){
       ? t : (reserva || "#6B5878");
   }
 
-  function escurecer(hex, k){
+  function escurecerCru(hex, k){
     const h = String(hex||"").replace("#","");
     if(h.length !== 6) return "#00000040";
     const v = i => Math.round(parseInt(h.slice(i,i+2),16) * k);
     return "rgb("+v(0)+","+v(2)+","+v(4)+")";
+  }
+
+  /* ── VOLUME ──────────────────────────────────────────────────
+     O desenho era chapado: cada peça, uma cor só. Ao lado de uma cabeça
+     fotografada isso vira papel recortado — a foto tem luz e o vetor não
+     tem nenhuma, e o olho lê essa diferença antes de ler a roupa.
+
+     A saída mais barata que existe: toda superfície passa a ser pintada
+     com a MESMA rampa lateral, ancorada no corpo e não em cada forma
+     (userSpaceOnUse). Sendo uma rampa só para a figura inteira, braço,
+     tronco e casaco recebem a luz do mesmo lado — e a figura fecha como um
+     volume, em vez de um mosaico de retalhos cada um com a sua luz.
+
+     Os moldes não precisaram mudar: eles continuam recebendo "a cor" e
+     escrevendo fill="..." como sempre. O que muda é que a cor virou uma
+     referência de degradê, e escurecer() sabe voltar dela para o tom de
+     verdade na hora de traçar o contorno. */
+  let rampas = "", rampaN = 0;
+  const corDaRampa = Object.create(null);   /* url(#vol3) -> #C9C1CE */
+  const rampaDaCor = Object.create(null);   /* #C9C1CE -> url(#vol3) */
+
+  function reiniciarRampas(){
+    rampas = ""; rampaN = 0;
+    for(const k in corDaRampa) delete corDaRampa[k];
+    for(const k in rampaDaCor) delete rampaDaCor[k];
+  }
+
+  function pintar(cor, cx){
+    const tom = String(cor);
+    if(rampaDaCor[tom]) return rampaDaCor[tom];
+    const id = "vol" + (++rampaN), url = "url(#" + id + ")";
+    rampaDaCor[tom] = url; corDaRampa[url] = tom;
+    const e = k => escurecerCru(tom, k);
+    /* a luz vem de cima e um pouco da esquerda, como numa vitrine */
+    rampas +=
+      '<linearGradient id="'+id+'" gradientUnits="userSpaceOnUse" '+
+        'x1="'+n(cx-44)+'" y1="0" x2="'+n(cx+44)+'" y2="0">'+
+        '<stop offset="0" stop-color="'+e(.68)+'"/>'+
+        '<stop offset="0.18" stop-color="'+e(.89)+'"/>'+
+        '<stop offset="0.40" stop-color="'+tom+'"/>'+
+        '<stop offset="0.70" stop-color="'+e(.92)+'"/>'+
+        '<stop offset="1" stop-color="'+e(.64)+'"/>'+
+      '</linearGradient>';
+    return url;
+  }
+
+  /* o contorno sai da cor de verdade, mesmo quando o preenchimento virou
+     degradê — sem isto o traço voltaria preto translúcido e a peça ficaria
+     com borda suja */
+  function escurecer(cor, k){
+    return escurecerCru(corDaRampa[cor] || cor, k);
   }
   const CONTORNO = 'stroke-width="1.3" stroke-linejoin="round" ';
 
@@ -2572,9 +2623,15 @@ function corSegura(v, reserva){
   }
 
   function corpo(m){
-    const t = tons();
+    const bruto = tons();
     const {cx,OY,CY,QY,Ox,Cx,Qx,JY,TY,W} = m;
+    const t = {pele: pintar(bruto.pele, cx), cabelo: pintar(bruto.cabelo, cx)};
     const bracoW = n(9.5*W), pernaW = n(15*W);
+    /* Com a cabeça recortada da foto, o cabelo desenhado não é ajuda: as
+       mechas dele apareceriam ao lado do cabelo dela, e duas cabeleiras na
+       mesma cabeça é pior do que nenhuma. A cabeça em elipse continua,
+       porque ela é o forro atrás das bordas macias do recorte. */
+    const semRecorte = !(modo === "foto" && avatarLocal && avatarLocal.recorte);
     return (
       /* pernas e braços são traços de ponta redonda: leem bem em 180px */
       '<g stroke="'+t.pele+'" fill="none" stroke-linecap="round" stroke-linejoin="round">'+
@@ -2591,18 +2648,22 @@ function corSegura(v, reserva){
         '<ellipse cx="'+n(cx+15)+'" cy="'+n(TY+7)+'" rx="7.5" ry="5"/>'+
         '<rect x="'+n(cx-6)+'" y="72" width="12" height="26" rx="5"/>'+
         '<path d="'+tronco(m,0)+'"/>'+
-        '<ellipse cx="'+cx+'" cy="56" rx="19" ry="23.5"/>'+
+        /* a cabeça da boneca sai de cena quando a dela chega: as duas juntas
+           deixavam um anel de pele em volta do cabelo */
+        (semRecorte ? '<ellipse cx="'+cx+'" cy="56" rx="19" ry="23.5"/>' : '')+
       '</g>'+
       /* cabelo: mechas laterais descem até o ombro */
-      '<g fill="'+t.cabelo+'">'+
-        '<path d="M '+(cx-20.5)+',60 C '+(cx-21.5)+',24 '+(cx+21.5)+',24 '+(cx+20.5)+',60 '+
-          'C '+(cx+20)+',50 '+(cx+14)+',47 '+cx+',47 '+
-          'C '+(cx-14)+',47 '+(cx-20)+',50 '+(cx-20.5)+',60 Z"/>'+
-        '<path d="M '+(cx-19)+',50 C '+(cx-26)+',74 '+(cx-25)+',90 '+(cx-22)+',104 '+
-          'L '+(cx-14)+',101 C '+(cx-17)+',86 '+(cx-17)+',66 '+(cx-14)+',54 Z"/>'+
-        '<path d="M '+(cx+19)+',50 C '+(cx+26)+',74 '+(cx+25)+',90 '+(cx+22)+',104 '+
-          'L '+(cx+14)+',101 C '+(cx+17)+',86 '+(cx+17)+',66 '+(cx+14)+',54 Z"/>'+
-      '</g>'
+      (semRecorte
+        ? '<g fill="'+t.cabelo+'">'+
+            '<path d="M '+(cx-20.5)+',60 C '+(cx-21.5)+',24 '+(cx+21.5)+',24 '+(cx+20.5)+',60 '+
+              'C '+(cx+20)+',50 '+(cx+14)+',47 '+cx+',47 '+
+              'C '+(cx-14)+',47 '+(cx-20)+',50 '+(cx-20.5)+',60 Z"/>'+
+            '<path d="M '+(cx-19)+',50 C '+(cx-26)+',74 '+(cx-25)+',90 '+(cx-22)+',104 '+
+              'L '+(cx-14)+',101 C '+(cx-17)+',86 '+(cx-17)+',66 '+(cx-14)+',54 Z"/>'+
+            '<path d="M '+(cx+19)+',50 C '+(cx+26)+',74 '+(cx+25)+',90 '+(cx+22)+',104 '+
+              'L '+(cx+14)+',101 C '+(cx+17)+',86 '+(cx+17)+',66 '+(cx+14)+',54 Z"/>'+
+          '</g>'
+        : '')
     );
   }
 
@@ -2693,13 +2754,13 @@ function corSegura(v, reserva){
     },
 
     oculos: (m,c) => {
-      const cx = m.cx;
+      const cx = m.cx, y = linhaDosOlhos() - 5.5;
       return '<g fill="'+c+'">'+
-        '<rect x="'+(cx-17)+'" y="49" width="14" height="11.5" rx="2.5"/>'+
-        '<rect x="'+(cx+3)+'" y="49" width="14" height="11.5" rx="2.5"/>'+
-        '<rect x="'+(cx-3)+'" y="52.5" width="6" height="2.6" rx="1.3"/>'+
-        '<rect x="'+(cx-20)+'" y="51" width="4" height="2.6" rx="1.3"/>'+
-        '<rect x="'+(cx+16)+'" y="51" width="4" height="2.6" rx="1.3"/>'+
+        '<rect x="'+(cx-17)+'" y="'+n(y)+'" width="14" height="11.5" rx="2.5"/>'+
+        '<rect x="'+(cx+3)+'" y="'+n(y)+'" width="14" height="11.5" rx="2.5"/>'+
+        '<rect x="'+(cx-3)+'" y="'+n(y+3.5)+'" width="6" height="2.6" rx="1.3"/>'+
+        '<rect x="'+(cx-20)+'" y="'+n(y+2)+'" width="4" height="2.6" rx="1.3"/>'+
+        '<rect x="'+(cx+16)+'" y="'+n(y+2)+'" width="4" height="2.6" rx="1.3"/>'+
       '</g>';
     }
   };
@@ -2728,15 +2789,16 @@ function corSegura(v, reserva){
   const BASE = "#C9C1CE";
   function base(m){
     const {cx,QY,Qx} = m;
+    const BASE_P = pintar(BASE, cx);
     let g = "";
     if(!look.baixo && !(look.cima && look.cima.molde === "vestido"))
-      g += '<path fill="'+BASE+'" stroke="'+escurecer(BASE,.86)+'" '+CONTORNO+
+      g += '<path fill="'+BASE_P+'" stroke="'+escurecer(BASE,.86)+'" '+CONTORNO+
         ' d="M '+n(cx-Qx-1)+','+n(QY-12)+' L '+n(cx+Qx+1)+','+n(QY-12)+
         ' L '+n(cx+Qx-4)+','+n(QY+52)+' L '+n(cx+3)+','+n(QY+52)+
         ' L '+n(cx)+','+n(QY+30)+' L '+n(cx-3)+','+n(QY+52)+
         ' L '+n(cx-Qx+4)+','+n(QY+52)+' Z"/>';
     if(!look.cima)
-      g += '<path d="'+tronco(m,1,m.QY-2)+'" fill="'+BASE+'" stroke="'+escurecer(BASE,.86)+'" '+CONTORNO+'/>';
+      g += '<path d="'+tronco(m,1,m.QY-2)+'" fill="'+BASE_P+'" stroke="'+escurecer(BASE,.86)+'" '+CONTORNO+'/>';
     return g;
   }
 
@@ -2764,7 +2826,7 @@ function corSegura(v, reserva){
     sobretudo:    m => [m.cx-m.Ox-15, m.OY-10, 2*(m.Ox+15), (m.QY+156*m.L)-(m.OY-10)],
     "bolsa-ombro":m => [m.cx+m.Qx-2,  m.QY+8,  44, 44],
     "bolsa-mao":  m => [m.cx+m.Ox-1,  m.QY+4,  38, 38],
-    oculos:       m => [m.cx-20, 45, 40, 19]
+    oculos:       m => [m.cx-20, linhaDosOlhos() - 9.5, 40, 19]
   };
 
   /* Acessório encaixa na caixa; roupa de corpo é ancorada pela ALTURA e
@@ -2818,7 +2880,7 @@ function corSegura(v, reserva){
         /* sem proporção ainda: segue no desenho até a imagem chegar */
       }
       const f = MOLDES[p.molde];
-      if(f) svg += f(m, corSegura(p.cor));
+      if(f) svg += f(m, pintar(corSegura(p.cor), m.cx));
     });
     return svg;
   }
@@ -2838,8 +2900,52 @@ function corSegura(v, reserva){
      SVG inteiro a cada quadro significa reserializar a foto em base64
      junto — uns cem mil caracteres, sessenta vezes por segundo. Com a
      conta separada, arrastar o controle só mexe em seis atributos. */
+  /* A cabeça da boneca é grande de propósito — é assim que desenho de moda
+     funciona, e uma cabeça pequena num traço plano fica seca. Só que agora
+     a cabeça é a DELA, fotografada, e cabeça de gente tem tamanho de gente:
+     manter a proporção da boneca devolvia uma cabeçorra, e o desenho por
+     baixo aparecia como auréola em volta do cabelo.
+
+     Então a conta é outra: a cabeça dela é encaixada NA CAIXA DA CABEÇA DA
+     BONECA — 37 de largura, queixo em 79 —, que é o espaço que o resto do
+     desenho foi construído esperando. Encolher para proporção de gente de
+     verdade foi a primeira tentativa e ficou pior: cabeça pequena num corpo
+     de nove cabeças lê como erro, não como realismo. O que dá realismo é a
+     fotografia dentro do contorno, não a métrica.
+
+     A largura vem daqui, e o queixo é encaixado no alto do pescoço em vez
+     de o rosto ser centrado numa oval. */
+  const CABECA = {larg: 37, queixo: 82};
+
+  /* Óculos moravam numa altura fixa, boa para a cabeça desenhada e só para
+     ela: com o rosto de verdade encaixado, e ainda por cima ajustável, a
+     armação flutuava acima dos olhos. Aqui sai a linha dos olhos de fato —
+     uns 40% da caixa do rosto, contando do topo dela —, e os acessórios de
+     cabeça passam a se pendurar nela. Sem foto, vale a altura de sempre. */
+  const OLHOS_PADRAO = 54.5;
+
+  function linhaDosOlhos(){
+    const a = avatarLocal;
+    if(modo !== "foto" || !a || !a.recorte || !a.cabeca) return OLHOS_PADRAO;
+    const g = geoRosto();
+    return g.y + (a.caixa.y + a.caixa.h*0.40) * g.e;
+  }
+
   function geoRosto(){
     const a = avatarLocal;
+    if(a.recorte && a.cabeca){
+      const c = a.cabeca;
+      const e = (CABECA.larg * rostoZoom) / c.w;
+      const queixoY = CABECA.queixo + rostoY;
+      return {
+        recorte: true, e,
+        x: ROSTO.cx - (c.x + c.w/2)*e,
+        y: queixoY - c.queixo*e,
+        w: a.w*e, h: a.h*e,
+        /* onde a cabeça dela ficou, para o forro e a sombra do queixo */
+        queixoY, alturaCabeca: c.h*e, largCabeca: c.w*e
+      };
+    }
     const cy = ROSTO.cy + rostoY, rx = ROSTO.rx, ry = ROSTO.ry;
     /* a caixa do rosto achada na foto é levada à largura da oval */
     const e = (2*rx*1.06*rostoZoom) / a.caixa.w;
@@ -2855,6 +2961,26 @@ function corSegura(v, reserva){
     const a = avatarLocal; if(!a) return "";
     const src = fotoSegura(a.url); if(!src) return "";
     const g = geoRosto();
+
+    /* O recorte já vem com o próprio contorno na transparência do PNG:
+       máscara oval por cima dele cortaria fora justamente o cabelo que ele
+       existe para trazer. Aqui só entra uma sombra sob o queixo, que é meio
+       pixel de código e resolve o efeito de cabeça flutuando. */
+    if(a.recorte && g.recorte){
+      /* Forro: a borda do recorte é macia de propósito, e macio sobre roxo
+         deixa o cabelo esfumaçado. Uma mancha da cor do cabelo dela por
+         trás, um pouco menor que a cabeça, devolve o peso sem aparecer. */
+      const meioY = g.queixoY - g.alturaCabeca*0.48;
+      return (
+        '<ellipse cx="110" cy="'+n(meioY)+'" rx="'+n(g.largCabeca*0.44)+'" '+
+          'ry="'+n(g.alturaCabeca*0.46)+'" fill="'+corSegura(a.cabelo, "#3A2A20")+'"/>'+
+        '<ellipse id="rosto-sombra" cx="110" cy="'+n(g.queixoY + 3)+'" '+
+          'rx="'+n(g.largCabeca*0.26)+'" ry="3.4" fill="#00000030"/>'+
+        '<image id="rosto-foto" href="'+src+'" x="'+n(g.x)+'" y="'+n(g.y)+'" '+
+          'width="'+n(g.w)+'" height="'+n(g.h)+'" preserveAspectRatio="none"/>'
+      );
+    }
+
     return (
       '<defs>'+
         '<radialGradient id="rosto-borda">'+
@@ -2881,16 +3007,21 @@ function corSegura(v, reserva){
   function moverRosto(){
     const b = $("#boneca");
     const img = b && b.querySelector("#rosto-foto");
-    const oval = b && b.querySelector("#rosto-oval-forma");
-    const mask = b && b.querySelector("#rosto-oval");
-    const som = b && b.querySelector("#rosto-sombra");
-    if(!avatarLocal || !img || !oval || !mask || !som) return desenhar();
+    if(!avatarLocal || !img) return desenhar();
     const g = geoRosto();
     img.setAttribute("x", n(g.x));  img.setAttribute("y", n(g.y));
     img.setAttribute("width", n(g.w)); img.setAttribute("height", n(g.h));
-    oval.setAttribute("cy", n(g.cy));
-    mask.setAttribute("y", n(g.cy - g.ry - 8));
-    som.setAttribute("cy", n(g.cy + g.ry + 1));
+    /* no caminho da oval há mais três peças que acompanham o rosto */
+    const oval = b.querySelector("#rosto-oval-forma");
+    const mask = b.querySelector("#rosto-oval");
+    const som = b.querySelector("#rosto-sombra");
+    /* no recorte o forro e a sombra mudam de TAMANHO junto com a cabeça,
+       não só de lugar — sai mais barato redesenhar do que remendar cinco
+       atributos e errar um */
+    if(g.recorte) return desenhar();
+    if(oval) oval.setAttribute("cy", n(g.cy));
+    if(mask) mask.setAttribute("y", n(g.cy - g.ry - 8));
+    if(som) som.setAttribute("cy", n(g.cy + g.ry + 1));
   }
 
   /* ── desenhar ── */
@@ -2915,9 +3046,7 @@ function corSegura(v, reserva){
       if(avatarLocal && (!iaLigada() || caiuParaLocal)){
         boneca.hidden = false; $("#soltar").hidden = true;
         boneca.setAttribute("viewBox", VIEWBOX_BONECA);
-        const m = medidas();
-        boneca.innerHTML = '<title id="boneca-desc">'+escapar(descricao())+'</title>'+
-          corpo(m) + rostoDaFoto() + base(m) + roupa(m);
+        boneca.innerHTML = montarFigura(rostoDaFoto());
         return;
       }
       /* sem foto, o SVG é esvaziado de verdade. Só escondê-lo deixaria a
@@ -2930,9 +3059,24 @@ function corSegura(v, reserva){
     boneca.hidden = false;
     $("#soltar").hidden = true;
     boneca.setAttribute("viewBox", VIEWBOX_BONECA);
+    boneca.innerHTML = montarFigura("");
+  }
+
+  /* A ordem importa e é a da vida: a sombra no chão, o corpo, o rosto, a
+     roupa de base e por fim as peças. As rampas de volume só existem
+     DEPOIS de tudo pintado — pintar() vai registrando conforme cada cor
+     aparece —, então o <defs> é montado no fim e colado na frente. */
+  function montarFigura(rosto){
+    reiniciarRampas();
     const m = medidas();
-    boneca.innerHTML = '<title id="boneca-desc">'+escapar(descricao())+'</title>'+
-      corpo(m) + base(m) + roupa(m);
+    const partes = corpo(m) + rosto + base(m) + roupa(m);
+    /* Sem sombra no chão a figura flutua, e figura que flutua lê como
+       adesivo por mais bem desenhada que esteja. Ela é larga e fraca de
+       propósito: sombra dura viraria mancha. */
+    const chao = '<ellipse cx="110" cy="'+n(m.TY+13)+'" rx="'+n(26*m.W)+'" ry="5" '+
+      'fill="#00000022"/>';
+    return '<title id="boneca-desc">'+escapar(descricao())+'</title>'+
+      '<defs>'+rampas+'</defs>' + chao + partes;
   }
 
   function descricao(){
@@ -3761,6 +3905,187 @@ function corSegura(v, reserva){
     return q ? [r/q, g/q, b/q] : null;
   }
 
+  /* ── A CABEÇA, RECORTADA DO FUNDO ───────────────────────────
+     A oval é honesta e entrega pouco. Ela mostra o rosto e joga fora o
+     cabelo de verdade, o formato da cabeça, a orelha, o brinco — o que
+     sobra é o rosto dela dentro de um penteado que não é dela. Nenhuma
+     quantidade de sombreado conserta isso.
+
+     Recortar a cabeça inteira devolve tudo, e de graça. O fundo de uma
+     selfie costuma ser liso, e liso é justamente o que um crescimento de
+     região sabe achar: começa nas quatro bordas do quadro — que são fundo
+     em qualquer retrato — e vai comendo vizinho parecido até esbarrar na
+     pessoa. O que não foi comido é ela.
+
+     Fundo bagunçado faz o recorte sair roto, então há três testes de
+     sanidade no fim; falhando qualquer um, a função devolve null e a oval
+     assume. Recorte ruim é pior do que oval boa.
+
+     O resultado sai como PNG com transparência, e não como máscara de SVG,
+     porque máscara de SVG não sabe desenhar um contorno de cabelo. */
+  const SEG = 400;        /* lado maior na hora de separar fundo e pessoa */
+  const RECORTE = 460;    /* lado maior do recorte que vai para a tela */
+
+  function recortarCabeca(img, W, H, rosto, tomPele){
+    const ks = Math.min(1, SEG/Math.max(W,H));
+    const sw = Math.max(16, Math.round(W*ks)), sh = Math.max(16, Math.round(H*ks));
+    const tela = document.createElement("canvas");
+    tela.width = sw; tela.height = sh;
+    const ctx = tela.getContext("2d", {willReadFrequently:true});
+    if(!ctx) return null;
+    ctx.drawImage(img, 0, 0, sw, sh);
+    let px;
+    try{ px = ctx.getImageData(0, 0, sw, sh).data; }
+    catch(e){ return null; }
+
+    const M = sw*sh;
+    const cor = p => [px[p*4], px[p*4+1], px[p*4+2]];
+    const dist = (a,b) => {
+      const d0 = a[0]-b[0], d1 = a[1]-b[1], d2 = a[2]-b[2];
+      return d0*d0 + d1*d1 + d2*d2;
+    };
+
+    /* AS SEMENTES SAEM DO TOPO E DOS LADOS, NUNCA DE BAIXO. Numa foto de
+       rosto a borda de baixo é o ombro da pessoa, não parede — colher ali
+       ensinava ao algoritmo que pele é cor de fundo, e o crescimento comia
+       a cara dela inteira. Foi exatamente o que aconteceu na primeira
+       versão: 98% da foto virou "fundo". */
+    const ate = Math.round(sh*0.62);
+    const sementes = [];
+    for(let x = 0; x < sw; x++) sementes.push(x);
+    for(let y = 0; y < ate; y++){ sementes.push(y*sw); sementes.push(y*sw + sw-1); }
+
+    /* Os representantes do fundo, colhidos nessas bordas — e nenhum deles
+       pode ter a cor da pele dela. Cabelo encostando na borda ainda pode
+       enganar; por isso existem os testes de sanidade lá embaixo. */
+    const reps = [];
+    for(const p of sementes){
+      const q = cor(p);
+      if(tomPele && dist(q, tomPele) < 46*46*3) continue;
+      if(reps.some(r => dist(r, q) < 30*30*3)) continue;
+      if(reps.length < 32) reps.push(q);
+    }
+    if(!reps.length) return null;
+
+    /* Duas condições, e as duas são necessárias. A LOCAL deixa o fundo
+       seguir uma parede com sombra ou degradê, que muda devagar. A GLOBAL
+       impede a deriva de cadeia: sem ela, passo a passo de vinte em vinte,
+       o crescimento atravessa o contorno da pessoa e come tudo. */
+    const GLOB = 52*52*3, LOC = 20*20*3;
+    const ancorado = p => { const q = cor(p); return reps.some(r => dist(r, q) < GLOB); };
+    const parecidos = (a, b) => dist(cor(a), cor(b)) < LOC;
+
+    const fundo = new Uint8Array(M), fila = new Int32Array(M);
+    let lido = 0, posto = 0;
+    const por = p => { if(!fundo[p]){ fundo[p] = 1; fila[posto++] = p; } };
+    for(const p of sementes) if(ancorado(p)) por(p);
+    const tenta = (p, v) => { if(!fundo[v] && parecidos(p, v) && ancorado(v)) por(v); };
+    while(lido < posto){
+      const p = fila[lido++], x = p % sw, y = (p - x)/sw;
+      if(x > 0)    tenta(p, p-1);
+      if(x < sw-1) tenta(p, p+1);
+      if(y > 0)    tenta(p, p-sw);
+      if(y < sh-1) tenta(p, p+sw);
+    }
+
+    /* 1. fundo de menos: a foto é bagunçada, e o recorte sairia roto.
+       2. fundo de mais: o crescimento vazou e comeu a pessoa. */
+    let quanto = 0;
+    for(let i = 0; i < M; i++) quanto += fundo[i];
+    if(quanto < M*0.22 || quanto > M*0.97) return null;
+
+    /* 3. o rosto tem de ter sobrevivido inteiro */
+    const emSeg = v => v * ks;
+    const rx0 = Math.max(0, Math.round(emSeg(rosto.x)));
+    const ry0 = Math.max(0, Math.round(emSeg(rosto.y)));
+    const rx1 = Math.min(sw-1, Math.round(emSeg(rosto.x + rosto.w)));
+    const ry1 = Math.min(sh-1, Math.round(emSeg(rosto.y + rosto.h)));
+    let vivo = 0, todo = 0;
+    for(let y = ry0; y <= ry1; y++) for(let x = rx0; x <= rx1; x++){
+      todo++; if(!fundo[y*sw + x]) vivo++;
+    }
+    if(!todo || vivo < todo*0.75) return null;
+
+    /* a janela da cabeça, em pixels da foto: sobra para cabelo em cima e
+       dos lados, e para o pescoço embaixo */
+    const L = rosto.w;
+    let jx = rosto.x - L*0.45, jy = rosto.y - L*0.38;
+    let jw = rosto.w + L*0.90, jh = rosto.h + L*0.38 + L*0.62;
+    jx = Math.max(0, jx); jy = Math.max(0, jy);
+    jw = Math.min(W - jx, jw); jh = Math.min(H - jy, jh);
+    if(jw < 8 || jh < 8) return null;
+
+    /* a máscara vira imagem e sobe de escala com a suavização do próprio
+       navegador — é ela que dá a borda macia, de graça */
+    const mTela = document.createElement("canvas");
+    mTela.width = sw; mTela.height = sh;
+    const mCtx = mTela.getContext("2d");
+    const dados = mCtx.createImageData(sw, sh);
+    for(let i = 0; i < M; i++){
+      const v = fundo[i] ? 0 : 255;
+      dados.data[i*4] = dados.data[i*4+1] = dados.data[i*4+2] = v;
+      dados.data[i*4+3] = 255;
+    }
+    mCtx.putImageData(dados, 0, 0);
+
+    const k2 = Math.min(1, RECORTE/Math.max(jw, jh));
+    const ow = Math.max(8, Math.round(jw*k2)), oh = Math.max(8, Math.round(jh*k2));
+
+    const saida = document.createElement("canvas");
+    saida.width = ow; saida.height = oh;
+    const sCtx = saida.getContext("2d", {willReadFrequently:true});
+    sCtx.drawImage(img, jx, jy, jw, jh, 0, 0, ow, oh);
+
+    const alfa = document.createElement("canvas");
+    alfa.width = ow; alfa.height = oh;
+    const aCtx = alfa.getContext("2d", {willReadFrequently:true});
+    aCtx.imageSmoothingEnabled = true;
+    aCtx.imageSmoothingQuality = "high";
+    aCtx.drawImage(mTela, jx*ks, jy*ks, jw*ks, jh*ks, 0, 0, ow, oh);
+
+    let fotoPx, alfaPx;
+    try{
+      fotoPx = sCtx.getImageData(0, 0, ow, oh);
+      alfaPx = aCtx.getImageData(0, 0, ow, oh).data;
+    }catch(e){ return null; }
+
+    /* O pescoço não pode terminar em linha reta: embaixo ele se desmancha
+       e entrega o corpo para o desenho, que continua de lá para baixo. */
+    const desmancha = Math.max(2, Math.round(oh*0.16));
+    for(let y = 0; y < oh; y++){
+      const queda = y > oh - desmancha ? (oh - y)/desmancha : 1;
+      for(let x = 0; x < ow; x++){
+        const i = (y*ow + x)*4;
+        fotoPx.data[i+3] = Math.round(alfaPx[i] * queda);
+      }
+    }
+    sCtx.putImageData(fotoPx, 0, 0);
+
+    /* A CABEÇA DELA, medida no que sobrou opaco — e só acima do queixo,
+       porque abaixo dele entram pescoço e ombro, que não contam para o
+       tamanho de uma cabeça. É esta medida que manda na colocação: supor a
+       proporção entre janela e cabeça erra com franja, coque e cabelo
+       curto, e o erro aparece como auréola em volta da figura. */
+    const queixo = Math.min(oh-1,
+      Math.max(1, Math.round((rosto.y - jy)*k2 + rosto.h*k2*0.92)));
+    let hx0 = ow, hx1 = -1, hy0 = oh;
+    for(let y = 0; y <= queixo; y++) for(let x = 0; x < ow; x++){
+      if(fotoPx.data[(y*ow + x)*4 + 3] > 120){
+        if(x < hx0) hx0 = x;
+        if(x > hx1) hx1 = x;
+        if(y < hy0) hy0 = y;
+      }
+    }
+    if(hx1 < hx0 || hy0 >= queixo) return null;
+
+    return {
+      url: saida.toDataURL("image/png"), w: ow, h: oh,
+      caixa: {x: (rosto.x - jx)*k2, y: (rosto.y - jy)*k2,
+              w: rosto.w*k2, h: rosto.h*k2},
+      cabeca: {x: hx0, y: hy0, w: hx1 - hx0 + 1, h: queixo - hy0 + 1, queixo}
+    };
+  }
+
   async function analisarRosto(url){
     const img = await carregarImagem(url);
     if(!img || !img.naturalWidth) return null;
@@ -3952,7 +4277,22 @@ function corSegura(v, reserva){
     }
     if(!cabelo) cabelo = pele.map(v => v*0.34);
 
-    /* A cópia que vai para a tela é redesenhada em 640px. A original tem
+    const cores = {
+      pele:   hexCor(pele[0], pele[1], pele[2]),
+      cabelo: hexCor(cabelo[0], cabelo[1], cabelo[2])
+    };
+
+    /* a caixa do rosto em pixels da FOTO, que é a moeda comum dos dois
+       caminhos daqui para baixo */
+    const naFoto = {x: cx0/k, y: cy0/k, w: cw/k, h: ch/k};
+
+    /* Caminho bom: a cabeça inteira, recortada do fundo — cabelo dela,
+       formato de cabeça dela. Só não sai quando o fundo é bagunçado. */
+    const corte = recortarCabeca(img, W, H, naFoto, pele);
+    if(corte) return {...corte, ...cores, recorte: true};
+
+    /* Caminho de reserva: a oval no rosto, com o cabelo desenhado em volta.
+       A cópia que vai para a tela é redesenhada em 640px. A original tem
        1400 e vira 100 KB de base64 dentro do SVG; a oval na tela não passa
        de uns 150 px, então o resto é peso puro no celular — e o SVG é
        reserializado a cada peça escolhida. */
@@ -3961,13 +4301,11 @@ function corSegura(v, reserva){
     const menor = document.createElement("canvas");
     menor.width = tw; menor.height = th;
     menor.getContext("2d").drawImage(img, 0, 0, tw, th);
-    const p = kt/k;      /* das coordenadas da análise para as da cópia */
 
     return {
       url: menor.toDataURL("image/jpeg", 0.84), w: tw, h: th,
-      caixa: {x: cx0*p, y: cy0*p, w: cw*p, h: ch*p},
-      pele:   hexCor(pele[0], pele[1], pele[2]),
-      cabelo: hexCor(cabelo[0], cabelo[1], cabelo[2])
+      caixa: {x: naFoto.x*kt, y: naFoto.y*kt, w: naFoto.w*kt, h: naFoto.h*kt},
+      ...cores, recorte: false
     };
   }
 
