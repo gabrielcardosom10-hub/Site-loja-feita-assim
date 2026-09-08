@@ -1,5 +1,15 @@
 # O provador com IA — o intermediário
 
+> **Você não precisa de nada disto para o provador funcionar.** O site já tem
+> um provador de avatar ligado e funcionando: a cliente manda uma foto do
+> rosto, o site encaixa esse rosto no corpo desenhado e veste as peças nele.
+> Roda no aparelho dela, **não custa nada por imagem** e a foto não sai do
+> celular. Este arquivo é só para quem decidir pagar pela versão em que a peça
+> é vestida por inteligência artificial e o resultado parece uma fotografia.
+>
+> E repare: ligar a IA **troca** o provador, não soma. Detalhes no `CONFIG`,
+> no bloco `provador.ia`.
+
 O site é estático. Uma chave de API dentro dele seria pública, e qualquer
 pessoa gastaria a conta da loja. O intermediário fica no meio: ele guarda a
 chave, e o navegador nunca a vê.

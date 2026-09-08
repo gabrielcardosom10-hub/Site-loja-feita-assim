@@ -612,6 +612,13 @@ a.marca{min-height:44px;}
   display:grid;grid-template-columns:repeat(2,1fr);
   gap:14px clamp(14px,4vw,26px);margin:6px 0 2px;justify-items:center;
 }
+/* uma janela só (caminho de graça) não divide o palco em duas colunas: ela
+   ficaria encostada à esquerda, como se faltasse a segunda. E o rótulo
+   "De frente" sob ela repetiria o que o título acabou de dizer — some da
+   tela, fica no aria-label do campo, que é quem o leitor de tela lê. */
+.rostos--um{grid-template-columns:1fr;}
+.rostos--um .rosto b{display:none;}
+.rostos--um .rosto__janela{width:clamp(96px,26vw,124px);}
 /* o rótulo fica FORA do círculo, como na referência: dentro dele "Olhando
    para cima" não cabia e saía cortado */
 .rosto{
@@ -649,6 +656,11 @@ a.marca{min-height:44px;}
   font-size:13.5px;font-weight:600;cursor:pointer;
   transition:background var(--t);
 }
+/* display:inline-flex na classe vence o atributo hidden — mesmo tropeço
+   que "Tom de pele" e a barra do celular já deram neste arquivo. Sem esta
+   linha, "Comece pela foto de frente" continuava na tela no caminho de
+   graça, onde não existe botão nenhum para apertar. */
+.prova__arquivo[hidden]{display:none;}
 .prova__arquivo:hover{background:var(--cal);}
 /* o input fica invisível mas continua sendo ele quem recebe foco e teclado */
 .prova__arquivo input{
@@ -699,6 +711,31 @@ a.marca{min-height:44px;}
 .consent__nao:hover{color:var(--tinta);}
 
 /* ── tamanho recomendado ── */
+/* Régua: rótulo curto à esquerda, controle ocupando o resto. O alvo tem os
+   44px inteiros de altura mesmo com o trilho fino — a área de toque é o
+   input, não o risco desenhado. */
+.regua{display:grid;grid-template-columns:74px minmax(0,1fr);align-items:center;gap:12px;}
+.regua>span{
+  font-size:11.5px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--cinza);
+}
+.regua input{
+  -webkit-appearance:none;appearance:none;
+  width:100%;min-width:0;height:44px;background:none;cursor:pointer;
+}
+.regua input::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:var(--fio);}
+.regua input::-moz-range-track{height:3px;border-radius:2px;background:var(--fio);}
+.regua input::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:22px;height:22px;margin-top:-9.5px;border-radius:50%;
+  background:var(--rosa-forte);border:2px solid var(--cal);
+}
+.regua input::-moz-range-thumb{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--rosa-forte);border:2px solid var(--cal);
+}
+.regua input:focus-visible{outline:2px solid var(--rosa-forte);outline-offset:4px;border-radius:8px;}
+
 .prova__abrir-medidas{
   justify-self:start;min-height:44px;padding:0 2px;color:var(--rosa-forte);
   font-family:var(--corpo);font-size:13px;
@@ -1255,15 +1292,15 @@ a.marca{min-height:44px;}
       </div>
 
       <div class="prova__grade">
-        <div class="prova__palco" id="palco">
+        <div class="prova__palco" id="prova-palco">
           <svg class="boneca" id="boneca" viewBox="44 12 132 446"
                role="img" aria-labelledby="boneca-desc"></svg>
 
           <!-- as fotos do rosto, antes de existir avatar -->
           <div class="prova__soltar" id="soltar" hidden>
-            <p class="rostos__tit"><b>Tire 4 fotos do seu rosto</b></p>
-            <p>Para montar o seu avatar a gente precisa de você de frente,
-              dos dois lados e olhando para cima. Só a primeira é obrigatória.</p>
+            <p class="rostos__tit"><b id="rostos-tit">Mande uma foto do seu rosto</b></p>
+            <p id="rostos-dica">De frente, com o rosto no meio do quadro e boa
+              luz. O corpo é desenhado no seu manequim, e a peça é vestida nele.</p>
             <div class="rostos" id="rostos"></div>
             <button class="prova__arquivo" id="criar-avatar" type="button" disabled>
               <span id="criar-txt">Faltam as fotos</span>
@@ -1281,12 +1318,16 @@ a.marca{min-height:44px;}
           loja tem <a href="#loja">provador de verdade</a>.
         </p>
         <p class="prova__nota" id="nota-foto" hidden>
-          O avatar é montado por inteligência artificial a partir das fotos do
-          seu rosto, e a peça é vestida nele de verdade — não desenhada por
-          cima. Mesmo assim é uma aproximação: o caimento do tecido no seu
-          corpo só o <a href="#loja">provador de verdade</a> mostra.
-          <span id="nota-ia" hidden>As suas fotos <b>saem do aparelho</b> para
-          isso acontecer, e a gente pergunta antes.</span>
+          <span id="nota-livre">O rosto é o seu, da foto que você mandou. O
+          corpo é desenhado no seu manequim e usa o tom da sua pele e do seu
+          cabelo tirados da mesma foto. Serve para ver a cor e o modelo da peça
+          em você; o caimento do tecido no seu corpo só o
+          <a href="#loja">provador de verdade</a> mostra.</span>
+          <span id="nota-ia" hidden>O avatar é montado por inteligência
+          artificial a partir das fotos do seu rosto, e a peça é vestida nele de
+          verdade. Ainda assim é uma aproximação: o caimento no seu corpo só o
+          <a href="#loja">provador de verdade</a> mostra. As suas fotos
+          <b>saem do aparelho</b> para isso acontecer, e a gente pergunta antes.</span>
         </p>
 
         <div class="prova__lado">
@@ -1328,11 +1369,25 @@ a.marca{min-height:44px;}
               </div>
             </div>
             <div class="prova__campo" id="campo-foto" hidden>
-              <p class="prova__dica">
-                O avatar é montado a partir das suas fotos e reaproveitado em
-                todas as peças. Trocar uma foto monta um avatar novo.
+              <p class="prova__dica" id="dica-foto">
+                O rosto da foto é reaproveitado em todas as peças. Trocar a
+                foto refaz o encaixe.
               </p>
               <p class="prova__erro" id="prova-erro" role="alert" hidden></p>
+
+              <div class="prova__campo" id="ajuste-rosto" hidden
+                   role="group" aria-labelledby="rot-encaixe">
+                <span class="prova__rot" id="rot-encaixe">Encaixe do rosto</span>
+                <label class="regua"><span>Tamanho</span>
+                  <input type="range" id="rosto-zoom" min="70" max="140" step="2" value="100"
+                         aria-valuetext="tamanho normal"></label>
+                <label class="regua"><span>Altura</span>
+                  <input type="range" id="rosto-y" min="-10" max="10" step="1" value="0"
+                         aria-valuetext="no meio"></label>
+                <button class="prova__abrir-medidas" id="rosto-auto" type="button">
+                  Voltar ao encaixe automático
+                </button>
+              </div>
 
               <div class="ia" id="ia" hidden>
                 <button class="ia__botao" id="ia-provar" type="button">
@@ -1614,9 +1669,19 @@ const CONFIG = {
   ],
 
   /* ── 7b. PROVADOR ─────────────────────────────────────────
-     O avatar que mostra o look montado. Ele é um DESENHO: serve para ver
-     a combinação das peças, não para simular caimento nem para parecer
-     uma foto da cliente. A tela diz isso, e deve continuar dizendo.
+     O provador que mostra o look montado, em dois modos.
+
+     "Numa boneca" é o desenho: serve para ver a combinação das peças, não
+     para simular caimento. "No meu avatar" põe o ROSTO DA CLIENTE, da foto
+     que ela mandar, sobre esse mesmo corpo desenhado — e tira dessa foto o
+     tom da pele e do cabelo, para a figura fechar como uma coisa só.
+
+     Os dois são aproximação, e a tela diz isso, e deve continuar dizendo.
+
+     O modo do avatar NÃO CUSTA NADA e não depende de nada: a foto é lida
+     no aparelho da própria cliente, com aritmética sobre os pixels, e não
+     é enviada para lugar nenhum. Funciona hoje, sem contratar serviço,
+     sem chave e sem conta em lugar nenhum.
 
      Cada peça acima ganhou dois campos que só o provador usa:
 
@@ -1674,7 +1739,22 @@ const CONFIG = {
        O provador usa o primeiro número que a peça realmente tem. */
     equivalencia: {P:["36","38"], M:["38","40"], G:["40","42"], GG:["42","44"]},
 
-    /* ── PROVAR COM IA ─────────────────────────────────────────
+    /* ── PROVAR COM IA (opcional, e PAGO) ──────────────────────
+       O provador acima já funciona sem isto. Este bloco é um degrau a
+       mais: em vez do rosto encaixado no corpo desenhado, a peça é
+       vestida por um modelo de inteligência artificial, e o resultado
+       parece uma fotografia.
+
+       O preço é literal: cada imagem gerada é cobrada pelo fornecedor. Numa
+       vitrine com movimento isso vira uma conta mensal que não existe
+       enquanto este campo estiver vazio. Ligue só se a conta fechar.
+
+       E repare que os dois caminhos NÃO CONVIVEM na mesma tela: ligar este
+       aqui TROCA o provador do rosto encaixado pelo da IA. O que era uma
+       foto vira quatro, o encaixe local sai de cena e passa a valer o
+       consentimento antes de cada envio. Desligar devolve tudo como está
+       hoje, sem perder nada.
+
        Desligado enquanto `endpoint` estiver vazio, e o botão nem aparece.
 
        O intermediário é `api/provar.js`, e ele sobe junto com o site na
@@ -1702,7 +1782,11 @@ const CONFIG = {
          Quando for ligar, ponha exatamente: "/api/provar"
          Caminho do próprio site — nenhum domínio de fora, e por isso a CSP
          continua em connect-src 'self'. */
-      endpoint: "/api/provar",
+      /* Voltou para vazio de propósito, e não por engano: com ele
+         preenchido o provador que aparece é o pago, e o do rosto
+         encaixado — que não custa nada — some da tela. Para ligar a IA
+         de novo é esta linha, e só ela: "/api/provar". */
+      endpoint: "",
       fornecedor: "FASHN",
       guarda: "Confirme com o fornecedor por quanto tempo a imagem fica guardada."
     },
@@ -2370,8 +2454,7 @@ escrever();
   /* estado */
   let pele = 0, altura = 1, manequim = 1, look = {};
   /* modo foto */
-  let modo = "boneca", foto = null;
-  let ombro = {x:0,y:0}, pe = {x:0,y:0};
+  let modo = "boneca";
   /* as fotos do rosto e o avatar gerado a partir delas */
   const ANGULOS = [
     {id:"frente", rot:"De frente"},
@@ -2380,6 +2463,8 @@ escrever();
     {id:"cima",   rot:"Olhando para cima"}
   ];
   let rostos = {}, avatar = null, avatarVestido = null;
+  /* O avatar de graça: o rosto dela, lido aqui mesmo, com dois ajustes. */
+  let avatarLocal = null, rostoZoom = 1, rostoY = 0;
   const VIEWBOX_BONECA = "44 12 132 446";
 
   /* ── geometria ──────────────────────────────────────────────
@@ -2408,7 +2493,19 @@ escrever();
      desta página é que NADA entra em atributo sem passar por uma função de
      segurança, e cor era a última exceção. Só passa #RGB, #RRGGBB ou
      #RRGGBBAA; o resto vira um neutro que não quebra o desenho. */
-  function corSegura(v, reserva){
+  /* A foto da cliente é um data: URL produzido por esta própria página, no
+   canvas — não vem do CONFIG, não vem da rede, não passa por lugar nenhum.
+   Ainda assim ela entra num atributo, e a regra deste arquivo é que nada
+   entra em atributo sem passar por uma função. urlSegura recusa data: de
+   propósito, porque é o esquema por onde entraria um SVG com script vindo
+   de fora; então aqui vai a peneira estreita, que só deixa passar
+   exatamente o que o canvas escreve. Uma aspa não cabe nesse alfabeto. */
+function fotoSegura(u){
+  const t = String(u == null ? "" : u);
+  return /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(t) ? t : "";
+}
+
+function corSegura(v, reserva){
     const t = String(v == null ? "" : v).trim();
     return /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?([0-9a-fA-F]{2})?$/.test(t)
       ? t : (reserva || "#6B5878");
@@ -2435,10 +2532,21 @@ escrever();
   }
 
   /* ── o corpo ── */
-  function corpo(m){
+  /* Com foto, a pele e o cabelo do desenho saem da própria foto. É isso
+     que faz o rosto de verdade e o corpo desenhado lerem como uma figura
+     só: pescoço, braços e pernas continuam no tom dela. Sem foto, valem os
+     tons que ela escolheu na paleta. */
+  function tons(){
+    if(modo === "foto" && avatarLocal)
+      return {pele: corSegura(avatarLocal.pele, "#C99368"),
+              cabelo: corSegura(avatarLocal.cabelo, "#3A2A20")};
     const bruto = (cfg.peles && cfg.peles[pele]) || {};
-    const t = {pele: corSegura(bruto.pele, "#C99368"),
-               cabelo: corSegura(bruto.cabelo, "#3A2A20")};
+    return {pele: corSegura(bruto.pele, "#C99368"),
+            cabelo: corSegura(bruto.cabelo, "#3A2A20")};
+  }
+
+  function corpo(m){
+    const t = tons();
     const {cx,OY,CY,QY,Ox,Cx,Qx,JY,TY,W} = m;
     const bracoW = n(9.5*W), pernaW = n(15*W);
     return (
@@ -2689,18 +2797,106 @@ escrever();
     return svg;
   }
 
+  /* ── O ROSTO NA FIGURA ───────────────────────────────────────
+     O rosto entra numa oval com a borda se desmanchando. Corte duro vira
+     adesivo — e adesivo foi exatamente o que a loja recusou na versão
+     anterior. Por baixo continua a cabeça desenhada, já no tom da foto:
+     onde a foto não alcança não fica buraco, fica pele.
+
+     A sombra do queixo no pescoço é meio pixel de código e resolve o
+     efeito de cabeça flutuando, que é o que mais denuncia colagem. */
+  const ROSTO = {cx:110, cy:58, rx:15.4, ry:19.2};
+
+  /* A conta do encaixe fica separada do desenho por um motivo prático: os
+     dois controles de ajuste disparam um evento por quadro, e refazer o
+     SVG inteiro a cada quadro significa reserializar a foto em base64
+     junto — uns cem mil caracteres, sessenta vezes por segundo. Com a
+     conta separada, arrastar o controle só mexe em seis atributos. */
+  function geoRosto(){
+    const a = avatarLocal;
+    const cy = ROSTO.cy + rostoY, rx = ROSTO.rx, ry = ROSTO.ry;
+    /* a caixa do rosto achada na foto é levada à largura da oval */
+    const e = (2*rx*1.06*rostoZoom) / a.caixa.w;
+    return {
+      cy, rx, ry,
+      x: ROSTO.cx - (a.caixa.x + a.caixa.w/2)*e,
+      y: cy - (a.caixa.y + a.caixa.h*0.46)*e,
+      w: a.w*e, h: a.h*e
+    };
+  }
+
+  function rostoDaFoto(){
+    const a = avatarLocal; if(!a) return "";
+    const src = fotoSegura(a.url); if(!src) return "";
+    const g = geoRosto();
+    return (
+      '<defs>'+
+        '<radialGradient id="rosto-borda">'+
+          '<stop offset="54%" stop-color="#ffffff"/>'+
+          '<stop offset="79%" stop-color="#ffffff" stop-opacity="0.9"/>'+
+          '<stop offset="100%" stop-color="#000000"/>'+
+        '</radialGradient>'+
+        '<mask id="rosto-oval" maskUnits="userSpaceOnUse" '+
+          'x="'+n(ROSTO.cx-g.rx-8)+'" y="'+n(g.cy-g.ry-8)+'" '+
+          'width="'+n(2*g.rx+16)+'" height="'+n(2*g.ry+16)+'">'+
+          '<ellipse id="rosto-oval-forma" cx="'+n(ROSTO.cx)+'" cy="'+n(g.cy)+'" '+
+            'rx="'+n(g.rx)+'" ry="'+n(g.ry)+'" fill="url(#rosto-borda)"/>'+
+        '</mask>'+
+      '</defs>'+
+      '<image id="rosto-foto" href="'+src+'" x="'+n(g.x)+'" y="'+n(g.y)+'" '+
+        'width="'+n(g.w)+'" height="'+n(g.h)+'" '+
+        'preserveAspectRatio="none" mask="url(#rosto-oval)"/>'+
+      '<ellipse id="rosto-sombra" cx="110" cy="'+n(g.cy+g.ry+1)+'" rx="8" ry="4.5" fill="#00000026"/>'
+    );
+  }
+
+  /* Move o rosto sem refazer o SVG. Se por qualquer motivo as peças não
+     estiverem lá, cai no desenho inteiro — nunca fica sem redesenhar. */
+  function moverRosto(){
+    const b = $("#boneca");
+    const img = b && b.querySelector("#rosto-foto");
+    const oval = b && b.querySelector("#rosto-oval-forma");
+    const mask = b && b.querySelector("#rosto-oval");
+    const som = b && b.querySelector("#rosto-sombra");
+    if(!avatarLocal || !img || !oval || !mask || !som) return desenhar();
+    const g = geoRosto();
+    img.setAttribute("x", n(g.x));  img.setAttribute("y", n(g.y));
+    img.setAttribute("width", n(g.w)); img.setAttribute("height", n(g.h));
+    oval.setAttribute("cy", n(g.cy));
+    mask.setAttribute("y", n(g.cy - g.ry - 8));
+    som.setAttribute("cy", n(g.cy + g.ry + 1));
+  }
+
   /* ── desenhar ── */
   function desenhar(){
     const boneca = $("#boneca");
     if(modo === "foto"){
-      boneca.hidden = !avatar;
-      $("#soltar").hidden = !!avatar;
-      if(avatar) mostrarAvatar(look.cima || look.sobre || look.baixo
-        ? (pecaParaIA() && pecaParaIA().p.nome) : null);
-      /* sem avatar, o SVG é esvaziado de verdade. Só escondê-lo deixaria a
+      /* com a IA ligada E o avatar pronto, quem manda é a imagem da IA */
+      if(avatar){
+        boneca.hidden = false; $("#soltar").hidden = true;
+        const alvo = pecaParaIA();
+        mostrarAvatar(avatarVestido && alvo ? alvo.p.nome : null);
+        return;
+      }
+      /* O caminho de graça, que é o padrão. Ele não aparece com a IA
+         ligada, e o motivo é de tela, não de gosto: as janelas das quatro
+         fotos ficam POR CIMA do palco, e mostrar a figura ali esconderia
+         justamente os campos das outras três — a pessoa escolheria a
+         primeira foto e perderia o caminho para as outras. Com a IA
+         ligada, quem manda é o fluxo dela: quatro fotos, um botão. */
+      if(!iaLigada() && avatarLocal){
+        boneca.hidden = false; $("#soltar").hidden = true;
+        boneca.setAttribute("viewBox", VIEWBOX_BONECA);
+        const m = medidas();
+        boneca.innerHTML = '<title id="boneca-desc">'+escapar(descricao())+'</title>'+
+          corpo(m) + rostoDaFoto() + base(m) + roupa(m);
+        return;
+      }
+      /* sem foto, o SVG é esvaziado de verdade. Só escondê-lo deixaria a
          imagem anterior viva no DOM — e rosto de cliente não fica pendurado
          em lugar nenhum depois que ela mandou trocar. */
-      else boneca.innerHTML = "";
+      boneca.hidden = true; $("#soltar").hidden = false;
+      boneca.innerHTML = "";
       return;
     }
     boneca.hidden = false;
@@ -2715,11 +2911,17 @@ escrever();
     const postas = ["cima","baixo","sobre","bolsa","oculos"]
       .map(v => look[v] && look[v].nome).filter(Boolean);
     if(modo === "foto"){
-      if(!avatar) return "Nenhum avatar montado ainda.";
-      const posta = pecaParaIA();
-      return posta && avatarVestido
-        ? "Seu avatar vestindo "+posta.p.nome+"."
-        : "Seu avatar, sem nenhuma peça vestida ainda.";
+      if(avatar){
+        const posta = pecaParaIA();
+        return posta && avatarVestido
+          ? "Seu avatar vestindo "+posta.p.nome+"."
+          : "Seu avatar, sem nenhuma peça vestida ainda.";
+      }
+      if(!avatarLocal) return "Nenhuma foto escolhida ainda.";
+      const eu = "O seu rosto, da foto que você escolheu, sobre um corpo "+
+        "desenhado no manequim "+(cfg.manequins||[])[manequim];
+      if(!postas.length) return eu + ", com roupa de base neutra, sem nenhuma peça escolhida ainda.";
+      return eu + ", vestindo: " + postas.join(", ") + ".";
     }
     const quem = "Desenho de uma mulher, manequim "+(cfg.manequins||[])[manequim];
     if(!postas.length) return quem + ", com roupa de base neutra, sem nenhuma peça escolhida ainda.";
@@ -2929,6 +3131,9 @@ escrever();
     const partes = [];
     if(modo === "foto"){
       partes.push("sua foto");
+      /* no avatar de graça o corpo é desenhado, então a altura volta a valer */
+      const alt = !iaLigada() && (cfg.alturas || [])[altura];
+      if(alt && alt.nome) partes.push(alt.nome);
     }else{
       const pl = (cfg.peles || [])[pele];
       if(pl && pl.nome) partes.push(pl.nome.toLowerCase());
@@ -2996,7 +3201,12 @@ escrever();
     iaVerUrl = null;
     desenhar(); pintarControles(); pintarTamanhos(); pintarLegenda();
     pintarResumo(); contar(); pintarIA(); pintarRostos();
-    const bt = $("#tirar-foto"); if(bt) bt.hidden = !(modo === "foto" && avatar);
+    const bt = $("#tirar-foto");
+    if(bt) bt.hidden = !(modo === "foto" && (avatar || (avatarLocal && !iaLigada())));
+    const aj = $("#ajuste-rosto");
+    /* os ajustes só valem sobre a figura desenhada: no resultado da IA o
+       rosto já está dentro da imagem, e mexer ali não moveria nada */
+    if(aj) aj.hidden = !(modo === "foto" && avatarLocal && !avatar && !iaLigada());
   }
 
   /* ── eventos ── */
@@ -3266,10 +3476,32 @@ escrever();
      HTML a cada foto recriava os <input>, e com isso: o foco se perdia no
      meio do preenchimento, e um campo escolhido antes deixava de existir
      enquanto a pessoa ainda mexia nele. */
+  /* Sem IA, uma foto de frente é tudo o que este provador usa — e então
+     pedir quatro seria pedir foto que ninguém vai ler. Com a IA ligada as
+     outras três voltam, porque aí elas entram de verdade no modelo. */
+  const angulosPedidos = () => iaLigada() ? ANGULOS : [ANGULOS[0]];
+
   function montarRostos(){
     const cx = $("#rostos"); if(!cx || cx.dataset.pronto) return;
     cx.dataset.pronto = "1";
-    cx.innerHTML = ANGULOS.map(a =>
+    const tit = $("#rostos-tit"), dica = $("#rostos-dica"), tirar = $("#tirar-foto");
+    if(tit) tit.textContent = iaLigada()
+      ? "Tire 4 fotos do seu rosto" : "Mande uma foto do seu rosto";
+    if(dica) dica.textContent = iaLigada()
+      ? "Para montar o seu avatar a gente precisa de você de frente, dos dois "+
+        "lados e olhando para cima. Só a primeira é obrigatória."
+      : "De frente, com o rosto no meio do quadro e boa luz. O corpo é "+
+        "desenhado no seu manequim, e a peça é vestida nele.";
+    if(tirar) tirar.textContent = iaLigada() ? "Trocar as fotos" : "Trocar a foto";
+    const dicaF = $("#dica-foto");
+    if(dicaF) dicaF.textContent = iaLigada()
+      ? "O avatar é montado a partir das suas fotos e reaproveitado em todas "+
+        "as peças. Trocar uma foto monta um avatar novo."
+      : "O rosto da foto é reaproveitado em todas as peças. Trocar a foto "+
+        "refaz o encaixe.";
+    const pedidos = angulosPedidos();
+    cx.classList.toggle("rostos--um", pedidos.length === 1);
+    cx.innerHTML = pedidos.map(a =>
       '<label class="rosto" data-angulo="'+a.id+'">'+
         '<span class="rosto__janela">'+
           '<svg class="rosto__ico" aria-hidden="true" viewBox="0 0 24 24">'+
@@ -3290,7 +3522,7 @@ escrever();
       const tem = !!rostos[a.id];
       jan.classList.toggle("rosto--cheio", tem);
       const img = jan.querySelector(".rosto__img"), ico = jan.querySelector(".rosto__ico");
-      if(tem) img.src = rostos[a.id]; else img.removeAttribute("src");
+      if(tem) img.src = fotoSegura(rostos[a.id]); else img.removeAttribute("src");
       img.hidden = !tem; ico.hidden = tem;
       jan.querySelector("input").setAttribute("aria-label",
         a.rot + (tem ? ", já escolhida. Toque para trocar" : ""));
@@ -3300,16 +3532,23 @@ escrever();
   function pintarRostos(){
     pintarJanelas();
     const quantos = ANGULOS.filter(a => rostos[a.id]).length;
-    const bt = $("#criar-avatar"); if(!bt) return;
-    bt.disabled = !rostos.frente || criandoAvatar;
-    $("#criar-txt").textContent = criandoAvatar ? "Montando o seu avatar…"
-      : !rostos.frente ? "Comece pela foto de frente"
-      : "Montar meu avatar (" + quantos + (quantos > 1 ? " fotos)" : " foto)");
+    const bt = $("#criar-avatar");
+    if(bt){
+      /* O botão só existe no caminho com IA. No de graça o rosto aparece no
+         instante em que a foto é escolhida, e um botão a mais só atrasaria
+         o que já está pronto na tela. */
+      bt.hidden = !iaLigada();
+      bt.disabled = !rostos.frente || criandoAvatar;
+      $("#criar-txt").textContent = criandoAvatar ? "Montando o seu avatar…"
+        : !rostos.frente ? "Comece pela foto de frente"
+        : "Montar com inteligência artificial (" + quantos + (quantos > 1 ? " fotos)" : " foto)");
+    }
     const cofre = $("#cofre");
     if(cofre) cofre.innerHTML = iaLigada()
-      ? 'As fotos <b>saem do seu aparelho</b> para o programa que monta o '+
-        'avatar. A gente explica tudo antes de enviar.'
-      : 'O provador com avatar ainda não foi ligado pela loja.';
+      ? 'A foto fica <b>no seu aparelho</b> para o provador em desenho. Só sai '+
+        'se você pedir a prova com inteligência artificial — e a gente avisa antes.'
+      : 'A sua foto <b>não sai do seu aparelho</b>. Ela é lida aqui mesmo, não '+
+        'é enviada para a loja nem para lugar nenhum, e some quando você fecha a página.';
   }
 
   async function lerArquivo(file){
@@ -3341,6 +3580,273 @@ escrever();
     return tela.toDataURL("image/jpeg", 0.86);
   }
 
+  /* ── O ROSTO, LIDO NO PRÓPRIO APARELHO ──────────────────────
+     Provador com inteligência artificial cobra por imagem. Para uma loja
+     que está começando isso vira conta de luz todo mês, então o caminho
+     padrão aqui é outro: o rosto DELA, de verdade, sobre o corpo
+     desenhado, com o tom da pele e do cabelo tirados da própria foto.
+
+     Não fica igual a foto de estúdio, e a página diz isso com todas as
+     letras. O que ele entrega é o que a dúvida da cliente pede: como a
+     cor e o modelo da peça conversam com ela — e não com uma modelo
+     qualquer que a loja nunca vai ter.
+
+     Tudo acontece num <canvas> desta página. Nada é enviado, nada é
+     guardado, não entra biblioteca nenhuma: é aritmética sobre os pixels,
+     e custa exatamente zero, agora e daqui a mil clientes.
+
+     Como o rosto é achado, sem modelo treinado nenhum:
+       1. cada pixel passa por um teste de cor de pele em YCbCr — é o
+          espaço em que tom de pele ocupa uma faixa estreita e estável,
+          do muito claro ao muito escuro, porque separa a luz da cor;
+       2. os pixels de pele viram regiões conectadas, e elas competem por
+          tamanho, por estar perto do meio e — o que mais separa — por
+          QUANTAS BORDAS DO QUADRO encostam: fundo encosta nas quatro,
+          rosto em nenhuma. Acima de 55% do quadro nem compete;
+       3. a mancha é medida linha a linha: ela engorda até as bochechas,
+          afina no pescoço e dispara nos ombros. A linha das bochechas dá a
+          largura do rosto, e dela sai o resto — altura de cabeça é
+          proporção conhecida, não chute.
+
+     Erra às vezes — foto de longe, contraluz, duas pessoas no quadro. Por
+     isso existem os dois controles de ajuste, e por isso o erro na tela
+     diz o que mudar na foto em vez de só reclamar. */
+  const ANALISE = 176;          /* lado maior da imagem analisada */
+
+  function carregarImagem(url){
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload  = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+  }
+
+  const hexCor = (r,g,b) => "#" + [r,g,b].map(v =>
+    Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2,"0")).join("");
+
+  /* média aparada: joga fora a sombra e o brilho e fica com o miolo. A
+     média cheia puxaria o tom para o reflexo da janela na testa. */
+  function corTipica(lista, de, ate){
+    if(!lista.length) return null;
+    lista.sort((a,b) => (a[0]+a[1]+a[2]) - (b[0]+b[1]+b[2]));
+    const i0 = Math.floor(lista.length*de);
+    const i1 = Math.min(lista.length, Math.max(i0+1, Math.floor(lista.length*ate)));
+    let r=0, g=0, b=0, q=0;
+    for(let i=i0; i<i1; i++){ r+=lista[i][0]; g+=lista[i][1]; b+=lista[i][2]; q++; }
+    return q ? [r/q, g/q, b/q] : null;
+  }
+
+  async function analisarRosto(url){
+    const img = await carregarImagem(url);
+    if(!img || !img.naturalWidth) return null;
+    const W = img.naturalWidth, H = img.naturalHeight;
+    const k = Math.min(1, ANALISE/Math.max(W,H));
+    const w = Math.max(8, Math.round(W*k)), h = Math.max(8, Math.round(H*k));
+    const tela = document.createElement("canvas");
+    tela.width = w; tela.height = h;
+    const ctx = tela.getContext("2d", {willReadFrequently:true});
+    if(!ctx) return null;
+    ctx.drawImage(img, 0, 0, w, h);
+    let px;
+    try{ px = ctx.getImageData(0, 0, w, h).data; }
+    catch(e){ return null; }
+
+    /* As duas metades do teste fazem trabalhos diferentes. A faixa de
+       crominância (Cb/Cr) diz "isto tem cor de pele", e vale do muito
+       claro ao muito escuro porque não olha para o brilho. As diferenças
+       cruas entre R, G e B dizem "isto não é cinza": parede bege, papel
+       e concreto passam folgado no primeiro teste — a primeira versão
+       disto lia a parede inteira como rosto — e caem no segundo, porque
+       cinza quente tem R e G quase iguais e pele nunca tem. */
+    const N = w*h, ehPele = new Uint8Array(N);
+    for(let i=0, j=0; i<N; i++, j+=4){
+      const r = px[j], g = px[j+1], b = px[j+2];
+      if(r - g < 10 || r - b < 14 || g <= b) continue;
+      const y  = 0.299*r + 0.587*g + 0.114*b;
+      if(y < 30) continue;
+      const cb = 128 - 0.168736*r - 0.331264*g + 0.5*b;
+      const cr = 128 + 0.5*r - 0.418688*g - 0.081312*b;
+      if(cb >= 77 && cb <= 127 && cr >= 137 && cr <= 178) ehPele[i] = 1;
+    }
+
+    /* regiões conectadas com pilha própria. Recursão aqui estoura a pilha
+       do navegador numa foto grande, e o travamento cai justo no celular
+       mais fraco, que é onde a maioria vai usar. */
+    const dono = new Int32Array(N).fill(-1);
+    const pilha = new Int32Array(N);
+    let melhor = null, id = 0;
+    for(let semente = 0; semente < N; semente++){
+      if(!ehPele[semente] || dono[semente] >= 0) continue;
+      let topo = 0, quantos = 0, x0 = w, y0 = h, x1 = -1, y1 = -1;
+      pilha[topo++] = semente; dono[semente] = id;
+      while(topo){
+        const p = pilha[--topo], x = p % w, y = (p - x)/w;
+        quantos++;
+        if(x < x0) x0 = x;
+        if(x > x1) x1 = x;
+        if(y < y0) y0 = y;
+        if(y > y1) y1 = y;
+        if(x > 0   && ehPele[p-1] && dono[p-1] < 0){ dono[p-1] = id; pilha[topo++] = p-1; }
+        if(x < w-1 && ehPele[p+1] && dono[p+1] < 0){ dono[p+1] = id; pilha[topo++] = p+1; }
+        if(y > 0   && ehPele[p-w] && dono[p-w] < 0){ dono[p-w] = id; pilha[topo++] = p-w; }
+        if(y < h-1 && ehPele[p+w] && dono[p+w] < 0){ dono[p+w] = id; pilha[topo++] = p+w; }
+      }
+      id++;
+      /* mancha que ocupa mais da metade do quadro é fundo, não rosto —
+         madeira e parede quente passam no teste de cor, e passariam a
+         mandar na figura se pudessem competir por tamanho */
+      if(quantos > N*0.55) continue;
+      const mx = (x0+x1)/2/w, my = (y0+y1)/2/h;
+      const perto = 1 - Math.min(1, Math.hypot(mx-0.5, my-0.42)*1.7);
+      /* e fundo encosta nas quatro bordas; rosto, em nenhuma ou numa */
+      const bordas = (x0 === 0) + (x1 === w-1) + (y0 === 0) + (y1 === h-1);
+      const nota = quantos * (0.4 + 0.6*perto) / (1 + 1.1*bordas);
+      if(!melhor || nota > melhor.nota) melhor = {nota, quantos, id: id-1, x0, y0, x1, y1};
+    }
+    /* mancha pequena demais não é rosto: é uma mão, um reflexo, madeira */
+    if(!melhor || melhor.quantos < N*0.008) return null;
+
+    /* Pescoço, colo e ombros são pele também, e caem na mesma mancha do
+       rosto. Sem tratar isso, a caixa sai com a largura dos OMBROS e o
+       rosto aparece minúsculo no meio da oval — foi o segundo erro desta
+       função, e o mais feio de olhar.
+
+       O que resolve é medir a mancha linha a linha. Descendo do alto: a
+       largura cresce até a linha das bochechas, encolhe até o pescoço e
+       dispara nos ombros. A largura das bochechas é a medida do rosto, e
+       é dela que sai todo o resto — altura de cabeça é proporção
+       conhecida, não chute: do alto do cabelo ao queixo dá pouco mais que
+       uma largura de rosto, em qualquer pessoa. */
+    const esq = new Int32Array(h).fill(w), dir = new Int32Array(h).fill(-1);
+    const conta = new Int32Array(h), vao = new Int32Array(h);
+    for(let y = melhor.y0; y <= melhor.y1; y++){
+      for(let x = 0; x < w; x++) if(dono[y*w+x] === melhor.id){
+        if(x < esq[y]) esq[y] = x;
+        if(x > dir[y]) dir[y] = x;
+        conta[y]++;
+      }
+      vao[y] = dir[y] >= esq[y] ? dir[y] - esq[y] + 1 : 0;
+    }
+    /* O perfil que manda é a CONTAGEM de pixels por linha, não a distância
+       entre a esquerda e a direita. Na altura do queixo os ombros já
+       aparecem nos cantos, e a distância entre extremos continua larga
+       enquanto o rosto já acabou — foi assim que o rosto claro saiu pequeno
+       demais dentro da oval, com um halo de parede em volta. Contagem não
+       cai nessa: canto vazio não conta. */
+    let bochecha = 0, yBoch = melhor.y0, encolheu = false, vale = 1e9;
+    for(let y = melhor.y0; y <= melhor.y1; y++){
+      const L = conta[y];
+      /* Depois do pescoço não se mede mais rosto nenhum. A primeira versão
+         continuava medindo, e o ombro passava a bochecha por um por cento
+         — o suficiente para a caixa toda se mudar para o tronco. */
+      if(encolheu){
+        if(L > vale*1.25) break;
+        if(L < vale) vale = L;
+        continue;
+      }
+      if(L > bochecha){ bochecha = L; yBoch = y; }
+      else if(L < bochecha*0.72){ encolheu = true; vale = L; }
+    }
+    if(bochecha < 8) return null;
+    /* a linha das bochechas é cheia, então vão e contagem batem; óculos ou
+       barba abrem buracos nela, e aí o vão vale mais — com teto, para um
+       buraco grande não trazer de volta a largura dos ombros */
+    const largura = Math.min(vao[yBoch], bochecha*1.3);
+
+    /* Cabelo castanho tem exatamente cor de pele, e nenhuma regra de pixel
+       separa os dois — são a mesma matéria. Então a mancha às vezes é só o
+       rosto (cabelo escuro, que o teste de cor descarta) e às vezes é a
+       cabeça inteira. Dá para saber qual: rosto sozinho começa logo acima
+       da linha das bochechas; cabeça inteira começa meia largura acima.
+       Sem essa distinção o rosto castanho saía pequeno no meio da oval,
+       com um halo de parede em volta. */
+    const subida = (yBoch - melhor.y0) / largura;
+    const comCabelo = subida > 0.38;
+    const rostoL   = comCabelo ? largura*0.86 : largura;
+    const rostoTopo = comCabelo ? melhor.y0 + largura*0.30 : melhor.y0;
+
+    /* a caixa sai na proporção da própria oval, para a foto entrar sem
+       sobra de um lado nem corte do outro */
+    const cw = rostoL*1.18;
+    const ch = rostoL*1.47;
+    const cx0 = (esq[yBoch] + dir[yBoch])/2 - cw/2;
+    const cy0 = rostoTopo - rostoL*0.30;
+
+    /* tom da pele: só o miolo do rosto, e sem os extremos de luz */
+    const bochechas = [];
+    const bx0 = Math.max(0, Math.round(cx0 + cw*0.22)), bx1 = Math.min(w-1, Math.round(cx0 + cw*0.78));
+    const by0 = Math.max(0, Math.round(cy0 + ch*0.32)), by1 = Math.min(h-1, Math.round(cy0 + ch*0.80));
+    for(let y = by0; y <= by1; y++) for(let x = bx0; x <= bx1; x++){
+      const p = y*w + x;
+      if(dono[p] !== melhor.id) continue;
+      bochechas.push([px[p*4], px[p*4+1], px[p*4+2]]);
+    }
+    const pele = corTipica(bochechas, 0.45, 0.78);
+    if(!pele) return null;
+    const luzPele = 0.299*pele[0] + 0.587*pele[1] + 0.114*pele[2];
+
+    /* Cabelo: subindo a partir do primeiro pixel de pele de cada coluna do
+       meio da testa, os pixels logo acima são a franja. Medir uma faixa
+       fixa não serve — franja baixa e cabelo preso deixam a faixa cheia de
+       parede, e a figura sairia com cabelo cor de parede.
+
+       Mesmo assim sobra parede quando o cabelo é curto, então fica a
+       trava: cabelo mais claro que a própria pele quase nunca é cabelo, é
+       o fundo. Nesse caso vale um escurecido da pele dela, que erra o tom
+       mas nunca destoa da figura. */
+    const acima = [];
+    const hx0 = Math.max(0, Math.round(cx0 + cw*0.28)), hx1 = Math.min(w-1, Math.round(cx0 + cw*0.72));
+    if(comCabelo){
+      /* o cabelo está DENTRO da mancha: o alto da cabeça é ele */
+      const ate = Math.min(h-1, Math.round(melhor.y0 + largura*0.22));
+      for(let y = Math.max(0, melhor.y0); y <= ate; y++)
+        for(let x = hx0; x <= hx1; x++){
+          const p = y*w + x;
+          if(dono[p] === melhor.id) acima.push([px[p*4], px[p*4+1], px[p*4+2]]);
+        }
+    }else{
+      for(let x = hx0; x <= hx1; x++){
+        let topo = -1;
+        for(let y = Math.max(0, melhor.y0); y <= Math.min(h-1, melhor.y0 + ch*0.35); y++)
+          if(dono[y*w+x] === melhor.id){ topo = y; break; }
+        if(topo < 0) continue;
+        for(let y = topo-1; y >= 0 && y > topo-1 - largura*0.16; y--){
+          const p = y*w + x;
+          if(ehPele[p]) continue;
+          acima.push([px[p*4], px[p*4+1], px[p*4+2]]);
+        }
+      }
+    }
+    let cabelo = acima.length > 20 ? corTipica(acima, 0.10, 0.45) : null;
+    if(cabelo){
+      const luz = 0.299*cabelo[0] + 0.587*cabelo[1] + 0.114*cabelo[2];
+      const alto = Math.max(cabelo[0], cabelo[1], cabelo[2]);
+      const baixo = Math.min(cabelo[0], cabelo[1], cabelo[2]);
+      /* claro demais é parede; azul ou verde forte é parede pintada */
+      if(luz > luzPele*0.92 || (alto - baixo > 58 && cabelo[2] > cabelo[0])) cabelo = null;
+    }
+    if(!cabelo) cabelo = pele.map(v => v*0.34);
+
+    /* A cópia que vai para a tela é redesenhada em 640px. A original tem
+       1400 e vira 100 KB de base64 dentro do SVG; a oval na tela não passa
+       de uns 150 px, então o resto é peso puro no celular — e o SVG é
+       reserializado a cada peça escolhida. */
+    const kt = Math.min(1, 640/Math.max(W,H));
+    const tw = Math.max(1, Math.round(W*kt)), th = Math.max(1, Math.round(H*kt));
+    const menor = document.createElement("canvas");
+    menor.width = tw; menor.height = th;
+    menor.getContext("2d").drawImage(img, 0, 0, tw, th);
+    const p = kt/k;      /* das coordenadas da análise para as da cópia */
+
+    return {
+      url: menor.toDataURL("image/jpeg", 0.84), w: tw, h: th,
+      caixa: {x: cx0*p, y: cy0*p, w: cw*p, h: ch*p},
+      pele:   hexCor(pele[0], pele[1], pele[2]),
+      cabelo: hexCor(cabelo[0], cabelo[1], cabelo[2])
+    };
+  }
+
   /* uma janela por ângulo: cada <input> sabe qual ângulo preenche */
   $("#rostos").addEventListener("change", async e => {
     const campo = e.target.closest("input[type=file]"); if(!campo) return;
@@ -3352,17 +3858,30 @@ escrever();
     /* trocar uma foto invalida o avatar: mostrar o antigo com fotos novas
        na tela seria dizer que ele veio delas */
     avatar = null; avatarVestido = null;
+    /* A de frente é a que vira rosto na figura, e ela vale na hora — a
+       leitura é local e leva uns poucos milissegundos. As outras três só
+       existem para o provador com IA, quando a loja liga. */
+    if(angulo === "frente" && !iaLigada()){
+      rostoZoom = 1; rostoY = 0;
+      const zoom = $("#rosto-zoom"), sobe = $("#rosto-y");
+      if(zoom){ zoom.value = 100; zoom.setAttribute("aria-valuetext", "tamanho normal"); }
+      if(sobe){ sobe.value = 0; sobe.setAttribute("aria-valuetext", "no meio"); }
+      avatarLocal = await analisarRosto(url);
+      if(!avatarLocal) erro("Não achei um rosto nessa foto. Tente uma de "+
+        "frente, com o rosto maior no meio do quadro e boa luz de frente.");
+    }
     atualizar();
   });
   $("#criar-avatar").addEventListener("click", criarAvatar);
   $("#tirar-foto").addEventListener("click", () => {
-    rostos = {}; avatar = null; avatarVestido = null; foto = null;
+    rostos = {}; avatar = null; avatarVestido = null;
+    avatarLocal = null; rostoZoom = 1; rostoY = 0;
     erro(""); iaEstado(""); atualizar();
     const um = $("#rostos input"); if(um) um.focus();
   });
   /* e ao sair da página, nada fica para trás */
   window.addEventListener("pagehide", () => {
-    rostos = {}; avatar = null; avatarVestido = null; foto = null;
+    rostos = {}; avatar = null; avatarVestido = null; avatarLocal = null;
   });
 
   /* ── medidas ── */
@@ -3393,31 +3912,63 @@ escrever();
   ["m-busto","m-cintura","m-quadril"].forEach(id =>
     $("#"+id).addEventListener("input", () => { contarMedidas(); atualizar(); }));
 
+  /* Os dois ajustes redesenham só a figura, não a tela inteira: arrastar um
+     controle dispara um evento por quadro, e refazer vitrine, conta e
+     tamanhos a cada quadro travaria o celular no meio do gesto. */
+  const mexer = (id, aplicar) => {
+    const c = $("#"+id); if(!c) return;
+    c.addEventListener("input", e => { aplicar(+e.target.value); moverRosto(); });
+  };
+  /* Sozinho, o controle de arrastar é lido como "100" e "menos 3", que não
+     dizem nada. O aria-valuetext troca isso por palavra. */
+  const dizerZoom = v => v === 100 ? "tamanho normal" : v + " por cento";
+  const dizerY = v => v === 0 ? "no meio"
+    : Math.abs(v) + (v < 0 ? " para cima" : " para baixo");
+  const falar = (id, texto) => { const c = $("#"+id); if(c) c.setAttribute("aria-valuetext", texto); };
+
+  mexer("rosto-zoom", v => {
+    const n = Number.isFinite(v) ? v : 100;
+    rostoZoom = n/100; falar("rosto-zoom", dizerZoom(n));
+  });
+  mexer("rosto-y", v => {
+    const n = Number.isFinite(v) ? v : 0;
+    rostoY = n; falar("rosto-y", dizerY(n));
+  });
+  if($("#rosto-auto")) $("#rosto-auto").addEventListener("click", () => {
+    rostoZoom = 1; rostoY = 0;
+    $("#rosto-zoom").value = 100; $("#rosto-y").value = 0;
+    falar("rosto-zoom", dizerZoom(100)); falar("rosto-y", dizerY(0));
+    moverRosto();
+  });
+
   if($("#ia-provar")) $("#ia-provar").addEventListener("click", provarComIA);
 
   /* ── trocar de modo ── */
   function trocarModo(novo){
-    /* Sem IA não existe modo avatar. A versão anterior desenhava as peças
-       por cima da foto, e é exatamente isso que a loja recusou: fica com
-       cara de adesivo. Melhor não oferecer do que oferecer ruim. */
-    if(novo === "foto" && !iaLigada()) novo = "boneca";
+    /* O modo do rosto existe sempre agora. Antes ele dependia da IA paga, e
+       sem ela a página desenhava as peças por cima da foto de corpo inteiro
+       — que é o que a loja recusou, com razão: ficava com cara de adesivo.
+       O rosto real sobre o corpo desenhado não tem esse problema, porque
+       peça e corpo estão no mesmo desenho, no mesmo lugar. */
     modo = novo;
     const naFoto = modo === "foto";
-    $("#modo-foto").hidden = !iaLigada();
+    $("#modo-foto").hidden = false;
     secao.classList.toggle("prova--foto", naFoto);
     $("#modo-boneca").setAttribute("aria-checked", String(!naFoto));
     $("#modo-foto").setAttribute("aria-checked", String(naFoto));
     $("#modo-boneca").tabIndex = naFoto ? -1 : 0;
     $("#modo-foto").tabIndex = naFoto ? 0 : -1;
-    /* tom de pele e altura só fazem sentido na boneca: na foto a pele é a
-       dela e a altura sai das marcas */
+    /* tom de pele sai da própria foto quando existe foto — a paleta só
+       aparece na boneca. A altura continua valendo no avatar de graça,
+       porque lá o corpo é desenhado; com a IA, não, porque lá o corpo vem
+       pronto na imagem. */
     $("#campo-pele").hidden = naFoto;
-    $("#campo-altura").hidden = naFoto;
+    $("#campo-altura").hidden = naFoto && iaLigada();
     $("#campo-foto").hidden = !naFoto;
     $("#nota-boneca").hidden = naFoto;
     $("#nota-foto").hidden = !naFoto;
     $("#prova-selo").textContent = naFoto
-      ? (iaLigada() ? "Sua foto" : "Sua foto, no seu aparelho")
+      ? (iaLigada() ? "Sua foto" : "Seu rosto, no seu aparelho")
       : "Desenho, não foto";
     /* com a IA ligada, "não sai do aparelho" deixa de ser verdade em um
        caminho — e o texto tem de dizer isso, não a versão antiga */
@@ -3425,14 +3976,7 @@ escrever();
        escolhe a foto e a largura —, então o painel abre sozinho */
     const voce = $("#voce"); if(voce) voce.open = naFoto;
     const notaIa = $("#nota-ia"); if(notaIa) notaIa.hidden = !iaLigada();
-    const cofre = $("#cofre");
-    if(cofre) cofre.innerHTML = iaLigada()
-      ? 'A foto fica <b>no seu aparelho</b> para o provador em desenho. Só sai '+
-        'se você pedir para a inteligência artificial provar — e aí a gente '+
-        'avisa antes.'
-      : 'A foto <b>não sai do seu aparelho</b>. Ela não é enviada para a loja '+
-        'nem para lugar nenhum, e some quando você fecha a página.';
-    $("#tirar-foto").hidden = !foto;
+    const notaLivre = $("#nota-livre"); if(notaLivre) notaLivre.hidden = iaLigada();
     erro("");
     atualizar();
   }
