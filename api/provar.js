@@ -10,14 +10,16 @@
  * Não tem variável de "qual motor usar" para configurar. Põe UMA chave nas
  * variáveis de ambiente da Vercel, e é ela que decide, nesta ordem:
  *
- *   GEMINI_KEY      → motor "gemini", fala DIRETO com a API do Google
+ *   GEMINI_KEY            → motor "gemini", fala DIRETO com a API do Google
  *                      (generativelanguage.googleapis.com), sem intermediário.
  *                      Se a loja tem assinatura Google AI Pro, os primeiros
  *                      US$ 10 do mês já vêm cobertos pela assinatura — ver
  *                      LEIA-ME.
- *   OPENROUTER_KEY  → motor "openrouter", chama o mesmo tipo de modelo do
- *                      Google, só que através da OpenRouter — útil para
- *                      quem já tem conta lá e não quer abrir mais uma.
+ *   OPENROUTER_KEY ou     → motor "openrouter", chama o mesmo tipo de modelo
+ *   OPENROUTER_API_KEY   do Google, só que através da OpenRouter — útil para
+ *                      quem já tem conta lá e não quer abrir mais uma. Os
+ *                      dois nomes funcionam (a OpenRouter documenta o
+ *                      segundo; o código sempre usou o primeiro).
  *   FASHN_KEY       → motor "fashn", o caminho original — um modelo feito
  *                      especificamente para vestir roupa em gente.
  *
@@ -68,9 +70,19 @@ const MAX_ROSTOS = 4;
    ambiente pode mudar entre um deploy e outro sem o processo reiniciar em
    todo lugar (a Vercel garante isso por invocação, mas custa nada checar
    toda vez em vez de confiar numa constante congelada na primeira leitura). */
+/* A OpenRouter chama a variável de "OPENROUTER_API_KEY" na própria
+   documentação deles, mas o resto deste arquivo sempre usou "OPENROUTER_KEY"
+   — mais curto, e igual ao padrão de GEMINI_KEY/FASHN_KEY. Aceita os dois
+   nomes para não depender de qual um a loja usou na Vercel. Função, não
+   constante, pela mesma razão de motorLigado logo abaixo: lida a cada
+   pedido, não só na primeira invocação a ficar quente. */
+function chaveOpenRouter(){
+  return process.env.OPENROUTER_KEY || process.env.OPENROUTER_API_KEY;
+}
+
 function motorLigado(){
   if(process.env.GEMINI_KEY) return "gemini";
-  if(process.env.OPENROUTER_KEY) return "openrouter";
+  if(chaveOpenRouter()) return "openrouter";
   if(process.env.FASHN_KEY) return "fashn";
   return null;
 }
@@ -197,7 +209,7 @@ async function chamarOpenRouter(partesDoConteudo){
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer " + process.env.OPENROUTER_KEY,
+      "Authorization": "Bearer " + chaveOpenRouter(),
       /* a OpenRouter recomenda estes dois para identificar quem chama —
          não são segredo, e ajudam se um dia for preciso falar com o
          suporte deles sobre uso da conta */
