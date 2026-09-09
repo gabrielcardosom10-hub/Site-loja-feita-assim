@@ -1384,3 +1384,87 @@ avatar"), e eu não desfaço uma decisão de propósito da loja sem perguntar
 primeiro, mesmo que a pergunta de hoje pareça andar na direção contrária.
 O servidor está pronto e testado; falta uma linha, e ela é escolha da loja,
 não minha.
+
+## Um terceiro motor: o Gemini direto, e o crédito do Google AI Pro
+
+> "como eu coloco a chave da api do google aqui para criar as fotos. eu
+> tenho conta pro nao sei se ajuda"
+
+A pergunta tinha duas partes, e a segunda mudou a resposta da primeira.
+"Como coloco a chave" já tinha caminho conhecido — é o mesmo padrão de
+`OPENROUTER_KEY`/`FASHN_KEY`, uma variável a mais na Vercel. Mas "eu tenho
+conta pro" pedia pesquisa: será que a assinatura do Google AI Pro (~US$
+20/mês) tem algo a ver com a API? Tem — desde a integração de
+janeiro/abril de 2026, o Google AI Pro passou a incluir US$ 10/mês em
+créditos de nuvem usáveis direto na API do Gemini, no mesmo Google AI
+Studio onde se gera a chave. Para uma loja que já vinha perguntando por
+onde economizar em cada uma das três conversas anteriores, isso muda qual
+motor faz mais sentido ligar primeiro.
+
+### Por que um terceiro motor, e não só trocar o segundo
+
+A OpenRouter já chama o Gemini — dava para parar aí. Mas o crédito do
+Google AI Pro só se aplica a chamadas feitas direto para a API do Google,
+não a chamadas que passam por um intermediário como a OpenRouter, que
+compra o acesso por fora e cobra a parte dela. Ignorar isso seria deixar
+dinheiro que a loja já paga (a assinatura Pro) sem usar. Por isso
+`GEMINI_KEY` chama `generativelanguage.googleapis.com` diretamente, sem
+OpenRouter no meio.
+
+### A mesma peça, um formato de entrada diferente
+
+A API direta do Gemini não aceita URL de imagem — só bytes embutidos no
+pedido (`inline_data`, base64 sem o prefixo `data:`). Isso encaixava sem
+esforço para as fotos da cliente, que já chegam como `data:` URI do
+navegador. Mas a foto da peça do catálogo é uma URL (`CONFIG.pecas`), e
+FASHN/OpenRouter aceitam URL direto. Para o motor Gemini, o servidor
+baixa a foto da peça ele mesmo e reembala em base64 antes de mandar —
+reusando o mesmo `HOSTS_PECA` que já validava essa URL antes de qualquer
+motor existir, então nenhuma superfície nova de SSRF se abre; é a mesma
+lista de hosts permitidos, só que agora também usada para buscar o
+arquivo, não só para referenciá-lo.
+
+### A prioridade entre os três
+
+`motorLigado()` agora testa `GEMINI_KEY` primeiro, depois `OPENROUTER_KEY`,
+depois `FASHN_KEY` — a ordem do mais provável de já estar pago (o crédito
+do Pro) para o mais específico (a FASHN, que só serve para isto mas não
+tem plano de graça associado a nenhuma assinatura que a loja já tenha). Se
+mais de uma chave existir, a de cima ganha; continua sem variável
+`MOTOR=` para escrever errado.
+
+### Um bug do mesmo tipo do da vez passada
+
+`chamarGemini(partes)` tinha `contents: [{parts}]` — abreviação de objeto
+do JavaScript que lê a variável `parts`, que não existe; o parâmetro
+chama `partes`, em português. `ReferenceError: parts is not defined` na
+primeira chamada, pego pelo primeiro teste que rodei
+(`gemini-direto.mjs`) antes de qualquer coisa tocar produção. Mesma lição
+da OpenRouter: revisar o código visualmente não pega isso, rodar a função
+pega.
+
+### O que muda, e o que não muda, na resposta ao cliente
+
+`resultadoIA()` já sabia lidar com resposta síncrona desde a OpenRouter —
+o Gemini direto também devolve `{estado:"completed", imagem}` na mesma
+chamada, sem fila para consultar, então o `index.html` não precisou de
+nenhuma mudança nova além de citar `GEMINI_KEY` nas mensagens de erro. O
+formato da imagem também é `data:image/...;base64,...`, então
+`imagemGerada()` (a peneira dupla criada para a OpenRouter) já cobre o
+Gemini direto sem ajuste.
+
+### O aviso de qualidade continua o mesmo, porque o modelo é o mesmo
+
+Gemini direto e Gemini via OpenRouter chamam a mesma família de modelo —
+a diferença é só o caminho até ele. Os avisos escritos para a OpenRouter
+(bom para vestir a peça, mais instável para montar o corpo inteiro a
+partir só do rosto) valem igual aqui, e o comentário no topo de
+`provar.js` e o `LEIA-ME` dizem isso sem fingir que o motor novo resolve
+o que já era limitação do modelo.
+
+### Continua a mesma decisão pendente
+
+`AVATAR_DESLIGADO` segue `true`. Esta é a terceira conversa seguida
+puxando na direção de "quero isto funcionando de verdade" — mas a decisão
+de reativar continua sendo da loja, não uma inferência minha a partir do
+tom das perguntas.

@@ -5,31 +5,37 @@
  * e qualquer pessoa gastaria a conta da loja. Esta função fica no meio: ela
  * guarda a chave, e o navegador nunca a vê.
  *
- * DOIS MOTORES, ESCOLHIDOS SOZINHOS PELA CHAVE QUE EXISTIR
+ * TRÊS MOTORES, ESCOLHIDOS SOZINHOS PELA CHAVE QUE EXISTIR
  * ──────────────────────────────────────────────────────────
  * Não tem variável de "qual motor usar" para configurar. Põe UMA chave nas
- * variáveis de ambiente da Vercel, e é ela que decide:
+ * variáveis de ambiente da Vercel, e é ela que decide, nesta ordem:
  *
- *   OPENROUTER_KEY  → motor "openrouter", chama um modelo de imagem do
- *                      Google (Gemini) através da OpenRouter.
+ *   GEMINI_KEY      → motor "gemini", fala DIRETO com a API do Google
+ *                      (generativelanguage.googleapis.com), sem intermediário.
+ *                      Se a loja tem assinatura Google AI Pro, os primeiros
+ *                      US$ 10 do mês já vêm cobertos pela assinatura — ver
+ *                      LEIA-ME.
+ *   OPENROUTER_KEY  → motor "openrouter", chama o mesmo tipo de modelo do
+ *                      Google, só que através da OpenRouter — útil para
+ *                      quem já tem conta lá e não quer abrir mais uma.
  *   FASHN_KEY       → motor "fashn", o caminho original — um modelo feito
  *                      especificamente para vestir roupa em gente.
  *
- * Se as duas existirem, a OpenRouter ganha (é a mais nova das duas e a que
- * a loja está usando agora). Nenhuma das duas é obrigatória: sem chave
- * nenhuma, este arquivo nem entra em cena — o provador de graça (o rosto
- * dela sobre o corpo desenhado) continua sendo o padrão.
+ * Se mais de uma existir, a ordem acima decide. Nenhuma é obrigatória: sem
+ * chave nenhuma, este arquivo nem entra em cena — o provador de graça (o
+ * rosto dela sobre o corpo desenhado) continua sendo o padrão.
  *
- * A DIFERENÇA QUE IMPORTA ENTRE OS DOIS, E QUE NINGUÉM CONTA DE GRAÇA:
+ * A DIFERENÇA QUE IMPORTA ENTRE OS TRÊS, E QUE NINGUÉM CONTA DE GRAÇA:
  * a FASHN foi treinada para UMA coisa — vestir roupa em pessoa, preservando
- * pose e identidade. A OpenRouter aqui chama um modelo GERAL de imagem, que
- * entende a instrução em texto ("vista esta pessoa com esta roupa") mas não
- * foi feito só para isso. Na etapa 2 (vestir a peça) o resultado costuma
- * ficar bom — é o caso de uso que o modelo mais treina. Na etapa 1 (montar
- * o corpo inteiro a partir só do rosto) é um pedido mais difícil para um
- * modelo geral, e o resultado varia mais de foto para foto. Se a loja notar
- * isso, o ajuste é no texto de PROMPT_AVATAR aqui embaixo — não é código
- * que precisa mudar, é o pedido que precisa ficar mais claro.
+ * pose e identidade. "gemini" e "openrouter" chamam o MESMO TIPO de modelo
+ * geral de imagem do Google (muda só o caminho até ele), que entende a
+ * instrução em texto ("vista esta pessoa com esta roupa") mas não foi feito
+ * só para isso. Na etapa 2 (vestir a peça) o resultado costuma ficar bom —
+ * é o caso de uso que o modelo mais treina. Na etapa 1 (montar o corpo
+ * inteiro a partir só do rosto) é um pedido mais difícil para um modelo
+ * geral, e o resultado varia mais de foto para foto. Se a loja notar isso,
+ * o ajuste é no texto de PROMPT_AVATAR aqui embaixo — não é código que
+ * precisa mudar, é o pedido que precisa ficar mais claro.
  *
  * SOBRE O TETO DE GASTO — leia antes de ligar.
  * O endereço é público, e tem de ser. Existem três tetos aqui, e eles não
@@ -63,6 +69,7 @@ const MAX_ROSTOS = 4;
    todo lugar (a Vercel garante isso por invocação, mas custa nada checar
    toda vez em vez de confiar numa constante congelada na primeira leitura). */
 function motorLigado(){
+  if(process.env.GEMINI_KEY) return "gemini";
   if(process.env.OPENROUTER_KEY) return "openrouter";
   if(process.env.FASHN_KEY) return "fashn";
   return null;
@@ -87,6 +94,9 @@ const MODELO_TRYON  = process.env.MODELO_TRYON  || "tryon-v1.6";
    mudar de novo, é só trocar a variável de ambiente, sem mexer em código —
    mesma ideia do MODELO_AVATAR acima. */
 const OPENROUTER_MODELO = process.env.OPENROUTER_MODELO || "google/gemini-3.1-flash-image";
+
+/* ── Gemini direto: mesmo modelo, sem o prefixo "google/" da OpenRouter ── */
+const GEMINI_MODELO = process.env.GEMINI_MODELO || "gemini-3.1-flash-image";
 
 /* Os pedidos vão em inglês de propósito: é a língua em que estes modelos
    seguem instrução de edição de imagem com mais precisão — funciona em
@@ -204,6 +214,74 @@ async function chamarOpenRouter(partesDoConteudo){
   return {ok: r.ok, status: r.status, corpo};
 }
 
+/* ── a API do Gemini, direto (sem intermediário) ─────────────────
+   Uma chamada só, igual à OpenRouter — mas o formato do pedido e da
+   resposta é outro (é a API do próprio fabricante, não um tradutor no
+   meio). E tem uma diferença que importa: esta API não aceita URL de
+   imagem, só os BYTES dela (em base64, dentro do próprio pedido). A foto
+   da cliente já chega assim; a foto da PEÇA chega como URL — por isso
+   `baixarComoBase64` existe, só para este motor. */
+async function chamarGemini(partes){
+  const r = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/" +
+      encodeURIComponent(GEMINI_MODELO) + ":generateContent",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": process.env.GEMINI_KEY
+      },
+      body: JSON.stringify({
+        contents: [{parts: partes}],
+        generationConfig: {responseModalities: ["TEXT", "IMAGE"]}
+      })
+    }
+  );
+  const corpo = await r.json().catch(() => ({}));
+  return {ok: r.ok, status: r.status, corpo};
+}
+
+/* separa um data: URI em {mimeType, data} — ou null se não for um dos
+   formatos que este arquivo aceita (a mesma checagem de ehImagem, mas
+   devolvendo as partes em vez de um booleano) */
+function partesDeDataUri(v){
+  const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/]+=*)$/.exec(String(v || ""));
+  return m ? {mimeType: m[1], data: m[2]} : null;
+}
+
+/* busca a foto da PEÇA (sempre uma URL já autorizada por daLista) e devolve
+   os bytes dela em base64 — é o único jeito de entregar essa imagem para a
+   API do Gemini, que não aceita URL de terceiro dentro do pedido */
+async function baixarComoBase64(url){
+  try{
+    const r = await fetch(url);
+    if(!r.ok) return null;
+    const tipo = (r.headers.get("content-type") || "image/jpeg").split(";")[0].trim();
+    if(!/^image\/(jpeg|png|webp)$/.test(tipo)) return null;
+    const buf = Buffer.from(await r.arrayBuffer());
+    if(buf.length > MAX_FOTO) return null;
+    return {mimeType: tipo, data: buf.toString("base64")};
+  }catch(e){ return null; }
+}
+
+/* a resposta do Gemini pode vir com o campo em inlineData (camelCase, o
+   padrão de saída) ou inline_data (snake_case, que a API também aceita em
+   alguns pontos) — tenta os dois, do mesmo jeito que o parser da OpenRouter
+   tenta mais de um formato em vez de apostar só num */
+function imagemDaRespostaGemini(corpo){
+  const partes = corpo && corpo.candidates && corpo.candidates[0] &&
+    corpo.candidates[0].content && corpo.candidates[0].content.parts;
+  if(!Array.isArray(partes)) return null;
+  for(const p of partes){
+    const inline = p && (p.inlineData || p.inline_data);
+    if(inline && inline.data){
+      const tipo = inline.mimeType || inline.mime_type || "image/png";
+      return "data:" + tipo + ";base64," + inline.data;
+    }
+  }
+  return null;
+}
+
 /* A resposta pode trazer a imagem em mais de um formato — a OpenRouter
    repassa modelos de fornecedores diferentes, e o formato exato de
    "imagem dentro da resposta de chat" ainda está se firmando entre eles.
@@ -270,8 +348,8 @@ export default async function handler(req, res){
 
   if(!motor)
     return res.status(503).json({erro: "sem chave", cair: true, mensagem:
-      "O provador com IA ainda não foi configurado. Falta OPENROUTER_KEY " +
-      "ou FASHN_KEY nas variáveis de ambiente."});
+      "O provador com IA ainda não foi configurado. Falta GEMINI_KEY, " +
+      "OPENROUTER_KEY ou FASHN_KEY nas variáveis de ambiente."});
 
   /* ── consultar um pedido em andamento ──────────────────────────
      Só existe fila do lado da FASHN. A OpenRouter devolve a imagem na
@@ -337,6 +415,29 @@ export default async function handler(req, res){
       return res.status(400).json({erro: "mande de 1 a 4 fotos do rosto, em JPEG, PNG ou WEBP"});
     if(rostos.some(f => String(f).length > MAX_FOTO))
       return res.status(413).json({erro: "foto muito grande", mensagem: "Escolha fotos menores."});
+
+    if(motor === "gemini"){
+      const entradas = rostos.map(partesDeDataUri).filter(Boolean);
+      if(entradas.length !== rostos.length)
+        return res.status(400).json({erro: "uma das fotos não pôde ser lida"});
+      const r = await chamarGemini([
+        {text: PROMPT_AVATAR},
+        ...entradas.map(f => ({inline_data: {mime_type: f.mimeType, data: f.data}}))
+      ]);
+      if(!r.ok) return res.status(502).json({
+        erro: (r.corpo.error && r.corpo.error.message) || ("a API respondeu " + r.status),
+        modelo: GEMINI_MODELO
+      });
+      const imagem = imagemDaRespostaGemini(r.corpo);
+      if(!imagem) return res.status(502).json({
+        erro: "a IA não devolveu uma imagem — pode ter recusado o pedido " +
+              "por segurança. Tente fotos diferentes.",
+        modelo: GEMINI_MODELO
+      });
+      const gasto = await marcarGasto();
+      return res.status(202).json({estado: "completed", imagem, etapa: "avatar",
+        tetoRigido: geral.rigido && gasto.rigido, doMes: gasto.n, tetoMes});
+    }
 
     if(motor === "openrouter"){
       const r = await chamarOpenRouter([
@@ -408,6 +509,38 @@ export default async function handler(req, res){
   if(!daLista(peca)) return res.status(400).json({erro: "a peça não é de um endereço autorizado"});
   if(foto.length > MAX_FOTO)
     return res.status(413).json({erro: "foto muito grande", mensagem: "Escolha uma foto menor."});
+
+  if(motor === "gemini"){
+    /* mesma regra da OpenRouter: o corpo nunca é URL com este motor,
+       porque o avatar da etapa 1 já veio como data URI */
+    if(!ehImagem(foto))
+      return res.status(400).json({erro: "a foto precisa ser JPEG, PNG ou WEBP"});
+    const fotoPartes = partesDeDataUri(foto);
+    /* a peça é sempre URL (fica hospedada pela loja) — mas esta API só
+       aceita bytes, então ela é baixada aqui, do endereço já autorizado */
+    const pecaPartes = await baixarComoBase64(peca);
+    if(!fotoPartes || !pecaPartes)
+      return res.status(502).json({erro: "não consegui preparar as imagens para a IA"});
+
+    const r = await chamarGemini([
+      {text: promptTryon(nomePeca, categoria)},
+      {inline_data: {mime_type: fotoPartes.mimeType, data: fotoPartes.data}},
+      {inline_data: {mime_type: pecaPartes.mimeType, data: pecaPartes.data}}
+    ]);
+    if(!r.ok) return res.status(502).json({
+      erro: (r.corpo.error && r.corpo.error.message) || ("a API respondeu " + r.status),
+      modelo: GEMINI_MODELO
+    });
+    const imagem = imagemDaRespostaGemini(r.corpo);
+    if(!imagem) return res.status(502).json({
+      erro: "a IA não devolveu uma imagem — pode ter recusado o pedido " +
+            "por segurança. Tente outra peça, ou monte o avatar de novo.",
+      modelo: GEMINI_MODELO
+    });
+    const gasto = await marcarGasto();
+    return res.status(202).json({estado: "completed", imagem, etapa: "provar",
+      tetoRigido: geral.rigido && gasto.rigido, doMes: gasto.n, tetoMes});
+  }
 
   if(motor === "openrouter"){
     /* Com a OpenRouter o corpo nunca é uma URL: o avatar que a etapa 1

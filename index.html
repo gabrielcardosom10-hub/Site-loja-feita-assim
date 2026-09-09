@@ -1840,17 +1840,24 @@ const CONFIG = {
        vestida por um modelo de inteligência artificial, e o resultado
        parece uma fotografia.
 
-       DOIS FORNECEDORES POSSÍVEIS, escolhidos sozinhos pela chave que
+       TRÊS FORNECEDORES POSSÍVEIS, escolhidos sozinhos pela chave que
        existir na Vercel — não tem nada para escolher aqui no CONFIG:
-         • OPENROUTER_KEY → chama um modelo de imagem do Google (Gemini)
-           através da OpenRouter. É o que a loja está usando agora.
+         • GEMINI_KEY → chama a API do Google direto, sem intermediário.
+           Se você já paga o Google AI Pro (a assinatura de ~US$ 20/mês),
+           esta é a que aproveita isso: ela vem com US$ 10/mês em créditos
+           de nuvem usáveis direto aqui, o que pode zerar o custo do
+           provador até esse limite.
+         • OPENROUTER_KEY → chama o mesmo tipo de modelo de imagem do
+           Google (Gemini), só que através da OpenRouter.
          • FASHN_KEY → o caminho original, um modelo feito especificamente
            para vestir roupa em gente.
-       Se as duas chaves existirem, a OpenRouter ganha. O comentário no
-       topo de `api/provar.js` explica a diferença de qualidade entre os
-       dois — resumo: a FASHN tende a acertar mais na primeira tentativa
-       porque só faz isso; a OpenRouter é mais barata e serve para o mesmo
-       fim, com resultado que varia um pouco mais.
+       Se houver mais de uma chave, a ordem de prioridade é GEMINI_KEY,
+       depois OPENROUTER_KEY, depois FASHN_KEY. O comentário no topo de
+       `api/provar.js` explica a diferença de qualidade entre os três —
+       resumo: a FASHN tende a acertar mais na primeira tentativa porque só
+       faz isso; o Gemini (direto ou via OpenRouter) é o mesmo modelo por
+       baixo, mais barato — ou de graça até o crédito do Pro acabar — com
+       resultado que varia um pouco mais.
 
        O preço é literal: cada imagem gerada é cobrada pelo fornecedor.
 
@@ -1862,8 +1869,10 @@ const CONFIG = {
 
        Preços que eu vi quando montei isto (CONFIRA no site do fornecedor
        antes de fechar o número — isso muda sem aviso):
-           OpenRouter (Gemini, modelo de imagem)  ≈ US$ 0,04 a US$ 0,07 por imagem
-           FASHN (modelo específico de try-on)    ≈ US$ 0,075 por imagem
+           Gemini direto (Google AI Studio)        ≈ US$ 0,04 por imagem
+             (ou de graça, dentro do crédito mensal do Google AI Pro)
+           OpenRouter (Gemini, modelo de imagem)   ≈ US$ 0,04 a US$ 0,07 por imagem
+           FASHN (modelo específico de try-on)     ≈ US$ 0,075 por imagem
        Com US$ 0,06 por imagem, por exemplo:
            US$ 10/mês  → TETO_MES = 166
            US$ 15/mês  → TETO_MES = 250   (é o padrão, se você não puser nada)
@@ -1875,8 +1884,8 @@ const CONFIG = {
        E o teto só é RÍGIDO de verdade com o Upstash configurado (o plano de
        graça dá conta). Sem ele, cada instância da função tem o seu contador
        e o teto vira estimativa. A trava que nunca falha continua sendo uma:
-       compre crédito PRÉ-PAGO limitado — na OpenRouter ou na FASHN,
-       qualquer uma das duas.
+       compre crédito PRÉ-PAGO limitado — no Google AI Studio, na
+       OpenRouter ou na FASHN, qualquer uma das três.
 
        E repare que os dois caminhos (IA e o desenho de graça) NÃO CONVIVEM
        na mesma tela: ligar este aqui TROCA o provador do rosto encaixado
@@ -1888,10 +1897,10 @@ const CONFIG = {
 
        O intermediário é `api/provar.js`, e ele sobe junto com o site na
        Vercel. Não há comando para rodar nem segunda conta para criar: falta
-       só pôr UMA das duas chaves nas variáveis de ambiente do projeto, em
-       Settings → Environment Variables → OPENROUTER_KEY ou FASHN_KEY. O
-       LEIA-ME da pasta `servidor/` tem o passo a passo e as variáveis
-       opcionais.
+       só pôr UMA das três chaves nas variáveis de ambiente do projeto, em
+       Settings → Environment Variables → GEMINI_KEY, OPENROUTER_KEY ou
+       FASHN_KEY. O LEIA-ME da pasta `servidor/` tem o passo a passo e as
+       variáveis opcionais.
 
        ATENÇÃO, E ISTO É O MAIS IMPORTANTE DESTE BLOCO: com a IA ligada, a
        foto da cliente PASSA A SAIR DO APARELHO. Ela vai para a empresa que
@@ -1923,7 +1932,7 @@ const CONFIG = {
       endpoint: "/api/provar",
       /* só documentação — nada no site lê este campo. Ele muda sozinho
          conforme a chave que estiver na Vercel: ver o topo de provar.js */
-      fornecedor: "OpenRouter (Gemini) ou FASHN — decide a chave na Vercel",
+      fornecedor: "Gemini direto, OpenRouter ou FASHN — decide a chave na Vercel",
       guarda: "Confirme com o fornecedor por quanto tempo a imagem fica guardada."
     },
 
@@ -4052,7 +4061,8 @@ function corSegura(v, reserva){
       if(!cairParaLocal("O provador com inteligência artificial não respondeu. "+
         "Este aqui roda no seu aparelho: o seu rosto, no corpo desenhado."))
         erro("Não consegui falar com o provador. Se você é da loja: confira se a "+
-             "OPENROUTER_KEY ou a FASHN_KEY está nas variáveis de ambiente da Vercel.");
+             "GEMINI_KEY, a OPENROUTER_KEY ou a FASHN_KEY está nas variáveis de "+
+             "ambiente da Vercel.");
     }finally{
       criandoAvatar = false; pintarRostos();
     }
@@ -4089,8 +4099,9 @@ function corSegura(v, reserva){
       /* fetch bloqueado pela CSP cai aqui, e é o engano mais provável de quem
          ligou a IA sem trocar connect-src */
       iaEstado("Não consegui falar com o provador. Se você é da loja: confira "+
-               "se a OPENROUTER_KEY ou a FASHN_KEY está nas variáveis de ambiente "+
-               "da Vercel, e se o endereço no CONFIG bate com o caminho da função.");
+               "se a GEMINI_KEY, a OPENROUTER_KEY ou a FASHN_KEY está nas "+
+               "variáveis de ambiente da Vercel, e se o endereço no CONFIG bate "+
+               "com o caminho da função.");
     }finally{
       iaOcupado = false; pintarIA();
     }

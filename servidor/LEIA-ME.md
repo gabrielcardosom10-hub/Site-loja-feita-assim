@@ -28,23 +28,57 @@ os dois antes de ligar a IA lá.
 O arquivo é `api/provar.js`, na raiz do projeto. Ele **sobe junto com o site**:
 não há comando para rodar, nem segunda conta para criar.
 
-### Dois fornecedores possíveis — a chave que existir decide
+### Três fornecedores possíveis — a chave que existir decide
 
-Não tem variável de "qual motor usar". Você põe **uma** das duas chaves, e o
-código escolhe sozinho pela que encontrar (se as duas existirem, a
-OpenRouter ganha):
+Não tem variável de "qual motor usar". Você põe **uma** das três chaves, e o
+código escolhe sozinho pela que encontrar, nesta ordem — Gemini direto,
+depois OpenRouter, depois FASHN:
 
-|  | OpenRouter (Gemini) | FASHN |
+|  | Gemini direto | OpenRouter (Gemini) | FASHN |
+|---|---|---|---|
+| o que é | a mesma família de modelo de imagem do Google, sem intermediário | o mesmo modelo, através da OpenRouter | modelo feito SÓ para vestir roupa em pessoa |
+| preço por imagem | ≈ US$ 0,04–0,07 (confira, muda sem aviso) | ≈ US$ 0,04–0,07 | ≈ US$ 0,075 |
+| **se você tem Google AI Pro** | os primeiros US$ 10/mês já vêm cobertos pela assinatura — ver abaixo | não conta para o Pro (é conta separada da OpenRouter) | não conta para o Pro |
+| qualidade | boa em vestir a peça; menos previsível em montar o corpo inteiro só a partir do rosto | igual ao Gemini direto — é o mesmo modelo | mais consistente nas duas etapas, porque só faz isso |
+| conta | **aistudio.google.com** — a mesma do Google AI Pro, se você já tem | openrouter.ai — uma chave só, se já usa noutros projetos | conta própria na fashn.ai |
+
+**Se você já paga o Google AI Pro (a assinatura de ~US$ 20/mês, com Gemini
+Advanced e afins), o caminho Gemini direto é o que aproveita isso**: desde
+abril de 2026 essa assinatura já vem com US$ 10 em créditos de nuvem por mês,
+usáveis direto na API — então uma parte do provador sai de graça, dentro do
+que você já paga. Confira no seu painel do Google AI Studio se esse crédito
+aparece disponível antes de contar com ele.
+
+Se você não tem Pro nem quer abrir conta nova no Google, e já usa a
+OpenRouter para outra coisa, ela serve igual — é o mesmo modelo por baixo,
+só muda o caminho até ele.
+
+Se notar que o avatar (a etapa de "montar o corpo a partir do rosto") sai
+estranho com frequência em qualquer um dos dois caminhos do Gemini, vale
+tentar a FASHN — ou ajustar o texto do pedido em `PROMPT_AVATAR`, no topo de
+`api/provar.js`.
+
+### Ligar — caminho Gemini direto (aproveita o Google AI Pro)
+
+1. Entre em **aistudio.google.com** com a MESMA conta Google da sua
+   assinatura Pro (se tiver uma) → **Get API key** → crie uma chave.
+   **Não me mande essa chave, nem cole em conversa nenhuma.**
+2. No painel da Vercel, abra o projeto → **Settings** → **Environment
+   Variables** e crie:
+
+| nome | valor | para quê |
 |---|---|---|
-| o que é | modelo de imagem GERAL, entende a instrução em texto | modelo feito SÓ para vestir roupa em pessoa |
-| preço por imagem | ≈ US$ 0,04–0,07 (confira, muda sem aviso) | ≈ US$ 0,075 |
-| qualidade | boa em vestir a peça; menos previsível em montar o corpo inteiro só a partir do rosto | mais consistente nas duas etapas, porque só faz isso |
-| conta | aistudio ou openrouter.ai — uma chave só, do jeito que você já usa em outros projetos | conta própria na fashn.ai |
+| `GEMINI_KEY` | a sua chave | **obrigatória** — sem ela (e sem as outras duas) o provador responde que não foi configurado |
+| `ORIGENS` | `https://site-loja-feita-assim.vercel.app` | de onde o site pode chamar |
+| `HOSTS_PECA` | `d8j0ntlcm91z4.cloudfront.net,site-loja-feita-assim.vercel.app` | de onde as fotos das peças podem vir |
+| `TETO_MES` | `250` | **o teto do bolso** — imagens no mês inteiro. Ver abaixo |
+| `TETO_HORA` | `20` | gerações por hora, no site todo (contra rajada) |
+| `TETO_IP` | `6` | gerações por hora, por pessoa (contra abuso) |
+| `GEMINI_MODELO` | `gemini-3.1-flash-image` | opcional — troque se o Google aposentar este modelo (acontece sem aviso) |
 
-Se você já tem conta na OpenRouter, é o caminho mais direto. Se notar que o
-avatar (a etapa de "montar o corpo a partir do rosto") sai estranho com
-frequência, vale tentar a FASHN — ou ajustar o texto do pedido em
-`PROMPT_AVATAR`, no topo de `api/provar.js`.
+Repare que o teto do mês continua valendo mesmo com o crédito do Pro: ele
+protege contra passar do que você decidiu gastar, os US$ 10 inclusos sendo
+suficientes ou não.
 
 ### Ligar — caminho OpenRouter
 
@@ -57,7 +91,7 @@ frequência, vale tentar a FASHN — ou ajustar o texto do pedido em
 
 | nome | valor | para quê |
 |---|---|---|
-| `OPENROUTER_KEY` | a sua chave | **obrigatória** — sem ela (e sem `FASHN_KEY`) o provador responde que não foi configurado |
+| `OPENROUTER_KEY` | a sua chave | **obrigatória** — sem ela (e sem `GEMINI_KEY`/`FASHN_KEY`) o provador responde que não foi configurado |
 | `ORIGENS` | `https://site-loja-feita-assim.vercel.app` | de onde o site pode chamar |
 | `HOSTS_PECA` | `d8j0ntlcm91z4.cloudfront.net,site-loja-feita-assim.vercel.app` | de onde as fotos das peças podem vir |
 | `TETO_MES` | `250` | **o teto do bolso** — imagens no mês inteiro. Ver abaixo |
@@ -80,8 +114,9 @@ frequência, vale tentar a FASHN — ou ajustar o texto do pedido em
 
 3. **Redeploy** (a Vercel só aplica variáveis novas num deploy novo).
 
-Os nomes de modelo (dos dois fornecedores, incluindo `OPENROUTER_MODELO`
-acima) existem como variável porque a API deles muda de versão sem avisar.
+Os nomes de modelo (dos três fornecedores, incluindo `GEMINI_MODELO` e
+`OPENROUTER_MODELO` acima) existem como variável porque a API deles muda de
+versão sem avisar.
 Se um dia o provador parar com erro `502` citando o nome do modelo, troque o
 nome na variável e faça outro redeploy — sem mexer em código.
 
@@ -104,12 +139,13 @@ para `false` para o modo aparecer.
 
 Abra `https://site-loja-feita-assim.vercel.app/api/provar` no navegador. Com a
 chave configurada ele responde `{"erro":"identificador inválido"}` **se o
-motor for a FASHN** — o que é o esperado, porque faltou o `?id=`. **Com a
-OpenRouter** não existe consulta por identificador (a resposta já vem pronta
-no POST), então essa rota responde `{"erro":"este motor não usa consulta por
-identificador"}` — também esperado, e também sinal de que a chave chegou.
-Se qualquer um dos dois responder `{"erro":"sem chave"}`, a variável não
-chegou: confira o nome e refaça o deploy.
+motor for a FASHN** — o que é o esperado, porque faltou o `?id=`. **Com o
+Gemini direto ou a OpenRouter** não existe consulta por identificador (a
+resposta já vem pronta no POST), então essa rota responde
+`{"erro":"este motor não usa consulta por identificador"}` — também
+esperado, e também sinal de que a chave chegou. Se qualquer um deles
+responder `{"erro":"sem chave"}`, a variável não chegou: confira o nome e
+refaça o deploy.
 
 ---
 
@@ -158,7 +194,7 @@ bolso no mês** — 20 por hora dá 14.400 por mês.
 
 ### E o que nunca falha
 
-**O saldo pré-pago no fornecedor** — na OpenRouter ou na FASHN, qualquer uma
+**O saldo pré-pago no fornecedor** — no Google AI Studio, na OpenRouter ou na FASHN, qualquer uma
 das duas. Ele não depende de nenhuma linha deste código estar certa. Compre
 crédito limitado; é o único teto que não depende de nada.
 
@@ -212,7 +248,7 @@ Enquanto o provador era só desenho, a foto **não saía do aparelho**, e a CSP
 com `connect-src 'self'` garantia isso por construção.
 
 **Com a IA ligada, as fotos do ROSTO da cliente são enviadas para o
-fornecedor configurado** (OpenRouter ou FASHN, conforme a chave que estiver
+fornecedor configurado** (Google, OpenRouter ou FASHN, conforme a chave que estiver
 na Vercel), que fica fora do Brasil. Não há como fazer diferente: o modelo
 roda em servidor.
 
@@ -224,7 +260,7 @@ Por isso o site pede **consentimento explícito** antes do primeiro envio e diz
 para onde a foto vai. Isso é obrigação da LGPD, e **a loja é a controladora
 desses dados**. Antes de publicar:
 
-- confira na política do fornecedor escolhido (OpenRouter ou FASHN) por
+- confira na política do fornecedor escolhido (Google, OpenRouter ou FASHN) por
   quanto tempo a imagem fica guardada;
 - escreva isso em `CONFIG.provador.ia.guarda`, no `index.html` — esse texto
   aparece na caixa de consentimento.
@@ -237,7 +273,7 @@ outro lugar.
 ## Caminho 2 — Cloudflare Workers (alternativa)
 
 Só se o site sair da Vercel. O arquivo é `worker.js`, nesta pasta — e **ele
-só sabe falar com a FASHN**. O caminho da OpenRouter descrito acima existe só
+só sabe falar com a FASHN**. Os caminhos do Gemini direto e da OpenRouter descritos acima existem só
 na versão Vercel (`api/provar.js`); portar para o worker é trabalho que ainda
 não foi feito.
 
@@ -257,7 +293,7 @@ navegador bloqueia a chamada, de propósito.
 | sintoma | causa provável |
 |---|---|
 | o modo de foto nem aparece na tela | `AVATAR_DESLIGADO` está `true` no `index.html` — a chave pode estar certa e mesmo assim ninguém vê o botão |
-| "o provador não foi configurado" | falta `OPENROUTER_KEY` **e** `FASHN_KEY`, ou faltou o redeploy |
+| "o provador não foi configurado" | falta `GEMINI_KEY`, `OPENROUTER_KEY` **e** `FASHN_KEY`, ou faltou o redeploy |
 | "não consegui falar com o provador" | o caminho em `CONFIG` não bate com o da função |
 | `403 origem não autorizada` | `ORIGENS` não bate com o endereço do site |
 | `400 a peça não é de um endereço autorizado` | falta o host das fotos em `HOSTS_PECA` |
