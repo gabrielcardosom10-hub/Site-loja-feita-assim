@@ -14,6 +14,7 @@ na Praça Dr. Nereu Ramos, 358 — loja 02 — Centro, Criciúma/SC.
 | `DESIGN.md` | o sistema visual, a segurança e as decisões de celular |
 | `_headers` | cabeçalhos de segurança (Netlify e Cloudflare; o Pages ignora) |
 | `.nojekyll` | desliga o Jekyll, para o Pages servir os arquivos como estão |
+| `sistema/` | Painel de Comando — ferramenta pessoal de rotina, tarefas, hábitos, finanças, metas, escrita e faculdade. `LEIA-ME.md` explica |
 
 ## Como mudar preço, peça, foto ou contato
 
