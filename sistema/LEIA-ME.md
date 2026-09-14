@@ -62,6 +62,22 @@ iguais sozinhos.
 **Faça a cópia de segurança.** Em *Dados* → *Baixar cópia (.json)*. Limpar os
 dados do navegador apaga tudo, e não há como recuperar sem a cópia.
 
+## Duas versões da mesma ferramenta
+
+| versão | quando usar |
+|---|---|
+| `index.html` + `estilo.css` + `app.js` | é o que vai para o ar no site, em `/sistema/` |
+| **`painel.html`** | **arquivo único**, com CSS e JavaScript dentro. Baixa, abre com dois cliques, funciona sem internet e sem servidor. Dá para mandar por WhatsApp ou guardar num pen drive |
+
+As duas rodam o mesmo código. O `painel.html` é **gerado**, nunca editado à
+mão — mexa no `estilo.css` e no `app.js` e rode:
+
+```
+python3 sistema/montar.py
+```
+
+Se editar o `painel.html` direto, a próxima montagem apaga a sua mudança.
+
 ## Arquivos
 
 | arquivo | para que serve |
@@ -69,6 +85,12 @@ dados do navegador apaga tudo, e não há como recuperar sem a cópia.
 | `index.html` | a casca da página: fontes e os dois arquivos abaixo |
 | `estilo.css` | sistema visual — cores, tipos e componentes, claro e escuro |
 | `app.js` | a ferramenta inteira: estado, cálculos, telas e ações |
+| `painel.html` | versão de arquivo único, gerada pelo `montar.py` |
+| `montar.py` | junta os três primeiros num `painel.html` |
 
 Para mexer no conteúdo pronto da primeira abertura, procure a função
 `padrao()` dentro do `app.js`. É de onde saem os exemplos.
+
+**Um detalhe do arquivo único:** cada cópia guarda os dados no navegador que
+a abriu. Se você abrir o `painel.html` de duas pastas diferentes, são dois
+painéis separados. Guarde o arquivo num lugar só e abra sempre de lá.
